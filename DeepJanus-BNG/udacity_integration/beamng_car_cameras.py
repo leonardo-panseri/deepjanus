@@ -1,18 +1,25 @@
 from beamngpy.sensors import Camera
+from beamngpy import BeamNGpy, Vehicle
 
 
 class BeamNGCarCameras:
-    def __init__(self):
-        direction = (0, 1, 0)
-        fov = 120
-        resolution = (320, 160)
-        y, z = 1.7, 1.0
+    def __init__(self, beamng: BeamNGpy, vehicle: Vehicle):
+        self.direction = (0, -1, 0)
+        self.fov = 120
+        self.resolution = (320, 160)
+        self.y = -2.2
+        self.z = 1.0
+        self.beamng = beamng
+        self.vehicle = vehicle
 
-        cam_center = 'cam_center', Camera((-0.3, y, z), direction, fov, resolution, colour=True, depth=True,
-                                          annotation=True)
-        cam_left = 'cam_left', Camera((-1.3, y, z), direction, fov, resolution, colour=True, depth=True,
-                                      annotation=True)
-        cam_right = 'cam_right', Camera((0.4, y, z), direction, fov, resolution, colour=True, depth=True,
-                                        annotation=True)
-
-        self.cameras_array = [cam_center, cam_left, cam_right]
+    def setup_cameras(self):
+        self.cam_center = Camera('cam_center', self.beamng, self.vehicle, pos=(-0.3, self.y, self.z),
+                                 dir=self.direction, field_of_view_y=self.fov, resolution=self.resolution,
+                                 requested_update_time=0.1, is_using_shared_memory=True, is_render_annotations=False,
+                                 is_render_depth=False, is_streaming=True)
+        self.cam_left = Camera('cam_left', self.beamng, self.vehicle, pos=(-1.3, self.y, self.z),
+                               dir=self.direction, field_of_view_y=self.fov, resolution=self.resolution,
+                               requested_update_time=0.1)
+        self.cam_right = Camera('cam_right', self.beamng, self.vehicle, pos=(0.4, self.y, self.z),
+                                dir=self.direction, field_of_view_y=self.fov, resolution=self.resolution,
+                                requested_update_time=0.1)
