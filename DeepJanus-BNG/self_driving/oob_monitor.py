@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from shapely.geometry import Point, Polygon
 
@@ -16,7 +16,7 @@ class OutOfBoundsMonitor:
         self.last_is_oob = False
         self.last_max_oob_percentage = 0
 
-    def get_oob_info(self, wrt="right", oob_bb=True, tolerance=0.05) -> Tuple[bool, int, float]:
+    def get_oob_info(self, wrt="right", oob_bb=True, tolerance=0.05) -> Tuple[bool, int, Union[int, float], float]:
         if oob_bb:
             is_oob = self.is_oob_bb(tolerance=tolerance, wrt=wrt)
             self.update_oob_percentage(is_oob)
