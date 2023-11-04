@@ -92,7 +92,7 @@ class BeamNGIndividual(Individual):
                 'members_distance': self.members_distance,
                 'm1': self.m1.to_dict(),
                 'm2': self.m2.to_dict(),
-                'seed': self.seed.to_dict()}
+                'seed': self.seed.to_dict() if self.seed else None}
 
     @classmethod
     def from_dict(self, d):
