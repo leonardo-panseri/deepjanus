@@ -1,5 +1,5 @@
 from beamngpy import Vehicle, BeamNGpy
-from self_driving.beamng_brewer import BeamNGCamera
+from beamngpy.sensors.camera import Camera
 from self_driving.decal_road import DecalRoad
 from self_driving.oob_monitor import OutOfBoundsMonitor
 from self_driving.road_polygon import RoadPolygon
@@ -12,7 +12,7 @@ class SimulationDataCollector:
     def __init__(self, vehicle: Vehicle, beamng: BeamNGpy, road: DecalRoad,
                  params: SimulationParams,
                  vehicle_state_reader: VehicleStateReader = None,
-                 camera: BeamNGCamera = None,
+                 camera: Camera = None,
                  simulation_name: str = None):
         self.vehicle_state_reader = vehicle_state_reader if vehicle_state_reader \
             else VehicleStateReader(vehicle, beamng)
@@ -20,7 +20,7 @@ class SimulationDataCollector:
         self.beamng: BeamNGpy = beamng
         self.road: DecalRoad = road
         self.params: SimulationParams = params
-        self.camera: BeamNGCamera = camera
+        self.camera: Camera = camera
         self.name = simulation_name
         self.states: SimulationDataRecords = []
         self.simulation_data: SimulationData = SimulationData(simulation_name)
@@ -48,12 +48,12 @@ class SimulationDataCollector:
     def take_car_picture_if_needed(self):
         last_state = self.states[-1]
         if last_state.is_oob:
-            self.camera.pose.pos = tuple(last_state.pos[:2]) + (-5,)
-            self.camera.pose.rot = (0, 0, -90)
+            self.camera.set_position(last_state.pos + (-5.0,))
+            self.camera.set_direction((0, 0, -90))
             img_path = self.simulation_data.path_root.joinpath(f'oob_camera_shot{last_state.oob_counter}.jpg')
             img_path.parent.mkdir(parents=True, exist_ok=True)
             if not img_path.exists():
-                self.camera.get_rgb_image().save(str(img_path))
+                self.camera.poll()['colour'].convert('RGB').save(str(img_path))
 
     def save(self):
         self.simulation_data.save()
