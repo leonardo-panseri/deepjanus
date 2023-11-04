@@ -5,3 +5,7 @@ keras
 deap
 opencv-python
 beamngpy
+numpy
+matplotlib
+Pillow
+pandas
