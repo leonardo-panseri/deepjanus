@@ -1,8 +1,9 @@
 from collections import namedtuple
+from typing import Optional
+
 import numpy as np
-from beamngpy import Vehicle, BeamNGpy
-from beamngpy.sensors import GForces, Electrics, Damage, Timer, Sensor
-from typing import List, Tuple
+from beamngpy import Vehicle
+from beamngpy.vehicle import Sensors
 
 VehicleStateProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering', 'steering_input',
                           'brake', 'brake_input', 'throttle', 'throttle_input', 'throttleFactor', 'engineThrottle',
@@ -12,25 +13,11 @@ VehicleState = namedtuple('VehicleState', VehicleStateProperties)
 
 
 class VehicleStateReader:
-    def __init__(self, vehicle: Vehicle, beamng: BeamNGpy, additional_sensors: List[Tuple[str, Sensor]] = None):
+    def __init__(self, vehicle: Vehicle):
         self.vehicle = vehicle
-        self.beamng = beamng
-        self.state: VehicleState = None
+        self.state: Optional[VehicleState] = None
+        self.sensors: Optional[Sensors] = None
         self.vehicle_state = {}
-
-        gforces = GForces()
-        electrics = Electrics()
-        damage = Damage()
-        timer = Timer()
-
-        self.vehicle.attach_sensor('gforces', gforces)
-        self.vehicle.attach_sensor('electrics', electrics)
-        self.vehicle.attach_sensor('damage', damage)
-        self.vehicle.attach_sensor('timer', timer)
-
-        if additional_sensors:
-            for (name, sensor) in additional_sensors:
-                self.vehicle.attach_sensor(name, sensor)
 
     def get_state(self) -> VehicleState:
         return self.state
@@ -39,13 +26,12 @@ class VehicleStateReader:
         return self.vehicle.get_bbox()
 
     def update_state(self):
-        sensors = self.beamng.poll_sensors(self.vehicle)
+        self.vehicle.poll_sensors()
+        sensors = self.vehicle.sensors
         self.sensors = sensors
-
-        self.vehicle.update_vehicle()
         st = self.vehicle.state
 
-        ele = sensors['electrics']['values']
+        ele = sensors['electrics']
         gforces = sensors['gforces']
 
         vel = tuple(st['vel'])
