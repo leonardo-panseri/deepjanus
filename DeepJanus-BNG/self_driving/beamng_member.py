@@ -84,8 +84,8 @@ class BeamNGMember(Member):
         barycenter = np.mean(self.control_nodes, axis=0)[:2]
         return barycenter
 
-    def mutate(self) -> 'BeamNGMember':
-        RoadMutator(self, lower_bound=-int(self.problem.config.MUTATION_EXTENT), upper_bound=int(self.problem.config.MUTATION_EXTENT)).mutate()
+    def mutate(self, node=None) -> 'BeamNGMember':
+        RoadMutator(self, lower_bound=-int(self.problem.config.MUTATION_EXTENT), upper_bound=int(self.problem.config.MUTATION_EXTENT)).mutate(node=node)
         self.distance_to_boundary = None
         return self
 
@@ -130,7 +130,7 @@ class RoadMutator:
         self.road.control_nodes[index] = tuple(gene)
         self.road.sample_nodes = catmull_rom(self.road.control_nodes, self.road.num_spline_nodes)
 
-    def mutate(self, num_undo_attempts=10):
+    def mutate(self, num_undo_attempts=10, node=None):
         backup_nodes = list(self.road.control_nodes)
         attempted_genes = set()
         n = len(self.road.control_nodes) - 2
@@ -145,27 +145,33 @@ class RoadMutator:
             assert 3 <= i <= n-3
             return i
 
-        gene_index = next_gene_index()
-
-        while gene_index != -1:
-            c, mut_value = self.mutate_gene(gene_index)
+        def find_valid_mutate(index: int) -> bool:
+            c, mut_value = self.mutate_gene(index)
 
             attempt = 0
 
-            is_valid = self.road.is_valid()
-            while not is_valid and attempt < num_undo_attempts:
-                self.undo_mutation(gene_index, c, mut_value)
-                c, mut_value = self.mutate_gene(gene_index)
+            is_mutation_valid = self.road.is_valid()
+            while not is_mutation_valid and attempt < num_undo_attempts:
+                self.undo_mutation(index, c, mut_value)
+                c, mut_value = self.mutate_gene(index)
                 attempt += 1
-                is_valid = self.road.is_valid()
+                is_mutation_valid = self.road.is_valid()
+            return is_mutation_valid
 
-            if is_valid:
-                break
-            else:
-                gene_index = next_gene_index()
+        if node:
+            if not find_valid_mutate(node):
+                raise ValueError("This road control node cannot be mutated")
+        else:
+            gene_index = next_gene_index()
 
-        if gene_index == -1:
-            raise ValueError("No gene can be mutated")
+            while gene_index != -1:
+                if find_valid_mutate(gene_index):
+                    break
+                else:
+                    gene_index = next_gene_index()
+
+            if gene_index == -1:
+                raise ValueError("No gene can be mutated")
 
         assert self.road.is_valid()
         assert self.road.control_nodes != backup_nodes
