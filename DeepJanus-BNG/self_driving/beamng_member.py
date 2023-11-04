@@ -77,10 +77,7 @@ class BeamNGMember(Member):
                 self.road_bbox.contains(RoadPolygon.from_nodes(self.control_nodes[1:-1])))
 
     def distance(self, other: 'BeamNGMember'):
-        #TODO
-        #return frechet_dist(self.sample_nodes, other.sample_nodes)
         return iterative_levenshtein(self.sample_nodes, other.sample_nodes)
-        #return frechet_dist(self.sample_nodes[0::3], other.sample_nodes[0::3])
 
     def to_tuple(self):
         import numpy as np
