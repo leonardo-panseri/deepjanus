@@ -61,7 +61,7 @@ class BeamNGMember(Member):
 
     def evaluate(self):
         if self.needs_evaluation():
-            self.problem._get_evaluator().evaluate([self])
+            self.problem.get_evaluator().evaluate([self])
             print('eval mbr', self)
 
         assert not self.needs_evaluation()

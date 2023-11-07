@@ -104,19 +104,19 @@ class BeamNGProblem(Problem):
                     log.info(f'reseed rem {pop[i]}')
                     pop[i] = ind1
 
-    def _get_evaluator(self):
+    def get_evaluator(self):
         if self._evaluator:
             return self._evaluator
         ev_name = self.config.beamng_evaluator
-        if ev_name == BeamNGConfig.EVALUATOR_FAKE:
-            from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
-            self._evaluator = BeamNGFakeEvaluator(self.config)
-        elif ev_name == BeamNGConfig.EVALUATOR_LOCAL_BEAMNG:
+        # if ev_name == BeamNGConfig.EVALUATOR_FAKE:
+        #     from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
+        #     self._evaluator = BeamNGFakeEvaluator(self.config)
+        if ev_name == BeamNGConfig.EVALUATOR_LOCAL_BEAMNG:
             from self_driving.beamng_nvidia_runner import BeamNGNvidiaOob
             self._evaluator = BeamNGNvidiaOob(self.config)
-        elif ev_name == BeamNGConfig.EVALUATOR_REMOTE_BEAMNG:
-            from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
-            self._evaluator = BeamNGRemoteEvaluator(self.config)
+        # elif ev_name == BeamNGConfig.EVALUATOR_REMOTE_BEAMNG:
+        #     from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
+        #     self._evaluator = BeamNGRemoteEvaluator(self.config)
         else:
             raise NotImplemented(self.config.beamng_evaluator)
 
@@ -127,5 +127,5 @@ class BeamNGProblem(Problem):
         # the following code does not work as wanted or expected!
         all_members = list(itertools.chain(*[(ind.m1, ind.m2) for ind in individuals]))
         log.info('----evaluation warmup')
-        self._get_evaluator().evaluate(all_members)
+        self.get_evaluator().evaluate(all_members)
         log.info('----warmpup completed')
