@@ -9,6 +9,7 @@ from core.folder_storage import FolderStorage
 from core.folders import folders
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
+from self_driving.beamng_nvidia_runner import BeamNGNvidiaOob
 from self_driving.beamng_problem import BeamNGProblem
 from self_driving.beamng_individual import BeamNGIndividual
 
@@ -198,6 +199,10 @@ if __name__ == '__main__':
         ind_time = timeit.default_timer() - ind_start
         log.info(f"Evaluation completed in {ind_time}s")
         ind_times[i] = ind_time
+
+        # Close the simulator to circumvent memory leaks
+        if isinstance(prob.get_evaluator(), BeamNGNvidiaOob):
+            prob.get_evaluator().brewer.beamng.close()
 
         # Prepare the results of the neighborhood exploration for serialization
         out = {'neighborhood_size': NEIGHBORHOOD_SIZE,

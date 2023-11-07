@@ -15,6 +15,7 @@ from udacity_integration.beamng_car_cameras import BeamNGCarCameras
 class BeamNGBrewer:
     def __init__(self, road_nodes: List4DTuple = None):
         self.beamng = BeamNGpy('localhost', 12345)
+        self.beamng.logger.setLevel(20)
         self.vehicle: Vehicle = None
         self.use_camera = False
         self.camera: Camera = None
@@ -24,9 +25,6 @@ class BeamNGBrewer:
         steps = 5
         self.params = SimulationParams(beamng_steps=steps, delay_msec=int(steps * 0.05 * 1000))
         self.vehicle_start_pose = BeamNGPose()
-
-        self.beamng.open()
-        self.beamng.logger.setLevel(20)
 
     def setup_road_nodes(self, road_nodes):
         self.road_nodes = road_nodes
@@ -51,6 +49,9 @@ class BeamNGBrewer:
         return self.camera
 
     def bring_up(self):
+        if not self.beamng.connection:
+            self.beamng.open()
+
         self.scenario = Scenario('tig', 'tigscenario')
         if self.vehicle:
             self.scenario.add_vehicle(self.vehicle, pos=self.vehicle_start_pose.pos,
