@@ -1,3 +1,5 @@
+import logging
+import timeit
 from enum import Enum, auto
 from typing import Optional
 import json
@@ -82,7 +84,7 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
     :param member_inside: the original member of the individual which is inside the frontier
     :param member_outside: the original member of the individual which is outside the frontier
     :param size: the size of the neighborhood to be generated
-    :return: a list of new members that are neighbors of the individuals
+    :return: two lists of new members that are neighbors of the two members of the individual
     :raise Exception if a neighborhood of this size cannot be generated
     """
     def find_mutated_node():
@@ -95,9 +97,15 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
                 return k
         return None
 
-    neighborhood = []
+    # Find which control node was mutated in the original individual and mutate it again
+    mutated_node = find_mutated_node()
+    if not mutated_node:
+        raise Exception('Cannot find mutated road control node')
+
+    neighborhood_in = []
+    neighborhood_out = []
     MAX_ATTEMPTS = 50
-    for _ in range(size):
+    for i in range(size * 2):
         same_road = True
         new_mbr: Optional[BeamNGMember] = None
         # Try generating a new member that is not equal to any other in the neighborhood
@@ -105,18 +113,14 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
         attempts = 0
         while same_road and attempts < MAX_ATTEMPTS:
             # Start from the original member inside the frontier
-            new_mbr = member_inside.clone()
+            new_mbr = member_inside.clone() if i < size else member_outside.clone()
 
-            # Find which control node was mutated in the original individual and mutate it again
-            mutated_node = find_mutated_node()
-            if not mutated_node:
-                raise Exception('Cannot find mutated road control node')
             new_mbr.mutate(mutated_node)
 
             # Check if the new road obtained through mutation is equal to another one in the neighborhood
             # or in the members of the original individual
             same_road = False
-            for neighbor in neighborhood + [member_inside, member_outside]:
+            for neighbor in neighborhood_in + neighborhood_out + [member_inside, member_outside]:
                 if neighbor.control_nodes == new_mbr.control_nodes:
                     same_road = True
 
@@ -125,14 +129,25 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
         if attempts == MAX_ATTEMPTS:
             raise Exception(f'Cannot generate neighborhood of size {size}')
 
-        neighborhood.append(new_mbr)
-    return neighborhood
+        if i < size:
+            neighborhood_in.append(new_mbr)
+        else:
+            neighborhood_out.append(new_mbr)
+    return neighborhood_in, neighborhood_out
 
 
 if __name__ == '__main__':
     # Set up the problem, needed for holding references to config, archive and evaluator
     cfg = BeamNGConfig()
     prob = BeamNGProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
+
+    # Set up logger
+    log = logging.getLogger('ExploreNeighborhood')
+    log.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(EXPERIMENT_FOLDER.joinpath('neighbors.log'), 'w', 'utf8')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    log.addHandler(fh)
 
     # Folder containing the archive that we want to examine
     ind_storage = FolderStorage(EXPERIMENT_FOLDER.joinpath('archive'), 'ind{}.json')
@@ -142,8 +157,11 @@ if __name__ == '__main__':
 
     # For each individual that we want to examine, re-run simulations of its original members
     # and then generate and simulate neighbors to estimate the chance of being outside the frontier
+    tot_start = timeit.default_timer()
+    ind_times = {}
     for i in INDIVIDUALS_INDEX:
-        print("==================== Evaluating original individual ====================")
+        log.info(f'Starting evaluation of individual {i}')
+        ind_start = timeit.default_timer()
         # Load the individual from file and evaluate it again
         ind, mbr_in, mbr_out = load_individual(ind_storage, i, prob)
         ind.evaluate()
@@ -152,23 +170,50 @@ if __name__ == '__main__':
         comp_w_original = compare_individual_with_original(mbr_in, mbr_out)
 
         # Generate members in the neighborhood
-        nbh = generate_neighborhood(mbr_in, mbr_out, NEIGHBORHOOD_SIZE)
-        outside_bound = 0
-        print("==================== Evaluating neighborhood ====================")
-        # For each member, evaluate it and check if it is outside the frontier
-        for mbr in nbh:
+        gen_nbh_start = timeit.default_timer()
+        nbh_in, nbh_out = generate_neighborhood(mbr_in, mbr_out, NEIGHBORHOOD_SIZE)
+        gen_nbh_time = timeit.default_timer() - gen_nbh_start
+        log.info(f"Neighborhood generated in {gen_nbh_time}s")
+
+        outside_frontier_in = 0
+        log.info("Evaluating neighborhood of member inside the frontier...")
+        # For each neighbor of the original member inside the frontier, evaluate it and check if it is outside
+        for mbr in nbh_in:
             mbr.evaluate()
 
             if mbr.distance_to_boundary < 0:
-                outside_bound += 1
+                outside_frontier_in += 1
+
+        outside_frontier_out = 0
+
+        log.info("Evaluating neighborhood of member outside the frontier...")
+        # For each neighbor of the original member outside the frontier, evaluate it and check if it is outside
+        for mbr in nbh_out:
+            mbr.evaluate()
+
+            if mbr.distance_to_boundary < 0:
+                outside_frontier_out += 1
+
+        # Calculate simulation time for this individual
+        ind_time = timeit.default_timer() - ind_start
+        log.info(f"Evaluation completed in {ind_time}s")
+        ind_times[i] = ind_time
 
         # Prepare the results of the neighborhood exploration for serialization
-        out = {'original_individual': ind.to_dict(),
-               'neighborhood_size': NEIGHBORHOOD_SIZE,
+        out = {'neighborhood_size': NEIGHBORHOOD_SIZE,
                'reevaluation_results': comp_w_original,
-               'neighbors_outside_frontier_percentage': outside_bound / NEIGHBORHOOD_SIZE,
-               'neighborhood': [mbr.to_dict() for mbr in nbh]}
+               'neighbors_IN_outside_frontier_percentage': outside_frontier_in / NEIGHBORHOOD_SIZE,
+               'neighbors_OUT_outside_frontier_percentage': outside_frontier_out / NEIGHBORHOOD_SIZE,
+               'simulation_time': ind_time,
+               'original_individual': ind.to_dict(),
+               'neighborhood_IN': [mbr.to_dict() for mbr in nbh_in],
+               'neighborhood_OUT': [mbr.to_dict() for mbr in nbh_out]}
 
         # Save the results to file
         with open(EXPERIMENT_FOLDER.joinpath('neighbors', f'ind{i}.json'), 'w') as f:
             f.write(json.dumps(out))
+
+    tot_time = timeit.default_timer() - tot_start
+    log.info("Experiment COMPLETE")
+    log.info(f"Total execution time: {tot_time}s")
+    log.info(f"Individuals execution time: {ind_times}")
