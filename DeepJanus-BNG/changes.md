@@ -37,6 +37,6 @@
 - Implement method to estimate probabilistic relevance of individuals at the frontier in _explore_neighborhood.py_:
   - Given the results of a DeepJanus experiment, load individuals at the frontier from their serialized representation and for each one of them
     1. Evaluate the two original members again and compare the evaluation with the one obtained in the original experiment
-    2. Generate new members that are "neighbors" of the individual: mutate the same road control node by a different value
+    2. Generate new members that are "neighbors" of the individual: mutate the same road by a different value
     3. Evaluate each member of the neighborhood
     4. Save the results of the simulations, along with the percentage of members of the neighborhood that are outside the frontier

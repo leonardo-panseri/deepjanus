@@ -1,7 +1,7 @@
 import logging
 import timeit
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 import json
 
 from core.archive_impl import SmartArchive
@@ -15,7 +15,7 @@ from self_driving.beamng_individual import BeamNGIndividual
 # Folder containing the serialized results of the experiment that we want to examine
 EXPERIMENT_FOLDER = folders.experiments.joinpath('HQ_1')
 # Indexes of the individuals that we want to examine
-INDIVIDUALS_INDEX = [360, 422]
+INDIVIDUALS_INDEX = [4, 210, 321, 360, 422]
 # Number of neighbors to generate and simulate for each individual
 NEIGHBORHOOD_SIZE = 10
 
@@ -97,42 +97,38 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
                 return k
         return None
 
-    # Find which control node was mutated in the original individual and mutate it again
-    mutated_node = find_mutated_node()
-    if not mutated_node:
-        raise Exception('Cannot find mutated road control node')
-
-    neighborhood_in = []
-    neighborhood_out = []
     MAX_ATTEMPTS = 50
-    for i in range(size * 2):
+
+    def gen_mutation(member: BeamNGMember, neighborhood: List[BeamNGMember], other_mutations: dict):
         same_road = True
         new_mbr: Optional[BeamNGMember] = None
         # Try generating a new member that is not equal to any other in the neighborhood
         # or to the two original ones
         attempts = 0
-        while same_road and attempts < MAX_ATTEMPTS:
+        while same_road:
             # Start from the original member inside the frontier
-            new_mbr = member_inside.clone() if i < size else member_outside.clone()
+            new_mbr = member.clone()
 
-            new_mbr.mutate(mutated_node)
+            new_mbr.mutate()
 
             # Check if the new road obtained through mutation is equal to another one in the neighborhood
             # or in the members of the original individual
-            same_road = False
-            for neighbor in neighborhood_in + neighborhood_out + [member_inside, member_outside]:
-                if neighbor.control_nodes == new_mbr.control_nodes:
-                    same_road = True
+            same_road = new_mbr.hex_hash() in other_mutations
 
             attempts += 1
+            if attempts == MAX_ATTEMPTS:
+                raise Exception(f'Cannot generate neighborhood of size {size}')
 
-        if attempts == MAX_ATTEMPTS:
-            raise Exception(f'Cannot generate neighborhood of size {size}')
+        other_mutations[new_mbr.hex_hash()] = True
+        neighborhood.append(new_mbr)
 
-        if i < size:
-            neighborhood_in.append(new_mbr)
-        else:
-            neighborhood_out.append(new_mbr)
+    neighborhood_in = []
+    neighborhood_out = []
+    all_members = {member_inside.hex_hash(): True, member_outside.hex_hash(): True}
+    for _ in range(size):
+        gen_mutation(member_inside, neighborhood_in, all_members)
+        gen_mutation(member_outside, neighborhood_out, all_members)
+
     return neighborhood_in, neighborhood_out
 
 
