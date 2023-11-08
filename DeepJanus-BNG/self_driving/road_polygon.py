@@ -4,7 +4,7 @@ from typing import Tuple
 
 from shapely.geometry import Polygon, LineString
 
-from self_driving.road_points import RoadPoints
+from self_driving.road_points import RoadPoints, List4DTuple
 
 
 class RoadPolygon:
@@ -12,7 +12,7 @@ class RoadPolygon:
     (a polygon or a sequence of polygons)."""
 
     @classmethod
-    def from_nodes(cls, nodes: List[Tuple[float, float]]):
+    def from_nodes(cls, nodes: List4DTuple):
         return RoadPolygon(RoadPoints.from_nodes(nodes))
 
     def __init__(self, road_points: RoadPoints):

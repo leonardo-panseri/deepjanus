@@ -2,13 +2,12 @@ import hashlib
 import random
 from typing import Tuple, Dict
 
-from similaritymeasures import frechet_dist
-
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_evaluator import BeamNGEvaluator
 from core.member import Member
 from self_driving.catmull_rom import catmull_rom
 from self_driving.road_bbox import RoadBoundingBox
+from self_driving.road_points import List4DTuple
 from self_driving.road_polygon import RoadPolygon
 from self_driving.edit_distance_polyline import iterative_levenshtein
 
@@ -20,7 +19,7 @@ class BeamNGMember(Member):
     """A class representing a road returned by the RoadGenerator."""
     counter = 0
 
-    def __init__(self, control_nodes: Tuple4F, sample_nodes: Tuple4F, num_spline_nodes: int,
+    def __init__(self, control_nodes: List4DTuple, sample_nodes: List4DTuple, num_spline_nodes: int,
                  road_bbox: RoadBoundingBox):
         super().__init__()
         BeamNGMember.counter += 1
@@ -85,9 +84,13 @@ class BeamNGMember(Member):
         return barycenter
 
     def mutate(self, node=None) -> 'BeamNGMember':
-        RoadMutator(self, lower_bound=-int(self.problem.config.MUTATION_EXTENT), upper_bound=int(self.problem.config.MUTATION_EXTENT)).mutate(node=node)
+        RoadMutator(self, lower_bound=-int(self.problem.config.MUTATION_EXTENT),
+                    upper_bound=int(self.problem.config.MUTATION_EXTENT)).mutate(node=node)
         self.distance_to_boundary = None
         return self
+
+    def hex_hash(self):
+        return hashlib.sha256(str([tuple(node) for node in self.control_nodes]).encode('UTF-8')).hexdigest()
 
     def __repr__(self):
         eval_boundary = 'na'
@@ -97,7 +100,7 @@ class BeamNGMember(Member):
                 eval_boundary = '+' + eval_boundary
             eval_boundary = '~' + eval_boundary
         eval_boundary = eval_boundary[:7].ljust(7)
-        h = hashlib.sha256(str([tuple(node) for node in self.control_nodes]).encode('UTF-8')).hexdigest()[-5:]
+        h = self.hex_hash[-5:]
         return f'{self.name_ljust} h={h} b={eval_boundary}'
 
 
@@ -109,7 +112,7 @@ class RoadMutator:
         self.lower_bound = lower_bound
         self.higher_bound = upper_bound
 
-    def mutate_gene(self, index, xy_prob=0.5) -> Tuple[int, int]:
+    def mutate_gene(self, index: int, xy_prob=0.5) -> Tuple[int, int]:
         gene = list(self.road.control_nodes[index])
         # Choose the mutation extent
         mut_value = random.randint(self.lower_bound, self.higher_bound)
@@ -124,7 +127,7 @@ class RoadMutator:
         self.road.sample_nodes = catmull_rom(self.road.control_nodes, self.road.num_spline_nodes)
         return c, mut_value
 
-    def undo_mutation(self, index, c, mut_value):
+    def undo_mutation(self, index: int, c, mut_value):
         gene = list(self.road.control_nodes[index])
         gene[c] -= mut_value
         self.road.control_nodes[index] = tuple(gene)

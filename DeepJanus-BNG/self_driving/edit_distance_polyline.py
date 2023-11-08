@@ -100,9 +100,6 @@ def _calc_dist_angle(points: ListOfPoints) -> ListOfAngleLength:
 def iterative_levenshtein(s: ListOfPoints, t: ListOfPoints):
     s_da = _calc_dist_angle(s)
     t_da = _calc_dist_angle(t)
-    #for i in range(len(s_da)):
-        #if np.abs(np.subtract(s_da[i][0], t_da[i][0])) > 10:
-            #print(str(s_da[i])+" "+str(t_da[i]))
     return _iterative_levenshtein_dist_angle(s_da, t_da)
 
 
