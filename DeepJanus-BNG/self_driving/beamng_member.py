@@ -100,7 +100,7 @@ class BeamNGMember(Member):
                 eval_boundary = '+' + eval_boundary
             eval_boundary = '~' + eval_boundary
         eval_boundary = eval_boundary[:7].ljust(7)
-        h = self.hex_hash[-5:]
+        h = self.hex_hash()[-5:]
         return f'{self.name_ljust} h={h} b={eval_boundary}'
 
 
