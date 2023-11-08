@@ -185,8 +185,10 @@ if __name__ == '__main__':
             if mbr.distance_to_boundary < 0:
                 outside_frontier_in += 1
 
-        outside_frontier_out = 0
+        # Close the simulator to circumvent memory leaks
+        prob.get_evaluator().brewer.beamng.close()
 
+        outside_frontier_out = 0
         log.info("Evaluating neighborhood of member outside the frontier...")
         # For each neighbor of the original member outside the frontier, evaluate it and check if it is outside
         for mbr in nbh_out:
@@ -201,8 +203,7 @@ if __name__ == '__main__':
         ind_times[i] = ind_time
 
         # Close the simulator to circumvent memory leaks
-        if isinstance(prob.get_evaluator(), BeamNGNvidiaOob):
-            prob.get_evaluator().brewer.beamng.close()
+        prob.get_evaluator().brewer.beamng.close()
 
         # Prepare the results of the neighborhood exploration for serialization
         out = {'neighborhood_size': NEIGHBORHOOD_SIZE,
