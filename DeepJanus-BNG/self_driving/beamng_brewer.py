@@ -1,3 +1,5 @@
+import subprocess
+
 from beamngpy import BeamNGpy, Scenario, Vehicle
 from beamngpy.sensors import Camera, GForces, Electrics, Damage, Timer
 from beamngpy.misc.quat import angle_to_quat
@@ -51,6 +53,8 @@ class BeamNGBrewer:
     def bring_up(self):
         if not self.beamng.connection:
             self.beamng.open()
+            # Do not pipe BeamNG.tech stdout to Python stdout
+            self.beamng.process.stdout = subprocess.DEVNULL
 
         self.scenario = Scenario('tig', 'tigscenario')
         if self.vehicle:
