@@ -1,6 +1,6 @@
 import logging
 import timeit
-from enum import Enum, auto
+from enum import Enum
 from typing import Optional
 import json
 
@@ -9,7 +9,6 @@ from core.folder_storage import FolderStorage
 from core.folders import folders
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
-from self_driving.beamng_nvidia_runner import BeamNGNvidiaOob
 from self_driving.beamng_problem import BeamNGProblem
 from self_driving.beamng_individual import BeamNGIndividual
 
