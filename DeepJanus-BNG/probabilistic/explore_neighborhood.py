@@ -1,21 +1,21 @@
+import argparse
+import json
 import logging
 import timeit
+from datetime import datetime
 from enum import Enum
 from typing import Optional, List
-import json
 
 from core.archive_impl import SmartArchive
 from core.folder_storage import FolderStorage
 from core.folders import folders
 from self_driving.beamng_config import BeamNGConfig
+from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
-from self_driving.beamng_individual import BeamNGIndividual
 
 # Folder containing the serialized results of the experiment that we want to examine
 EXPERIMENT_FOLDER = folders.experiments.joinpath('HQ_1')
-# Indexes of the individuals that we want to examine
-INDIVIDUALS_INDEX = [4, 210, 321, 360, 422]
 # Number of neighbors to generate and simulate for each individual
 NEIGHBORHOOD_SIZE = 10
 
@@ -26,7 +26,8 @@ def load_individual(storage: FolderStorage, individual_index: int, problem: Beam
     :param storage: the FolderStorage where the serialized individuals are kept
     :param individual_index: the index of the individual to load
     :param problem: the BeamNGProblem that will be used for evaluation
-    :return: a tuple containing the individual, the member inside the frontier and the member outside of it
+    :return: a tuple containing the individual, the member inside the frontier, the member outside of it,
+             and a flag indicating if m1 is the member inside (otherwise it is m2)
     """
     # Load individual from its JSON representation in the storage
     individual = BeamNGIndividual.from_dict(storage.load_json_by_index(individual_index))
@@ -35,12 +36,15 @@ def load_individual(storage: FolderStorage, individual_index: int, problem: Beam
 
     # Check which member is inside the frontier and which is outside
     # Assuming that we have only individuals at the frontier in the storage
+    m1_inside: bool
     if individual.m1.distance_to_boundary < 0:
         member_inside = individual.m2
         member_outside = individual.m1
+        m1_inside = False
     else:
         member_inside = individual.m1
         member_outside = individual.m2
+        m1_inside = True
 
     # Set distance to boundary for both members to None so that they can be re-evaluated
     member_inside.clear_evaluation()
@@ -48,7 +52,7 @@ def load_individual(storage: FolderStorage, individual_index: int, problem: Beam
     member_outside.clear_evaluation()
     member_outside.problem = problem
 
-    return individual, member_inside, member_outside
+    return individual, member_inside, member_outside, m1_inside
 
 
 class ComparisonResult(str, Enum):
@@ -133,6 +137,13 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
 
 
 if __name__ == '__main__':
+    # Get indexes of individuals which neighbourhood to explore from command line arguments
+    parser = argparse.ArgumentParser(description='Explore the neighborhood of individuals on the frontier identified '
+                                                 'by DeepJanus')
+    parser.add_argument('individuals', metavar='ind', type=int, nargs='+',
+                        help='an individual whose neighborhood to explore')
+    args = parser.parse_args()
+
     # Set up the problem, needed for holding references to config, archive and evaluator
     cfg = BeamNGConfig()
     prob = BeamNGProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
@@ -140,7 +151,9 @@ if __name__ == '__main__':
     # Set up logger
     log = logging.getLogger('ExploreNeighborhood')
     log.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(EXPERIMENT_FOLDER.joinpath('neighbors.log'), 'w', 'utf8')
+    fh = logging.FileHandler(EXPERIMENT_FOLDER
+                             .joinpath(f'neighbors_{datetime.now().strftime("%d-%m_%H-%M")}.log'),
+                             'w', 'utf8')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     log.addHandler(fh)
@@ -155,11 +168,11 @@ if __name__ == '__main__':
     # and then generate and simulate neighbors to estimate the chance of being outside the frontier
     tot_start = timeit.default_timer()
     ind_times = {}
-    for i in INDIVIDUALS_INDEX:
+    for i in args.individuals:
         log.info(f'Starting evaluation of individual {i}')
         ind_start = timeit.default_timer()
         # Load the individual from file and evaluate it again
-        ind, mbr_in, mbr_out = load_individual(ind_storage, i, prob)
+        ind, mbr_in, mbr_out, m1_in = load_individual(ind_storage, i, prob)
         ind.evaluate()
 
         # Check if the evaluation results have changed compared to what was saved on file
@@ -174,7 +187,9 @@ if __name__ == '__main__':
         outside_frontier_in = 0
         log.info("Evaluating neighborhood of member inside the frontier...")
         # For each neighbor of the original member inside the frontier, evaluate it and check if it is outside
-        for mbr in nbh_in:
+        for mbr_idx in range(len(nbh_in)):
+            print(f"==================> Evaluating neighbor {mbr_idx} of member inside the frontier of individual {i}")
+            mbr = nbh_in[mbr_idx]
             mbr.evaluate()
 
             if mbr.distance_to_boundary < 0:
@@ -186,7 +201,9 @@ if __name__ == '__main__':
         outside_frontier_out = 0
         log.info("Evaluating neighborhood of member outside the frontier...")
         # For each neighbor of the original member outside the frontier, evaluate it and check if it is outside
-        for mbr in nbh_out:
+        for mbr_idx in range(len(nbh_out)):
+            print(f"==================> Evaluating neighbor {mbr_idx} of member outside the frontier of individual {i}")
+            mbr = nbh_out[mbr_idx]
             mbr.evaluate()
 
             if mbr.distance_to_boundary < 0:
@@ -206,6 +223,7 @@ if __name__ == '__main__':
                'neighbors_IN_outside_frontier_percentage': outside_frontier_in / NEIGHBORHOOD_SIZE,
                'neighbors_OUT_outside_frontier_percentage': outside_frontier_out / NEIGHBORHOOD_SIZE,
                'simulation_time': ind_time,
+               'original_individual_member_inside': 'm1' if m1_in else 'm2',
                'original_individual': ind.to_dict(),
                'neighborhood_IN': [mbr.to_dict() for mbr in nbh_in],
                'neighborhood_OUT': [mbr.to_dict() for mbr in nbh_out]}
