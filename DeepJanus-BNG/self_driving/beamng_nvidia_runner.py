@@ -33,6 +33,7 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
         if not os.path.exists(self.model_file):
             raise Exception(f'File {self.model_file} does not exist!')
         self.model = None
+        self.simulation_count = 0
 
     def evaluate(self, members: List[BeamNGMember]):
         for member in members:
@@ -63,6 +64,11 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
         if not self.brewer:
             self.brewer = BeamNGBrewer()
             self.camera = self.brewer.setup_scenario_camera()
+
+        if self.simulation_count >= self.config.beamng_restart_after_n_simulations:
+            self.brewer.close_beamng()
+            self.simulation_count = 0
+        self.simulation_count += 1
 
         brewer = self.brewer
         brewer.setup_road_nodes(nodes)

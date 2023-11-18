@@ -188,9 +188,6 @@ def explore_neighborhood(individuals: List[int]):
             if mbr.distance_to_boundary < 0:
                 outside_frontier_in += 1
 
-        # Close the simulator to circumvent memory leaks
-        prob.get_evaluator().brewer.beamng.close()
-
         outside_frontier_out = 0
         log.info("Evaluating neighborhood of member outside the frontier...")
         # For each neighbor of the original member outside the frontier, evaluate it and check if it is outside
@@ -206,9 +203,6 @@ def explore_neighborhood(individuals: List[int]):
         ind_time = timeit.default_timer() - ind_start
         log.info(f"Evaluation completed in {ind_time}s")
         ind_times[i] = ind_time
-
-        # Close the simulator to circumvent memory leaks
-        prob.get_evaluator().brewer.beamng.close()
 
         # Prepare the results of the neighborhood exploration for serialization
         out = {'neighborhood_size': NEIGHBORHOOD_SIZE,

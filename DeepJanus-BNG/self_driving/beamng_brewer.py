@@ -59,7 +59,7 @@ class BeamNGBrewer:
         self.scenario = Scenario('tig', 'tigscenario')
         if self.vehicle:
             self.scenario.add_vehicle(self.vehicle, pos=self.vehicle_start_pose.pos,
-                                 rot_quat=angle_to_quat(self.vehicle_start_pose.rot))
+                                      rot_quat=angle_to_quat(self.vehicle_start_pose.rot))
 
         self.scenario.make(self.beamng)
 
@@ -68,20 +68,23 @@ class BeamNGBrewer:
         self.beamng.pause()
 
         if self.use_camera:
-            self.camera = Camera('brewer_camera', self.beamng, is_static=True, pos=(0, 0, 0), dir=(0, 0, 0), field_of_view_y=120,
-                                 resolution=(1280, 1280))
+            self.camera = Camera('brewer_camera', self.beamng, is_static=True, pos=(0, 0, 0), dir=(0, 0, 0),
+                                 field_of_view_y=120, resolution=(1280, 1280))
 
         if self.car_cameras:
             self.car_cameras.setup_cameras()
 
         self.beamng.start_scenario()
 
-    def __del__(self):
+    def close_beamng(self):
         if self.beamng:
             try:
                 self.beamng.close()
             except:
                 pass
+
+    def __del__(self):
+        self.close_beamng()
 
 
 if __name__ == '__main__':
