@@ -1,9 +1,10 @@
-## Project Structure
+## General
 - Add _.gitignore_
 - _requirements.txt_:
   - Remove shapely version
   - Remove outdated bundled beamngpy library, adding it here instead
   - Add missing required libraries
+- Convert ML models from h5 format to standard Keras format, to ensure compatibility with new Python versions and fix a memory leak
 
 ## Udacity Integration
 - _beamng_car_cameras.py_:
@@ -16,7 +17,7 @@
 - _beamng_brewer.py_:
   - Refactor brewer camera to use beamngpy Camera object and remove custom BeamNGCamera class
   - Move here initialization of car cameras and other sensors
-  - Make call to open and connect to simulator only once instead of at every simulation
+  - Update call to open and connect to simulator to run only if simulator is open with new API
   - Convert angle of vehicle from euler to quaternion (needed by new beamngpy version)
   - Add framerate limit to _set_deterministic()_ call as it is now mandatory
 - _beamng_nvidia_runner.py_:
@@ -36,7 +37,7 @@
 ## Probabilistic
 - Implement method to estimate probabilistic relevance of individuals at the frontier in _explore_neighborhood.py_:
   - Given the results of a DeepJanus experiment, load individuals at the frontier from their serialized representation and for each one of them
-    1. Evaluate the two original members again and compare the evaluation with the one obtained in the original experiment
-    2. Generate new members that are "neighbors" of the individual: mutate the same road by a different value
-    3. Evaluate each member of the neighborhood
-    4. Save the results of the simulations, along with the percentage of members of the neighborhood that are outside the frontier
+    1. Evaluate the two original members again and compare the evaluation with the one obtained in the original experiment (to check if experiments are deterministic and reproducible)
+    2. Generate new members that are "neighbors" of the individual: for both members, mutate the same road by a different value
+    3. Evaluate each member of the two neighborhoods
+    4. Save the results of the simulations, along with the percentage of members of the neighborhoods that are outside the frontier
