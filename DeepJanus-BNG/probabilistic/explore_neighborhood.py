@@ -136,14 +136,7 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
     return neighborhood_in, neighborhood_out
 
 
-if __name__ == '__main__':
-    # Get indexes of individuals which neighbourhood to explore from command line arguments
-    parser = argparse.ArgumentParser(description='Explore the neighborhood of individuals on the frontier identified '
-                                                 'by DeepJanus')
-    parser.add_argument('individuals', metavar='ind', type=int, nargs='+',
-                        help='an individual whose neighborhood to explore')
-    args = parser.parse_args()
-
+def explore_neighborhood(individuals: List[int]):
     # Set up the problem, needed for holding references to config, archive and evaluator
     cfg = BeamNGConfig()
     prob = BeamNGProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
@@ -168,7 +161,7 @@ if __name__ == '__main__':
     # and then generate and simulate neighbors to estimate the chance of being outside the frontier
     tot_start = timeit.default_timer()
     ind_times = {}
-    for i in args.individuals:
+    for i in individuals:
         log.info(f'Starting evaluation of individual {i}')
         ind_start = timeit.default_timer()
         # Load the individual from file and evaluate it again
@@ -236,3 +229,14 @@ if __name__ == '__main__':
     log.info("Experiment COMPLETE")
     log.info(f"Total execution time: {tot_time}s")
     log.info(f"Individuals execution time: {ind_times}")
+
+
+if __name__ == '__main__':
+    # Get indexes of individuals which neighbourhood to explore from command line arguments
+    parser = argparse.ArgumentParser(description='Explore the neighborhood of individuals on the frontier identified '
+                                                 'by DeepJanus')
+    parser.add_argument('individuals', metavar='ind', type=int, nargs='+',
+                        help='an individual whose neighborhood to explore')
+    args = parser.parse_args()
+
+    explore_neighborhood(args.individuals)
