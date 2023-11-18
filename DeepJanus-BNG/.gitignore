@@ -2,5 +2,7 @@
 data/member_seeds/basic5/
 data/simulations/
 venv/
+venv39/
+venv311/
 
 *.log
