@@ -2,7 +2,7 @@ import matplotlib.animation as animation
 import numpy as np
 import matplotlib.pyplot as plt
 
-from core.folder_storage import SeedStorage
+from core.folders import SeedStorage
 from self_driving.beamng_member import BeamNGMember
 from self_driving.road_points import RoadPoints
 

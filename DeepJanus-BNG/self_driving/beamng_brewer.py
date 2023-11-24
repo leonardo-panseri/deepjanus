@@ -3,7 +3,7 @@ import subprocess
 from beamngpy import BeamNGpy, Scenario, Vehicle
 from beamngpy.sensors import Camera, GForces, Electrics, Damage, Timer
 from beamngpy.misc.quat import angle_to_quat
-from core.folder_storage import SeedStorage
+from core.folders import SeedStorage
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 

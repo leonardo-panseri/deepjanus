@@ -2,7 +2,7 @@ import json
 import os
 from typing import Tuple, List, Callable
 
-from core.folders import folders
+from core.folders import FOLDERS
 
 
 class RoadStorage:
@@ -10,7 +10,7 @@ class RoadStorage:
     def __init__(self, path: str = None):
         if path is None:
             path='test_driving'
-        self.folder = str(folders.member_seeds.joinpath(path))
+        self.folder = str(FOLDERS.member_seeds.joinpath(path))
         os.makedirs(self.folder, exist_ok=True)
 
     def all_files(self) -> List[str]:

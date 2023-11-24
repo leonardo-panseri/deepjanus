@@ -12,7 +12,7 @@ from typing import Iterable
 
 import numpy as np
 import matplotlib.pyplot as plt
-from core.folders import folders
+from core.folders import FOLDERS
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_road_imagery import BeamNGRoadImagery
@@ -71,7 +71,7 @@ class _BeamNGIndividualCompositeMembersStore:
 
 
 if __name__ == '__main__':
-    store = _BeamNGIndividualCompositeMembersStore(folders.experiments.joinpath('exp1/gen0/population'))
+    store = _BeamNGIndividualCompositeMembersStore(FOLDERS.experiments.joinpath('exp1/gen0/population'))
     ind = store.load('ind1')
     store.save(ind, 'ind_xx')
 

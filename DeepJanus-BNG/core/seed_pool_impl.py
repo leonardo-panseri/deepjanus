@@ -2,8 +2,7 @@ from typing import Dict
 
 from core.problem import Problem
 from core.member import Member
-from core.folder_storage import SeedStorage
-from core.folders import folders
+from core.folders import FOLDERS, SeedStorage
 from core.seed_pool import SeedPool
 
 
@@ -22,7 +21,7 @@ class SeedPoolFolder(SeedPool):
         path = self.file_path_list[item]
         result: Member = self.cache.get(path, None)
         if not result:
-            result = self.problem.member_class().from_dict(self.storage.read(path))
+            result = self.problem.member_class().from_dict(self.storage.load_json_by_path(path))
             self.cache[path] = result
         result.problem = self.problem
         return result
@@ -44,7 +43,7 @@ class SeedPoolRandom(SeedPool):
 class SeedPoolMnist(SeedPool):
     def __init__(self, problem: Problem, filename):
         super().__init__(problem)
-        content = folders.member_seeds.joinpath(filename).read_text()
+        content = FOLDERS.member_seeds.joinpath(filename).read_text()
         self.seeds_index = content.split(',')
         self.cache: Dict[str, Member] = {}
 

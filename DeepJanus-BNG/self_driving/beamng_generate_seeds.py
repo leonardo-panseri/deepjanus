@@ -1,7 +1,7 @@
 import json
 
 from beamng_config import BeamNGConfig
-from core.folder_storage import SeedStorage
+from core.folders import SeedStorage
 from self_driving.road_generator import RoadGenerator
 
 if __name__ == "__main__":

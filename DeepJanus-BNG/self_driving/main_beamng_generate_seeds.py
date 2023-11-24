@@ -4,7 +4,7 @@ from core.archive import SmartArchive
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_problem import BeamNGProblem
 from core.config import Config
-from core.folder_storage import SeedStorage
+from core.folders import SeedStorage
 
 config_silly = BeamNGConfig()
 config_silly.MODEL_FILE = 'self-driving-car-4600.h5'

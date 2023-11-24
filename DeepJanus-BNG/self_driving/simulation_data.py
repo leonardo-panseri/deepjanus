@@ -8,7 +8,7 @@ from typing import List
 from core import folders
 from self_driving.beamng_road_imagery import BeamNGRoadImagery
 from self_driving.decal_road import DecalRoad
-from core.folders import folders
+from core.folders import FOLDERS
 from core.misc import delete_folder_recursively
 
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',
@@ -40,7 +40,7 @@ class SimulationData:
 
     def __init__(self, simulation_name: str):
         self.name = simulation_name
-        self.path_root: Path = folders.simulations.joinpath(simulation_name)
+        self.path_root: Path = FOLDERS.simulations.joinpath(simulation_name)
         self.path_json: Path = self.path_root.joinpath('simulation.full.json')
         self.path_partial: Path = self.path_root.joinpath('simulation.partial.tsv')
         self.path_road_img: Path = self.path_root.joinpath('road')
@@ -127,7 +127,7 @@ class SimulationData:
 
 
 if __name__ == '__main__':
-    for s in (sim.parts[-2:] for sim in folders.simulations.joinpath('beamng_nvidia_runner').glob('*')):
+    for s in (sim.parts[-2:] for sim in FOLDERS.simulations.joinpath('beamng_nvidia_runner').glob('*')):
         sim1 = SimulationData('/'.join(s)).load()
         if len(sim1.states) == 0:
             print(sim1.name)

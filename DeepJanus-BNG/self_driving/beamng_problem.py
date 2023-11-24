@@ -6,7 +6,7 @@ from typing import List
 from deap import creator
 
 from core.archive import Archive
-from core.folders import folders
+from core.folders import FOLDERS
 from core.log import get_logger
 from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
@@ -34,7 +34,7 @@ class BeamNGProblem(Problem):
         else:
             seed_pool = SeedPoolFolder(self, config.SEED_FOLDER)
         self._seed_pool_strategy = SeedPoolAccessStrategy(seed_pool)
-        self.experiment_path = folders.experiments.joinpath(self.config.EXPERIMENT_NAME)
+        self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
         delete_folder_recursively(self.experiment_path)
 
     def deap_generate_individual(self):

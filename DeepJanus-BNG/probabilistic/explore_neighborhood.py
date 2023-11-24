@@ -7,15 +7,14 @@ from enum import Enum
 from typing import Optional, List
 
 from core.archive import SmartArchive
-from core.folder_storage import FolderStorage
-from core.folders import folders
+from core.folders import FOLDERS, FolderStorage
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
 
 # Folder containing the serialized results of the experiment that we want to examine
-EXPERIMENT_FOLDER = folders.experiments.joinpath('HQ_1')
+EXPERIMENT_FOLDER = FOLDERS.experiments.joinpath('HQ_1')
 # Number of neighbors to generate and simulate for each individual
 NEIGHBORHOOD_SIZE = 10
 

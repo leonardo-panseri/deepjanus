@@ -5,8 +5,7 @@ from typing import List, Tuple, Optional
 
 from PIL import Image
 
-from core.folder_storage import SeedStorage
-from core.folders import folders
+from core.folders import FOLDERS, SeedStorage
 from core.log import get_logger
 from self_driving.beamng_brewer import BeamNGBrewer
 from self_driving.beamng_config import BeamNGConfig
@@ -29,7 +28,7 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
     def __init__(self, config: BeamNGConfig):
         self.config = config
         self.brewer: Optional[BeamNGBrewer] = None
-        self.model_file = str(folders.trained_models_colab.joinpath(config.MODEL_FILE))
+        self.model_file = str(FOLDERS.trained_models_colab.joinpath(config.MODEL_FILE))
         if not os.path.exists(self.model_file):
             raise Exception(f'File {self.model_file} does not exist!')
         self.model = None

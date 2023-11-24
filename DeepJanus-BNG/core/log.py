@@ -1,7 +1,7 @@
 import logging
 import os
 
-from core.folders import folders
+from core.folders import FOLDERS
 from core.ini_file import IniFile
 
 
@@ -42,7 +42,7 @@ class LogSetup:
 
 
 log_setup = LogSetup()
-log_setup.use_ini(folders.log_ini)
+log_setup.use_ini(FOLDERS.log_ini)
 
 
 def get_logger(logger_name_path):
