@@ -21,7 +21,7 @@ class GreedyArchive(Archive):
     """Archive that stores every individual at the frontier"""
     def process_population(self, pop: Iterable[Individual]):
         for candidate in pop:
-            if candidate.oob_ff < 0:
+            if candidate.distance_to_frontier < 0:
                 self.add(candidate)
 
 
@@ -33,8 +33,8 @@ class SmartArchive(Archive):
 
     def process_population(self, pop: Iterable[Individual]):
         for candidate in pop:
-            assert candidate.oob_ff, candidate.name
-            if candidate.oob_ff < 0:
+            assert candidate.distance_to_frontier, candidate.name
+            if candidate.distance_to_frontier < 0:
                 if len(self) == 0:
                     self._add(candidate)
                     log.debug('add initial individual')

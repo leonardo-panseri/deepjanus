@@ -18,8 +18,8 @@ class BeamNGIndividual(Individual):
 
     def __init__(self, m1: BeamNGMember, m2: BeamNGMember, config: Config, archive: Archive):
         super().__init__(m1, m2)
-        self.m1: BeamNGMember = self.m1
-        self.m2: BeamNGMember = self.m2
+        self.m1: BeamNGMember = m1
+        self.m2: BeamNGMember = m2
         BeamNGIndividual.counter += 1
         self.name = f'ind{str(BeamNGIndividual.counter)}'
         self.name_ljust = self.name.ljust(6)
@@ -27,7 +27,6 @@ class BeamNGIndividual(Individual):
         self.archive = archive
         self.m1.parent = self
         self.m2.parent = self
-        self.sparseness = None
         self.aggregate = None
         self.seed: BeamNGMember
 
@@ -54,7 +53,7 @@ class BeamNGIndividual(Individual):
         print('Time to eval: ', stop - start)
 
         border = self.m1.distance_to_boundary * self.m2.distance_to_boundary
-        self.oob_ff = border if border > 0 else -0.1
+        self.distance_to_frontier = border if border > 0 else -0.1
         ff1 = self.sparseness - (self.config.K_SD * self.members_distance)
 
         log.info(f'evaluated {self}')
@@ -62,7 +61,7 @@ class BeamNGIndividual(Individual):
         stop = timeit.default_timer()
         print('Total Time: ', stop - start)
 
-        return ff1, self.oob_ff
+        return ff1, self.distance_to_frontier
 
     def clone(self) -> 'BeamNGIndividual':
         res: BeamNGIndividual = creator.Individual(self.m1.clone(), self.m2.clone(), self.config, self.archive)
@@ -95,7 +94,7 @@ class BeamNGIndividual(Individual):
                 'seed': self.seed.to_dict() if self.seed else None}
 
     @classmethod
-    def from_dict(self, d):
+    def from_dict(cls, d):
         m1 = BeamNGMember.from_dict(d['m1'])
         m2 = BeamNGMember.from_dict(d['m2'])
         ind = BeamNGIndividual(m1, m2, None, None)
@@ -112,7 +111,6 @@ class BeamNGIndividual(Individual):
         condition = False
         while not condition:
             road_to_mutate.mutate()
-            #if self.m1.distance(self.m2) != 0.0:
             if self.m1.control_nodes != self.m2.control_nodes:
                 condition = True
         self.members_distance = None
