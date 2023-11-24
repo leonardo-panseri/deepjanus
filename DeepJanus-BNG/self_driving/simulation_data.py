@@ -8,8 +8,7 @@ from typing import List
 from core import folders
 from self_driving.beamng_road_imagery import BeamNGRoadImagery
 from self_driving.decal_road import DecalRoad
-from core.folders import FOLDERS
-from core.misc import delete_folder_recursively
+from core.folders import FOLDERS, delete_folder_recursively
 
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',
                                   'steering_input', 'brake', 'brake_input', 'throttle', 'throttle_input',

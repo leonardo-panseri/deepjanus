@@ -1,10 +1,31 @@
-from typing import Iterable
+from typing import Iterable, Callable, TypeVar
+
+import numpy as np
 
 from individual import Individual
 from log import get_logger
-from misc import closest_elements
 
 log = get_logger(__file__)
+T = TypeVar("T")
+
+
+def closest_elements(elements_set: set[T], obj: T, distance_fun: Callable[[T, T], float]) -> list[tuple[T, float]]:
+    """Returns pairs of closest elements."""
+    elements = list(elements_set)
+    distances = [distance_fun(obj, el) for el in elements]
+    indexes = list(np.argsort(distances))
+    result = [(elements[idx], distances[idx]) for idx in indexes]
+    return result
+
+
+def evaluate_sparseness(ind: Individual, pop: set[Individual]):
+    """Calculates the minimum distance that the individual have from each other individual in a group."""
+    elements = pop - {ind}
+    if len(elements) == 0:
+        return 1.0
+
+    closest_element_dist = closest_elements(elements, ind, lambda a, b: a.distance(b))[0]
+    return closest_element_dist[1]
 
 
 class Archive(set):

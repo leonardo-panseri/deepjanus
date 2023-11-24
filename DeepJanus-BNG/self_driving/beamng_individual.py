@@ -5,8 +5,7 @@ from deap import creator
 
 from core.config import Config
 from core.log import get_logger
-from core.misc import evaluate_sparseness
-from core.archive import Archive
+from core.archive import Archive, evaluate_sparseness
 from core.individual import Individual
 from self_driving.beamng_member import BeamNGMember
 

@@ -6,11 +6,10 @@ from typing import List
 from deap import creator
 
 from core.archive import Archive
-from core.folders import FOLDERS
+from core.folders import FOLDERS, delete_folder_recursively
 from core.log import get_logger
 from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
-from core.misc import delete_folder_recursively
 from core.problem import Problem
 from core.seed_pool_access_strategy import SeedPoolAccessStrategy
 from core.seed_pool_impl import SeedPoolFolder, SeedPoolRandom

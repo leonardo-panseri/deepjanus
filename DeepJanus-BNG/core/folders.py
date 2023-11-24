@@ -1,6 +1,34 @@
 import json
 import os
+import shutil
 from pathlib import Path
+from time import sleep
+
+from log import get_logger
+
+log = get_logger(__file__)
+
+
+def delete_folder_recursively(path: str | Path):
+    """Removes a folder and all its contents."""
+    path = str(path)
+    if not os.path.exists(path):
+        return
+    assert os.path.isdir(path), path
+    log.info(f'Removing [{path}]')
+    shutil.rmtree(path, ignore_errors=True)
+
+    # sometimes rmtree fails to remove files
+    for tries in range(20):
+        if os.path.exists(path):
+            sleep(0.1)
+            shutil.rmtree(path, ignore_errors=True)
+
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+    if os.path.exists(path):
+        raise Exception(f'Unable to remove folder [{path}]')
 
 
 class Folders:
@@ -60,7 +88,7 @@ class FolderStorage:
         return dumps
 
     @classmethod
-    def load_json_by_path(cls, path: str):
+    def load_json_by_path(cls, path: str | Path):
         """Read and parse the JSON content of the file at the path."""
         assert os.path.exists(path), path
         with open(path, 'r') as f:
@@ -68,7 +96,7 @@ class FolderStorage:
         return nodes
 
     @classmethod
-    def save_json_by_path(cls, path: str, object_instance):
+    def save_json_by_path(cls, path: str | Path, object_instance):
         """Save a JSON representation of an object to the file at the path."""
         with open(path, 'w') as f:
             dumps = json.dumps(object_instance)
