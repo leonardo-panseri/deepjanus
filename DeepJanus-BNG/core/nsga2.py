@@ -5,7 +5,7 @@ from deap import base
 from deap import creator
 from deap import tools
 
-from core.log_setup import get_logger
+from core.log import get_logger
 from core.problem import Problem
 
 log = get_logger(__file__)

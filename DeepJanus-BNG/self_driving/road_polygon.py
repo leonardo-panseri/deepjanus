@@ -1,10 +1,12 @@
-import logging
 from typing import List
 from typing import Tuple
 
 from shapely.geometry import Polygon, LineString
 
+from core.log import get_logger
 from self_driving.road_points import RoadPoints, List4DTuple
+
+log = get_logger(__file__)
 
 
 class RoadPolygon:
@@ -107,12 +109,12 @@ class RoadPolygon:
         that is, if there are no intersections between non-adjacent polygons and if
         the adjacent polygons have as intersection a LineString (a line or segment)."""
         if self.num_polygons == 0:
-            logging.debug("No polygon constructed.")
+            log.debug("No polygon constructed.")
             return False
 
         for i, polygon in enumerate(self.polygons):
             if not polygon.is_valid:
-                logging.debug("Polygon %s is invalid." % polygon)
+                log.debug("Polygon %s is invalid." % polygon)
                 return False
 
         for i, polygon in enumerate(self.polygons):
@@ -122,16 +124,16 @@ class RoadPolygon:
                     assert i == j
                     continue
                 if polygon.contains(other) or other.contains(polygon):
-                    logging.debug("No polygon should contain any other polygon.")
+                    log.debug("No polygon should contain any other polygon.")
                     return False
                 if not self._are_neighbouring_polygons(i, j) and other.intersects(polygon):
-                    logging.debug("The non-neighbouring polygons %s and %s intersect." % (polygon, other))
+                    log.debug("The non-neighbouring polygons %s and %s intersect." % (polygon, other))
                     return False
                 if self._are_neighbouring_polygons(i, j) and not isinstance(other.intersection(polygon), LineString):
-                    logging.debug("The neighbouring polygons %s and %s have an intersection of type %s." % (
+                    log.debug("The neighbouring polygons %s and %s have an intersection of type %s." % (
                         polygon, other, type(other.intersection(polygon))))
                     return False
-        logging.debug("The road is apparently valid.")
+        log.debug("The road is apparently valid.")
         return True
 
 

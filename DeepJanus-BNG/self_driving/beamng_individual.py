@@ -4,7 +4,7 @@ import numpy as np
 from deap import creator
 
 from core.config import Config
-from core.log_setup import get_logger
+from core.log import get_logger
 from core.misc import evaluate_sparseness
 from core.archive import Archive
 from core.individual import Individual

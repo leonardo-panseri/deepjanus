@@ -7,7 +7,7 @@ from PIL import Image
 
 from core.folder_storage import SeedStorage
 from core.folders import folders
-from core.log_setup import get_logger
+from core.log import get_logger
 from self_driving.beamng_brewer import BeamNGBrewer
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_evaluator import BeamNGEvaluator

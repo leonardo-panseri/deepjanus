@@ -7,7 +7,7 @@ from deap import creator
 
 from core.archive import Archive
 from core.folders import folders
-from core.log_setup import get_logger
+from core.log import get_logger
 from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
 from core.misc import delete_folder_recursively

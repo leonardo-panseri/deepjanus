@@ -6,3 +6,4 @@ venv39/
 venv311/
 
 *.log
+log.ini

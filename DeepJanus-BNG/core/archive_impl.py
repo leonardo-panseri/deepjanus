@@ -1,10 +1,12 @@
 from itertools import permutations
 from typing import List, Tuple
-import logging as log
+from log import get_logger
 
 from core.archive import Archive
 from core.individual import Individual
 from core.misc import closest_elements
+
+log = get_logger(__file__)
 
 
 class GreedyArchive(Archive):
