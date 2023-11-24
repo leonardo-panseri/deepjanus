@@ -8,10 +8,10 @@
 
 import json
 from pathlib import Path
+from typing import Iterable
 
 import numpy as np
 import matplotlib.pyplot as plt
-from core.archive import IndividualSet
 from core.folders import folders
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember
@@ -23,7 +23,7 @@ class BeamNGIndividualSetStore:
     def __init__(self, folder: Path):
         self.folder = folder
 
-    def save(self, individuals: IndividualSet):
+    def save(self, individuals: Iterable[BeamNGIndividual]):
         for ind in individuals:
             _BeamNGIndividualCompositeMembersStore(self.folder).save(ind)
             # _BeamNGIndividualSimpleStore(self.folder).save(ind)

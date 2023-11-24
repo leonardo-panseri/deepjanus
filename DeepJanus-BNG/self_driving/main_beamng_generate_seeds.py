@@ -1,6 +1,6 @@
 import json
 
-from core.archive_impl import SmartArchive
+from core.archive import SmartArchive
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_problem import BeamNGProblem
 from core.config import Config

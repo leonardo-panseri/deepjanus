@@ -1,5 +1,5 @@
 from core import nsga2
-from core.archive_impl import SmartArchive
+from core.archive import SmartArchive
 from self_driving.beamng_config import BeamNGConfig
 import matplotlib.pyplot as plt
 

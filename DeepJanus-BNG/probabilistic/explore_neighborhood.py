@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional, List
 
-from core.archive_impl import SmartArchive
+from core.archive import SmartArchive
 from core.folder_storage import FolderStorage
 from core.folders import folders
 from self_driving.beamng_config import BeamNGConfig
