@@ -1,12 +1,10 @@
-from typing import List
-
 import numpy as np
-from core.individual import Individual
-from core.member import Member
+from individual import Individual
+from member import Member
 
 
-def get_radius_seed(solution: List[Individual]):
-    # Calculate the distance between each misclassified digit and the seed (mindist metric)
+def get_radius_seed(solution: list[Individual]):
+    """Calculates the distance between each member outside the frontier and the seed (mindist metric)"""
     if len(solution) == 0:
         return None
     distances = list()
@@ -18,8 +16,10 @@ def get_radius_seed(solution: List[Individual]):
     return radius
 
 
-def get_diameter(solution: List[Member]):
-    # Calculate the distance between each misclassified digit and the farthest element of the solution (diameter metric)
+def get_diameter(solution: list[Member]):
+    """Calculates the distance between each member outside the frontier
+     and the farthest element of the solution (diameter metric)"""
+    #
     if len(solution) == 0:
         return None
     max_distances = list()
