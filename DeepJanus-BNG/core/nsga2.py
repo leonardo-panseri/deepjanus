@@ -30,7 +30,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     # Bi-objective fitness function:
     # 1. Maximize the sparseness among the individuals in the archive
     # 2. Minimize the distance to the frontier of behavior
-    creator.create("FitnessMulti", base.Fitness, weights=config.fitness_weights)
+    creator.create("FitnessMulti", base.Fitness, weights=config.FITNESS_WEIGHTS)
     # Individuals will be represented by a custom class, based on the problem
     # Their fitness will be evaluated by the bi-objective fitness function defined above
     creator.create("Individual", problem.deap_individual_class(), fitness=creator.FitnessMulti)
@@ -74,7 +74,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
 
     # Generate initial population
     log.info("### Initializing population....")
-    pop = toolbox.population(n=config.POPSIZE)
+    pop = toolbox.population(n=config.POP_SIZE)
 
     # Evaluate the initial population
     # Note: the fitness functions are all invalid before the first iteration since they have not been evaluated.
@@ -122,7 +122,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
         toolbox.update_archive(offspring + pop)
 
         # Select the next generation population
-        pop = toolbox.select(pop + offspring, config.POPSIZE)
+        pop = toolbox.select(pop + offspring, config.POP_SIZE)
 
         # Calculate statistics for the current generation
         record = stats.compile(pop)

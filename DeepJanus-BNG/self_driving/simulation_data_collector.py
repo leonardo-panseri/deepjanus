@@ -15,7 +15,7 @@ class SimulationDataCollector:
                  camera: Camera = None,
                  simulation_name: str = None):
         self.vehicle_state_reader = vehicle_state_reader if vehicle_state_reader \
-            else VehicleStateReader(vehicle, beamng)
+            else VehicleStateReader(vehicle)
         self.oob_monitor = OutOfBoundsMonitor(RoadPolygon.from_nodes(road.nodes), self.vehicle_state_reader)
         self.beamng: BeamNGpy = beamng
         self.road: DecalRoad = road

@@ -29,7 +29,7 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
     def __init__(self, config: BeamNGConfig):
         self.config = config
         self.brewer: Optional[BeamNGBrewer] = None
-        self.model_file = str(folders.trained_models_colab.joinpath(config.keras_model_file))
+        self.model_file = str(folders.trained_models_colab.joinpath(config.MODEL_FILE))
         if not os.path.exists(self.model_file):
             raise Exception(f'File {self.model_file} does not exist!')
         self.model = None
@@ -62,13 +62,8 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
 
     def _run_simulation(self, nodes) -> SimulationData:
         if not self.brewer:
-            self.brewer = BeamNGBrewer()
+            self.brewer = BeamNGBrewer(self.config)
             self.camera = self.brewer.setup_scenario_camera()
-
-        if self.simulation_count >= self.config.beamng_restart_after_n_simulations:
-            self.brewer.close_beamng()
-            self.simulation_count = 0
-        self.simulation_count += 1
 
         brewer = self.brewer
         brewer.setup_road_nodes(nodes)
@@ -86,7 +81,7 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
 
         steps = brewer.params.beamng_steps
         simulation_id = time.strftime('%Y-%m-%d--%H-%M-%S', time.localtime())
-        name = self.config.simulation_name.replace('$(id)', simulation_id)
+        name = self.config.SIM_NAME.replace('$(id)', simulation_id)
         sim_data_collector = SimulationDataCollector(self.vehicle, beamng, brewer.decal_road, brewer.params,
                                                      vehicle_state_reader=self.vehicle_state_reader,
                                                      camera=self.camera,
@@ -134,7 +129,7 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
             sim_data_collector.get_simulation_data().end(success=False, exception=ex)
             traceback.print_exception(type(ex), ex, ex.__traceback__)
         finally:
-            if self.config.simulation_save:
+            if self.config.SAVE_SIM_DATA:
                 sim_data_collector.save()
                 try:
                     sim_data_collector.take_car_picture_if_needed()
@@ -147,11 +142,14 @@ class BeamNGNvidiaOob(BeamNGEvaluator):
 
     def end_iteration(self):
         try:
-            if self.config.beamng_close_at_iteration:
-                self._close()
-            else:
-                if self.brewer:
-                    self.brewer.beamng.stop_scenario()
+            if self.brewer:
+                self.brewer.beamng.stop_scenario()
+
+            self.simulation_count += 1
+            if self.config.BEAMNG_RESTART_AFTER > 0:
+                if self.simulation_count >= self.config.BEAMNG_RESTART_AFTER:
+                    self.brewer.close_beamng()
+                    self.simulation_count = 0
         except Exception as ex:
             log.debug('end_iteration() failed:')
             traceback.print_exception(type(ex), ex, ex.__traceback__)

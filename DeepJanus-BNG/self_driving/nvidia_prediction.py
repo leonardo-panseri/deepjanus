@@ -1,12 +1,12 @@
 import numpy as np
 
-from core.config import Config
+from beamng_config import BeamNGConfig
 from self_driving.simulation_data import SimulationDataRecord
 from udacity_integration.udacity_utils import preprocess
 
 
 class NvidiaPrediction:
-    def __init__(self, model, config: Config):
+    def __init__(self, model, config: BeamNGConfig):
         self.model = model
         self.config = config
         self.speed_limit = config.MAX_SPEED

@@ -5,6 +5,7 @@ from typing import Tuple, List
 import numpy as np
 
 from self_driving.beamng_brewer import BeamNGBrewer
+from self_driving.beamng_config import BeamNGConfig
 from udacity_integration.beamng_car_cameras import BeamNGCarCameras
 from self_driving.road_generator import RoadGenerator
 from self_driving.beamng_tig_maps import maps
@@ -73,7 +74,7 @@ def distance(p1, p2):
 
 
 def run_sim(street_1: DecalRoad):
-    brewer = BeamNGBrewer(street_1.nodes)
+    brewer = BeamNGBrewer(BeamNGConfig(), road_nodes=street_1.nodes)
     waypoint_goal = BeamNGWaypoint('waypoint_goal', get_node_coords(street_1.nodes[-1]))
 
     vehicle = brewer.setup_vehicle()

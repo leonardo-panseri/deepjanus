@@ -7,12 +7,12 @@ from core.config import Config
 from core.folder_storage import SeedStorage
 
 config_silly = BeamNGConfig()
-config_silly.keras_model_file = 'self-driving-car-4600.h5'
-config_silly.beamng_close_at_iteration = True
+config_silly.MODEL_FILE = 'self-driving-car-4600.h5'
+config_silly.BEAMNG_RESTART_AFTER = 1
 
 config_smart = BeamNGConfig()
-config_smart.keras_model_file = 'self-driving-car-185-2020.h5'
-config_smart.beamng_close_at_iteration = True
+config_smart.MODEL_FILE = 'self-driving-car-185-2020.h5'
+config_smart.BEAMNG_RESTART_AFTER = 1
 
 problem_silly = BeamNGProblem(config_silly, SmartArchive(config_silly.ARCHIVE_THRESHOLD))
 problem_smart = BeamNGProblem(config_smart, SmartArchive(config_smart.ARCHIVE_THRESHOLD))

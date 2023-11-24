@@ -1,21 +1,32 @@
-# this class must have simple fields in order to be serialized
 from core.config import Config
 
 
-# this class must have simple fields in order to be serialized
 class BeamNGConfig(Config):
-    EVALUATOR_FAKE = 'EVALUATOR_FAKE'
+    """Extension of the base DeepJanus config for BeamNG-specific parameters."""
     EVALUATOR_LOCAL_BEAMNG = 'EVALUATOR_LOCAL_BEAMNG'
-    EVALUATOR_REMOTE_BEAMNG = 'EVALUATOR_REMOTE_BEAMNG'
 
     def __init__(self):
         super().__init__()
 
-        self.num_control_nodes = 10
+        # Number of control nodes for each road
+        self.NUM_CONTROL_NODES = 10
+        # Length of the interpolation segments to create a road from control nodes
+        self.SEG_LENGTH = 25
 
+        # Name of the Lane-Keeping Assist System Keras model
+        self.MODEL_FILE = 'self-driving-car-185-2020'  # 'self-driving-car-4600'
+
+        # Minimum speed that the car is allowed to drive (in km/h)
         self.MIN_SPEED = 10
+        # Maximum speed that the car is allowed to drive (in km/h)
         self.MAX_SPEED = 25
 
-        self.beamng_close_at_iteration = False
-        self.beamng_restart_after_n_simulations = 22
-        self.beamng_evaluator = self.EVALUATOR_LOCAL_BEAMNG
+        # Port for the BeamNG instance
+        self.BEAMNG_PORT = 12345
+        # How many frames should the simulator try to render in a second
+        self.BEAMNG_FPS = 30
+        # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks
+        # Set to -1 to disable
+        self.BEAMNG_RESTART_AFTER = 22
+        # Type of evaluator that runs the BeamNG simulations
+        self.BEAMNG_EVALUATOR = self.EVALUATOR_LOCAL_BEAMNG

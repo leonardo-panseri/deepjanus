@@ -1,34 +1,38 @@
 class Config:
+    """Class storing all DeepJanus parameters that can be tweaked during experiments."""
+    # Seed pool strategy: create randomized individuals and use them as seeds
     GEN_RANDOM = 'GEN_RANDOM'
+    # Seed pool strategy: pick random individuals from seed pool
     GEN_RANDOM_SEEDED = 'GEN_RANDOM_SEEDED'
+    # Seed pool strategy: pick sequential individuals from seed pool
     GEN_SEQUENTIAL_SEEDED = 'GEN_SEQUENTIAL_SEEDED'
 
-    SEG_LENGTH = 25
-    NUM_SPLINE_NODES = 10
-    INITIAL_NODE = (0.0, 0.0, -28.0, 8.0)
-    ROAD_BBOX_SIZE = (-250, 0, 250, 500)
-
     def __init__(self):
-        self.experiment_name = 'exp'
-        self.fitness_weights = (1.0, -1.0)
+        # Unique identifier for the experiment
+        self.EXPERIMENT_NAME = 'exp'
+        # Weights to be multiplied to the fitness functions,
+        # a positive value means that the function will be maximized, a negative value means that it will be minimized
+        self.FITNESS_WEIGHTS = (1.0, -1.0)
 
-        self.POPSIZE = 12
+        # Size of the population
+        self.POP_SIZE = 12
+        # Number of generations
         self.NUM_GENERATIONS = 150
 
-        self.RESEED_UPPER_BOUND = int(self.POPSIZE * 0.1)
-
+        # Absolute value of bound for the mutation of a member
         self.MUTATION_EXTENT = 6.0
+        # Minimum distance that an individual must have with all other individuals in the archive to be added
         self.ARCHIVE_THRESHOLD = 35.0
 
+        # Weight for the distance between members in the "Quality of Individual" fitness function
         self.K_SD = 0.01
 
-        self.simulation_save = True
-        self.simulation_name = 'beamng_nvidia_runner/sim_$(id)'
+        # Flag for turning on/off collection of extended data about simulations
+        self.SAVE_SIM_DATA = True
+        # Unique identifier for a simulation, can use '$(id)' for an incremental int identifier
+        self.SIM_NAME = 'beamng_nvidia_runner/sim_$(id)'
 
-        #self.keras_model_file = 'self-driving-car-4600'
-        self.keras_model_file = 'self-driving-car-185-2020'
-
-        #self.generator_name = Config.GEN_RANDOM
-        #self.generator_name = Config.GEN_RANDOM_SEEDED
-        self.generator_name = Config.GEN_SEQUENTIAL_SEEDED
-        self.seed_folder = 'population_HQ1'
+        # Type of seed pool strategy to utilize
+        self.SEED_POOL_STRATEGY = Config.GEN_SEQUENTIAL_SEEDED
+        # Name of the seed pool folder
+        self.SEED_FOLDER = 'population_HQ1'

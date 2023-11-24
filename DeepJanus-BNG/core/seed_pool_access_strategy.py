@@ -19,7 +19,7 @@ class SeedPoolAccessStrategy:
         return self.pool[self.counter]
 
     def get_seed(self):
-        generator_name = self.pool.problem.config.generator_name
+        generator_name = self.pool.problem.config.SEED_POOL_STRATEGY
         if generator_name == Config.GEN_RANDOM:
             seed = self.pool.problem.generate_random_member()
         elif generator_name == Config.GEN_RANDOM_SEEDED:

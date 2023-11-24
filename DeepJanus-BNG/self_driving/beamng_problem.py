@@ -29,12 +29,12 @@ class BeamNGProblem(Problem):
         self.config: BeamNGConfig = config
         self._evaluator: BeamNGEvaluator = None
         super().__init__(config, archive)
-        if self.config.generator_name == self.config.GEN_RANDOM:
-            seed_pool = SeedPoolRandom(self, config.POPSIZE)
+        if self.config.SEED_POOL_STRATEGY == self.config.GEN_RANDOM:
+            seed_pool = SeedPoolRandom(self, config.POP_SIZE)
         else:
-            seed_pool = SeedPoolFolder(self, config.seed_folder)
+            seed_pool = SeedPoolFolder(self, config.SEED_FOLDER)
         self._seed_pool_strategy = SeedPoolAccessStrategy(seed_pool)
-        self.experiment_path = folders.experiments.joinpath(self.config.experiment_name)
+        self.experiment_path = folders.experiments.joinpath(self.config.EXPERIMENT_NAME)
         delete_folder_recursively(self.experiment_path)
 
     def deap_generate_individual(self):
@@ -75,7 +75,7 @@ class BeamNGProblem(Problem):
         BeamNGIndividualSetStore(gen_path.joinpath('archive')).save(self.archive)
 
     def generate_random_member(self) -> Member:
-        result = RoadGenerator(num_control_nodes=self.config.num_control_nodes,
+        result = RoadGenerator(num_control_nodes=self.config.NUM_CONTROL_NODES,
                                seg_length=self.config.SEG_LENGTH).generate()
         result.config = self.config
         result.problem = self
@@ -89,14 +89,6 @@ class BeamNGProblem(Problem):
 
     def reseed(self, pop, offspring):
         if len(self.archive) > 0:
-            stop = self.config.RESEED_UPPER_BOUND + 1
-            seed_range = min(random.randrange(0, stop), len(pop))
-            #log.info(f'reseed{seed_range}')
-            #for i in range(0, seed_range):
-            #    ind1 = self.deap_generate_individual()
-            #    rem_idx = -(i + 1)
-            #    log.info(f'reseed rem {pop[rem_idx]}')
-            #    pop[rem_idx] = ind1
             archived_seeds = [i.seed for i in self.archive]
             for i in range(len(pop)):
                 if pop[i].seed in archived_seeds:
@@ -107,7 +99,7 @@ class BeamNGProblem(Problem):
     def get_evaluator(self):
         if self._evaluator:
             return self._evaluator
-        ev_name = self.config.beamng_evaluator
+        ev_name = self.config.BEAMNG_EVALUATOR
         # if ev_name == BeamNGConfig.EVALUATOR_FAKE:
         #     from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
         #     self._evaluator = BeamNGFakeEvaluator(self.config)
@@ -118,7 +110,7 @@ class BeamNGProblem(Problem):
         #     from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
         #     self._evaluator = BeamNGRemoteEvaluator(self.config)
         else:
-            raise NotImplemented(self.config.beamng_evaluator)
+            raise NotImplemented(self.config.BEAMNG_EVALUATOR)
 
         return self._evaluator
 

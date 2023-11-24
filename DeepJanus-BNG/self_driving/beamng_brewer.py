@@ -15,8 +15,9 @@ from udacity_integration.beamng_car_cameras import BeamNGCarCameras
 
 
 class BeamNGBrewer:
-    def __init__(self, road_nodes: List4DTuple = None):
-        self.beamng = BeamNGpy('localhost', 12345)
+    def __init__(self, config: BeamNGConfig, road_nodes: List4DTuple = None):
+        self.config = config
+        self.beamng = BeamNGpy('localhost', config.BEAMNG_PORT)
         self.beamng.logger.setLevel(20)
         self.vehicle: Vehicle = None
         self.use_camera = False
@@ -64,7 +65,7 @@ class BeamNGBrewer:
         self.scenario.make(self.beamng)
 
         self.beamng.load_scenario(self.scenario)
-        self.beamng.set_deterministic(60)
+        self.beamng.set_deterministic(self.config.BEAMNG_FPS)
         self.beamng.pause()
 
         if self.use_camera:
@@ -88,8 +89,7 @@ class BeamNGBrewer:
 
 
 if __name__ == '__main__':
-    config = BeamNGConfig()
-    brewer = BeamNGBrewer()
+    brewer = BeamNGBrewer(BeamNGConfig())
     vehicle = brewer.setup_vehicle()
     camera = brewer.setup_scenario_camera()
 
