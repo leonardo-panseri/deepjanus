@@ -2,6 +2,7 @@ from core.config import Config
 from core.archive import Archive
 from core.individual import Individual
 from core.member import Member
+from core.seed_pool import SeedPoolFolder, SeedPoolRandom
 
 
 class Problem:
@@ -9,6 +10,15 @@ class Problem:
     def __init__(self, config: Config, archive: Archive):
         self.config: Config = config
         self.archive = archive
+
+        if self.config.SEED_POOL_STRATEGY == self.config.GEN_RANDOM:
+            self.seed_pool = SeedPoolRandom(self, config.POP_SIZE)
+        elif self.config.SEED_POOL_STRATEGY == self.config.GEN_RANDOM_SEEDED:
+            self.seed_pool = SeedPoolFolder(self, False, config.SEED_FOLDER)
+        elif self.config.SEED_POOL_STRATEGY == self.config.GEN_SEQUENTIAL_SEEDED:
+            self.seed_pool = SeedPoolFolder(self, True, config.SEED_FOLDER)
+        else:
+            raise ValueError(f"Seed pool strategy {self.config.SEED_POOL_STRATEGY} is invalid")
 
     def deap_generate_individual(self) -> Individual:
         """Generates a new individual from the seed pool."""

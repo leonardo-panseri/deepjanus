@@ -107,4 +107,4 @@ class FolderStorage:
 class SeedStorage(FolderStorage):
     """Shorthand for creating a FolderStorage for a seed pool"""
     def __init__(self, subfolder: str):
-        super().__init__(FOLDERS.member_seeds.joinpath(subfolder), 'member_seeds{:04}.json')
+        super().__init__(FOLDERS.member_seeds.joinpath(subfolder), 'seed{}.json')

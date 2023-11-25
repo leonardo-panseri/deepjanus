@@ -1,6 +1,5 @@
 import itertools
 import json
-import random
 from typing import List
 
 from deap import creator
@@ -11,7 +10,6 @@ from core.log import get_logger
 from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
 from core.problem import Problem
-from core.seed_pool import SeedPoolAccessStrategy, SeedPoolRandom, SeedPoolFolder
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_evaluator import BeamNGEvaluator
 from self_driving.beamng_individual import BeamNGIndividual
@@ -27,16 +25,11 @@ class BeamNGProblem(Problem):
         self.config: BeamNGConfig = config
         self._evaluator: BeamNGEvaluator = None
         super().__init__(config, archive)
-        if self.config.SEED_POOL_STRATEGY == self.config.GEN_RANDOM:
-            seed_pool = SeedPoolRandom(self, config.POP_SIZE)
-        else:
-            seed_pool = SeedPoolFolder(self, config.SEED_FOLDER)
-        self._seed_pool_strategy = SeedPoolAccessStrategy(seed_pool)
         self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
         delete_folder_recursively(self.experiment_path)
 
     def deap_generate_individual(self):
-        seed = self._seed_pool_strategy.get_seed()
+        seed = self.seed_pool.get_seed()
         road1 = seed.clone()
         road2 = seed.clone().mutate()
         road1.config = self.config
