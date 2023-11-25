@@ -71,7 +71,7 @@ class FolderStorage:
 
     def get_path_by_index(self, index: int) -> Path:
         """Get the path to the file with the given index, using the mask to generate the file name."""
-        assert index > 0
+        assert index >= 0
         return self.folder.joinpath(self.mask.format(index))
 
     def load_json_by_index(self, index: int) -> dict:
