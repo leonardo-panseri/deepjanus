@@ -9,7 +9,7 @@ class IniFile:
         :param path: the path of the INI file
         """
         self.path = path
-        self.config = configparser.ConfigParser()
+        self.config = configparser.ConfigParser(interpolation=None)
 
     def _save(self):
         """Save the config in memory to the file on disk"""

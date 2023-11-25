@@ -14,8 +14,9 @@ class LogSetup:
     def use_ini(self, ini_path):
         """Set the INI file from which to load the logging configurations."""
         self._log_ini = IniFile(ini_path)
-        fmt = self._log_ini.get_option_or_create('config', 'format',
-                                                 '[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s')
+        fmt = (self._log_ini
+               .get_option_or_create('config', 'format',
+                                     r'[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s'))
         date_fmt = self._log_ini.get_option_or_create('config', 'date_format', '%H:%M:%S')
         logging.basicConfig(format=fmt, datefmt=date_fmt)
         for logger in self._all_loggers:
