@@ -11,7 +11,7 @@ from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
 from core.problem import Problem
 from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_evaluator import BeamNGEvaluator
+from self_driving.beamng_evaluator import BeamNGEvaluator, BeamNGLocalEvaluator
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_individual_set_store import BeamNGIndividualSetStore
 from self_driving.beamng_member import BeamNGMember
@@ -95,8 +95,7 @@ class BeamNGProblem(Problem):
         #     from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
         #     self._evaluator = BeamNGFakeEvaluator(self.config)
         if ev_name == BeamNGConfig.EVALUATOR_LOCAL_BEAMNG:
-            from self_driving.beamng_nvidia_runner import BeamNGNvidiaOob
-            self._evaluator = BeamNGNvidiaOob(self.config)
+            self._evaluator = BeamNGLocalEvaluator(self.config)
         # elif ev_name == BeamNGConfig.EVALUATOR_REMOTE_BEAMNG:
         #     from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
         #     self._evaluator = BeamNGRemoteEvaluator(self.config)

@@ -3,7 +3,6 @@ import random
 from typing import Tuple, Dict
 
 from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_evaluator import BeamNGEvaluator
 from core.member import Member
 from self_driving.catmull_rom import catmull_rom
 from self_driving.road_bbox import RoadBoundingBox
@@ -31,7 +30,6 @@ class BeamNGMember(Member):
         self.road_bbox = road_bbox
         self.config: BeamNGConfig = None
         self.problem: 'BeamNGProblem' = None
-        self._evaluator: BeamNGEvaluator = None
 
     def clone(self):
         res = BeamNGMember(list(self.control_nodes), list(self.sample_nodes), self.num_spline_nodes, self.road_bbox)
