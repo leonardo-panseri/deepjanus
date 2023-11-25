@@ -13,12 +13,12 @@ from core.folders import FOLDERS, delete_folder_recursively
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',
                                   'steering_input', 'brake', 'brake_input', 'throttle', 'throttle_input',
                                   'throttleFactor', 'engineThrottle', 'wheelspeed', 'vel_kmh', 'is_oob', 'oob_counter',
-                                  'max_oob_percentage', 'oob_distance']
+                                  'max_oob_percentage', 'oob_distance', 'dist_from_goal']
 
 SimulationDataRecord = namedtuple('SimulationDataRecord', SimulationDataRecordProperties)
 SimulationDataRecords = List[SimulationDataRecord]
 
-SimulationParams = namedtuple('SimulationParameters', ['beamng_steps', 'delay_msec'])
+SimulationParams = namedtuple('SimulationParameters', ['iteration_steps', 'fps_limit'])
 
 
 class SimulationInfo:

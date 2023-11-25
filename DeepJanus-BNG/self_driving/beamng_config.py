@@ -21,8 +21,14 @@ class BeamNGConfig(Config):
         # Maximum speed that the car is allowed to drive (in km/h)
         self.MAX_SPEED = 25
 
+        # Host for the BeamNG instance
+        self.BEAMNG_HOST = 'localhost'
         # Port for the BeamNG instance
         self.BEAMNG_PORT = 12345
+        # Log level for BeamNGpy
+        self.BEAMNG_LOG_LVL = 'INFO'
+        # How many steps should the simulator advance at each iteration
+        self.BEAMNG_STEPS = 5
         # How many frames should the simulator try to render in a second
         self.BEAMNG_FPS = 30
         # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks

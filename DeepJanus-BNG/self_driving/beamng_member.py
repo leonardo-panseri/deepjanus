@@ -7,7 +7,7 @@ from self_driving.beamng_evaluator import BeamNGEvaluator
 from core.member import Member
 from self_driving.catmull_rom import catmull_rom
 from self_driving.road_bbox import RoadBoundingBox
-from self_driving.road_points import List4DTuple
+from self_driving.beamng_wrappers import RoadNodes
 from self_driving.road_polygon import RoadPolygon
 from self_driving.edit_distance_polyline import iterative_levenshtein
 
@@ -19,7 +19,7 @@ class BeamNGMember(Member):
     """A class representing a road returned by the RoadGenerator."""
     counter = 0
 
-    def __init__(self, control_nodes: List4DTuple, sample_nodes: List4DTuple, num_spline_nodes: int,
+    def __init__(self, control_nodes: RoadNodes, sample_nodes: RoadNodes, num_spline_nodes: int,
                  road_bbox: RoadBoundingBox):
         super().__init__()
         BeamNGMember.counter += 1

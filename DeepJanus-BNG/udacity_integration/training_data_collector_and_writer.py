@@ -2,13 +2,12 @@ import os
 from datetime import datetime
 from typing import List, Dict
 
-from udacity_integration.beamng_car_cameras import BeamNGCarCameras
 from beamngpy import Vehicle, BeamNGpy
 
 from self_driving.decal_road import DecalRoad
 from self_driving.oob_monitor import OutOfBoundsMonitor
 from self_driving.road_polygon import RoadPolygon
-from self_driving.vehicle_state_reader import VehicleStateReader
+from self_driving.beamng_wrappers import BeamNGVehicle, BeamNGVehicleCameras
 
 CSV_header = ['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed']
 CSV_idx: Dict[str, int] = {k: v for v, k in enumerate(CSV_header)}
@@ -16,9 +15,9 @@ CSV_idx: Dict[str, int] = {k: v for v, k in enumerate(CSV_header)}
 
 class TrainingDataCollectorAndWriter:
 
-    def __init__(self, vehicle: Vehicle, beamng: BeamNGpy, road: DecalRoad, cameras: BeamNGCarCameras):
+    def __init__(self, vehicle: Vehicle, beamng: BeamNGpy, road: DecalRoad, cameras: BeamNGVehicleCameras):
 
-        self.vehicle_state_reader = VehicleStateReader(vehicle, beamng, additional_sensors=cameras.cameras_array)
+        self.vehicle_state_reader = BeamNGVehicle(vehicle, beamng, additional_sensors=cameras.cameras_array)
         self.oob_monitor = OutOfBoundsMonitor(RoadPolygon.from_nodes(road.nodes), self.vehicle_state_reader)
         self.beamng = beamng
         self.road = road

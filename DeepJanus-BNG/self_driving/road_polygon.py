@@ -4,7 +4,7 @@ from typing import Tuple
 from shapely.geometry import Polygon, LineString
 
 from core.log import get_logger
-from self_driving.road_points import RoadPoints, List4DTuple
+from self_driving.beamng_wrappers import RoadNodes, RoadPoints
 
 log = get_logger(__file__)
 
@@ -14,7 +14,7 @@ class RoadPolygon:
     (a polygon or a sequence of polygons)."""
 
     @classmethod
-    def from_nodes(cls, nodes: List4DTuple):
+    def from_nodes(cls, nodes: RoadNodes):
         return RoadPolygon(RoadPoints.from_nodes(nodes))
 
     def __init__(self, road_points: RoadPoints):

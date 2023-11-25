@@ -4,9 +4,9 @@ from typing import Tuple, List
 
 import numpy as np
 
-from self_driving.beamng_brewer import BeamNGBrewer
+from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_config import BeamNGConfig
-from udacity_integration.beamng_car_cameras import BeamNGCarCameras
+from self_driving.beamng_wrappers import BeamNGVehicleCameras
 from self_driving.road_generator import RoadGenerator
 from self_driving.beamng_tig_maps import maps
 from self_driving.beamng_waypoint import BeamNGWaypoint
@@ -74,24 +74,24 @@ def distance(p1, p2):
 
 
 def run_sim(street_1: DecalRoad):
-    brewer = BeamNGBrewer(BeamNGConfig(), road_nodes=street_1.nodes)
+    brewer = BeamNGInterface(BeamNGConfig(), road_nodes=street_1.nodes)
     waypoint_goal = BeamNGWaypoint('waypoint_goal', get_node_coords(street_1.nodes[-1]))
 
     vehicle = brewer.setup_vehicle()
     camera = brewer.setup_scenario_camera()
-    beamng = brewer.beamng
-    brewer.setup_road_nodes(street_1.nodes)
+    beamng = brewer._bng
+    brewer.setup_road(street_1.nodes)
 
     maps.beamng_map.generated().write_items(brewer.decal_road.to_json() + '\n' + waypoint_goal.to_json())
 
-    cameras = BeamNGCarCameras()
+    cameras = BeamNGVehicleCameras()
 
     brewer.vehicle_start_pose = brewer.road_points.vehicle_start_pose()
     #brewer.vehicle_start_pose = BeamNGPose()
 
     sim_data_collector = TrainingDataCollectorAndWriter(vehicle, beamng, street_1, cameras)
 
-    brewer.bring_up()
+    brewer.beamng_bring_up()
     print('bring up ok')
 
     script = calculate_script(brewer.road_points.middle)

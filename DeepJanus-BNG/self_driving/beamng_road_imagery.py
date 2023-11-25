@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from core.folders import SeedStorage
 from self_driving.beamng_member import BeamNGMember
-from self_driving.road_points import RoadPoints
+from self_driving.beamng_wrappers import RoadPoints
 
 
 class BeamNGRoadImagery:

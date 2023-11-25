@@ -16,7 +16,7 @@ from core.folders import FOLDERS
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_road_imagery import BeamNGRoadImagery
-from self_driving.road_points import RoadPoints
+from self_driving.beamng_wrappers import RoadPoints
 
 
 class BeamNGIndividualSetStore:

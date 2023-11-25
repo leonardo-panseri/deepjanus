@@ -3,6 +3,8 @@ import os
 import shutil
 import time
 
+LEVEL_NAME = 'tig'
+
 
 class BeamNGMainFolder:
     def __init__(self, path):

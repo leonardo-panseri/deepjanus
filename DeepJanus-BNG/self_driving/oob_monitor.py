@@ -3,12 +3,12 @@ from typing import Tuple, Union
 from shapely.geometry import Point, Polygon
 
 from self_driving.road_polygon import RoadPolygon
-from self_driving.vehicle_state_reader import VehicleStateReader
+from self_driving.beamng_wrappers import BeamNGVehicle
 
 
 class OutOfBoundsMonitor:
-    def __init__(self, road_polygon: RoadPolygon, vehicle_state_reader: VehicleStateReader):
-        assert isinstance(vehicle_state_reader, VehicleStateReader)
+    def __init__(self, road_polygon: RoadPolygon, vehicle_state_reader: BeamNGVehicle):
+        assert isinstance(vehicle_state_reader, BeamNGVehicle)
         assert isinstance(road_polygon, RoadPolygon)
         self.road_polygon = road_polygon
         self.vehicle_state_reader = vehicle_state_reader
@@ -26,7 +26,7 @@ class OutOfBoundsMonitor:
         self.update_oob_counter(is_oob)
 
         last_max_oob_percentage = self.last_max_oob_percentage if oob_bb else float("nan")
-        oob_distance = float("nan") if oob_bb else self.oob_distance( wrt=wrt)
+        oob_distance = float("nan") if oob_bb else self.oob_distance(wrt=wrt)
 
         return is_oob, self.oob_counter, last_max_oob_percentage, oob_distance
 
