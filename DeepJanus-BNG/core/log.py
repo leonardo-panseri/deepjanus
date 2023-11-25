@@ -1,12 +1,12 @@
 import logging
 import os
 
-from core.folders import FOLDERS
 from core.ini_file import IniFile
 
 
 class LogSetup:
     """Class to configure logging for a DeepJanus instance"""
+
     def __init__(self):
         self._all_loggers: set[logging.Logger] = set()
         self._log_ini: IniFile | None = None
@@ -15,7 +15,7 @@ class LogSetup:
         """Set the INI file from which to load the logging configurations."""
         self._log_ini = IniFile(ini_path)
         fmt = self._log_ini.get_option_or_create('config', 'format',
-                                                    '[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s')
+                                                 '[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s')
         date_fmt = self._log_ini.get_option_or_create('config', 'date_format', '%H:%M:%S')
         logging.basicConfig(format=fmt, datefmt=date_fmt)
         for logger in self._all_loggers:
@@ -42,7 +42,6 @@ class LogSetup:
 
 
 log_setup = LogSetup()
-log_setup.use_ini(FOLDERS.log_ini)
 
 
 def get_logger(logger_name_path):

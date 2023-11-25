@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 
-from log import get_logger
+from core.log import get_logger
 
 log = get_logger(__file__)
 

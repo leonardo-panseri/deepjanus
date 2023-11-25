@@ -11,8 +11,7 @@ from core.log import get_logger
 from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
 from core.problem import Problem
-from core.seed_pool_access_strategy import SeedPoolAccessStrategy
-from core.seed_pool_impl import SeedPoolFolder, SeedPoolRandom
+from core.seed_pool import SeedPoolAccessStrategy, SeedPoolRandom, SeedPoolFolder
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_evaluator import BeamNGEvaluator
 from self_driving.beamng_individual import BeamNGIndividual

@@ -2,8 +2,8 @@ from typing import Iterable, Callable, TypeVar
 
 import numpy as np
 
-from individual import Individual
-from log import get_logger
+from core.individual import Individual
+from core.log import get_logger
 
 log = get_logger(__file__)
 T = TypeVar("T")

@@ -1,6 +1,6 @@
 from numpy import mean
 
-from member import Member
+from core.member import Member
 
 
 class Individual:

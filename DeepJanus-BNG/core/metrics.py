@@ -1,6 +1,7 @@
 import numpy as np
-from individual import Individual
-from member import Member
+
+from core.individual import Individual
+from core.member import Member
 
 
 def get_radius_seed(solution: list[Individual]):
