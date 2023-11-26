@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from core.ini_file import IniFile
 
@@ -45,7 +46,12 @@ class LogSetup:
 log_setup = LogSetup()
 
 
-def get_logger(logger_name_path):
+def configure(ini_path: Path):
+    """Sets up the logger for DeepJanus to use configurations from the file."""
+    log_setup.use_ini(ini_path)
+
+
+def get_logger(logger_name_path: str):
     """
     Get a new logger for a Python file.
     :param logger_name_path: the path of the Python file that will use this logger (__file__)
