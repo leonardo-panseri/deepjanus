@@ -107,6 +107,10 @@ class Individual(Generic[T]):
         result = sorted([self.m1, self.m2], key=lambda m: m.distance_to_frontier)
         return tuple(result)
 
+    def save(self, folder):
+        """Saves a human-interpretable representation of the individual on disk."""
+        raise NotImplemented()
+
     def to_dict(self) -> dict:
         """Serializes the individual into a dictionary that can be easily stored on disk."""
         raise NotImplemented()

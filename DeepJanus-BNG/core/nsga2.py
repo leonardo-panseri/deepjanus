@@ -98,7 +98,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     logbook.record(gen=0, evals=len(pop), **record)
     log.info(f"Generation {0} stats:\n{logbook.stream}")
 
-    # Problem-specific callback to execute actions at each iteration (e.g., save data to file)
+    # Customizable callback to execute actions at each iteration (e.g., save data to file)
     problem.on_iteration(0, pop, logbook)
 
     # Begin the generational process
@@ -132,7 +132,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
         logbook.record(gen=gen, evals=len(individuals_to_eval), **record)
         log.info(f"Generation {gen} stats:\n{logbook.stream}")
 
-        # Problem-specific callback to execute actions at each iteration (e.g., save data to file)
+        # Customizable callback to execute actions at each iteration (e.g., save data to file)
         problem.on_iteration(gen, pop, logbook)
 
     return pop, logbook

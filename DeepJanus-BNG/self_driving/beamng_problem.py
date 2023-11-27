@@ -1,20 +1,12 @@
-import json
-from typing import List
-
-from deap import creator
-
 from core.archive import Archive
 from core.evaluator import Evaluator
-from core.folders import FOLDERS, delete_folder_recursively
 from core.log import get_logger
 from core.member import Member
-from core.metrics import get_radius_seed, get_diameter
 from core.mutator import Mutator
 from core.problem import Problem
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_evaluator import BeamNGLocalEvaluator
 from self_driving.beamng_individual import BeamNGIndividual
-from self_driving.beamng_individual_set_store import BeamNGIndividualSetStore
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_mutator import BeamNGRoadMutator
 from self_driving.road_generator import RoadGenerator
@@ -27,12 +19,6 @@ class BeamNGProblem(Problem):
     def __init__(self, config: BeamNGConfig, archive: Archive):
         self.config: BeamNGConfig = config
         super().__init__(config, archive)
-
-        self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
-        delete_folder_recursively(self.experiment_path)
-
-        self._evaluator: Evaluator | None = None
-        self._mutator: Mutator | None = None
 
     def deap_individual_class(self):
         return BeamNGIndividual
@@ -56,28 +42,6 @@ class BeamNGProblem(Problem):
         result = RoadGenerator(num_control_nodes=self.config.NUM_CONTROL_NODES,
                                seg_length=self.config.SEG_LENGTH).generate(name=name)
         return result
-
-    def on_iteration(self, idx, pop: List[BeamNGIndividual], logbook):
-        # self.archive.process_population(pop)
-
-        self.experiment_path.mkdir(parents=True, exist_ok=True)
-        self.experiment_path.joinpath('config.json').write_text(json.dumps(self.config.__dict__))
-
-        gen_path = self.experiment_path.joinpath(f'gen{idx}')
-        gen_path.mkdir(parents=True, exist_ok=True)
-
-        # Generate final report at the end of the last iteration.
-        if idx + 1 == self.config.NUM_GENERATIONS:
-            report = {
-                'archive_len': len(self.archive),
-                'radius': get_radius_seed(self.archive),
-                'diameter_out': get_diameter([ind.members_by_sign()[0] for ind in self.archive]),
-                'diameter_in': get_diameter([ind.members_by_sign()[1] for ind in self.archive])
-            }
-            gen_path.joinpath(f'report{idx}.json').write_text(json.dumps(report))
-
-        BeamNGIndividualSetStore(gen_path.joinpath('population')).save(pop)
-        BeamNGIndividualSetStore(gen_path.joinpath('archive')).save(self.archive)
 
     def get_evaluator(self) -> Evaluator:
         if not self._evaluator:

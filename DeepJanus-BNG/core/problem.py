@@ -1,11 +1,13 @@
-from typing import Callable
+import json
 
 from core.config import Config
 from core.archive import Archive
 from core.evaluator import Evaluator
+from core.folders import FOLDERS, delete_folder_recursively
 from core.individual import Individual
 from core.log import get_logger
 from core.member import Member
+from core.metrics import get_radius_seed, get_diameter
 from core.mutator import Mutator
 from core.seed_pool import SeedPoolFolder, SeedPoolRandom
 
@@ -28,6 +30,12 @@ class Problem:
             raise ValueError(f"Seed pool strategy {self.config.SEED_POOL_STRATEGY} is invalid")
 
         self.individual_creator = None
+
+        self._evaluator: Evaluator | None = None
+        self._mutator: Mutator | None = None
+
+        self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
+        delete_folder_recursively(self.experiment_path)
 
     def deap_individual_class(self):
         """Returns the class that represents individuals for this problem."""
@@ -66,7 +74,31 @@ class Problem:
 
     def on_iteration(self, idx, pop: list[Individual], logbook):
         """Problem-specific callback to execute actions at each iteration."""
-        raise NotImplemented()
+        self.experiment_path.mkdir(parents=True, exist_ok=True)
+        self.experiment_path.joinpath('config.json').write_text(json.dumps(self.config.__dict__))
+
+        gen_path = self.experiment_path.joinpath(f'gen{idx}')
+
+        pop_path = gen_path.joinpath('population')
+        pop_path.mkdir(parents=True, exist_ok=True)
+        for ind in pop:
+            ind.save(pop_path)
+
+        arch_path = gen_path.joinpath('archive')
+        arch_path.mkdir(parents=True, exist_ok=True)
+        for ind in self.archive:
+            ind.save(pop_path)
+
+        # Generate final report at the end of the last iteration.
+        if idx + 1 == self.config.NUM_GENERATIONS:
+            report = {
+                'generations': idx + 1,
+                'archive_len': len(self.archive),
+                'radius': get_radius_seed(self.archive),
+                'diameter_out': get_diameter([ind.members_by_sign()[0] for ind in self.archive]),
+                'diameter_in': get_diameter([ind.members_by_sign()[1] for ind in self.archive])
+            }
+            self.experiment_path.joinpath(f'report.json').write_text(json.dumps(report))
 
     def get_evaluator(self) -> Evaluator:
         """Returns the evaluator that implements the strategy for evaluating members."""
