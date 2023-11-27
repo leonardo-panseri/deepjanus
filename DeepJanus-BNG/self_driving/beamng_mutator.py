@@ -56,6 +56,7 @@ class BeamNGRoadMutator(Mutator):
         assert member.control_nodes != original_nodes
 
     def mutate_gene(self, member: BeamNGMember, index: int, xy_prob=0.5) -> tuple[int, int]:
+        """Mutates a road control node of a member."""
         gene = list(member.control_nodes[index])
         # Choose the mutation extent
         mut_value = random.randint(self.lower_bound, self.higher_bound)
@@ -72,6 +73,7 @@ class BeamNGRoadMutator(Mutator):
 
     @classmethod
     def undo_mutation(cls, member: BeamNGMember, index: int, coord_index: int, mut_value: int):
+        """Removes a previously applied mutation."""
         gene = list(member.control_nodes[index])
         gene[coord_index] -= mut_value
         member.control_nodes[index] = tuple(gene)

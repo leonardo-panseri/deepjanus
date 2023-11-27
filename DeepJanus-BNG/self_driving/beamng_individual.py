@@ -13,6 +13,8 @@ log = get_logger(__file__)
 
 
 class BeamNGIndividual(Individual[BeamNGMember]):
+    """Individual for DeepJanus-BNG"""
+
     counter = 1
 
     def __init__(self, m1: BeamNGMember, m2: BeamNGMember, seed: BeamNGMember = None, name: str = None):

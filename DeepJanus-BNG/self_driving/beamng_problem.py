@@ -15,6 +15,7 @@ log = get_logger(__file__)
 
 
 class BeamNGProblem(Problem):
+    """Representation of the DeepJanus-BNG problem"""
 
     def __init__(self, config: BeamNGConfig, archive: Archive):
         self.config: BeamNGConfig = config

@@ -8,6 +8,8 @@ from self_driving.road_polygon import RoadPolygon
 
 
 class BeamNGMember(Member):
+    """Member for DeepJanus-BNG"""
+
     counter = 1
 
     def __init__(self, control_nodes: RoadNodes, sample_nodes: RoadNodes, num_spline_nodes: int,
