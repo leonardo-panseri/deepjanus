@@ -4,6 +4,7 @@ import traceback
 
 from keras.src.saving.saving_api import load_model
 
+from core.evaluator import Evaluator
 from core.folders import FOLDERS, SeedStorage
 from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
@@ -17,15 +18,7 @@ from self_driving.simulation_data_collector import SimulationDataCollector
 log = get_logger(__file__)
 
 
-class BeamNGEvaluator:
-    """Abstract class for implementing strategies to evaluate members with a BeamNG simulation"""
-    def evaluate(self, members: list[BeamNGMember]):
-        """Evaluates a list of members by running BeamNG simulations and for each member sets the values
-        needed to calculate the fitness functions."""
-        pass
-
-
-class BeamNGLocalEvaluator(BeamNGEvaluator):
+class BeamNGLocalEvaluator(Evaluator):
     """Executes a local BeamNG instance and uses it to evaluate members."""
     def __init__(self, config: BeamNGConfig):
         self.config = config
@@ -37,29 +30,29 @@ class BeamNGLocalEvaluator(BeamNGEvaluator):
 
         self.model = None
 
-    def evaluate(self, members: list[BeamNGMember]):
-        for member in members:
-            if not member.needs_evaluation():
-                log.info(f'{member} is already evaluated. skipping')
-                continue
-            counter = 20
-            attempt = 0
-            while True:
-                attempt += 1
-                if attempt == counter:
-                    raise Exception('Exhausted attempts')
-                if attempt > 1:
-                    log.info(f'RETRYING TO run simulation, attempt {attempt}')
-                else:
-                    log.info(f'{member} BeamNG evaluation start')
-                if attempt > 2:
-                    time.sleep(5)
-                sim = self._run_simulation(member.sample_nodes)
-                if sim.info.success:
-                    break
+    def evaluate(self, member: BeamNGMember) -> None:
+        if not member.needs_evaluation():
+            log.info(f'{member} is already evaluated. skipping')
+            return
 
-            member.distance_to_boundary = sim.min_oob_distance()
-            log.info(f'{member} BeamNG evaluation completed')
+        counter = 20
+        attempt = 0
+        while True:
+            attempt += 1
+            if attempt == counter:
+                raise Exception('Exhausted attempts')
+            if attempt > 1:
+                log.info(f'RETRYING TO run simulation, attempt {attempt}')
+            else:
+                log.info(f'{member} BeamNG evaluation start')
+            if attempt > 2:
+                time.sleep(5)
+            sim = self._run_simulation(member.sample_nodes)
+            if sim.info.success:
+                break
+
+        member.distance_to_frontier = sim.min_oob_distance()
+        log.info(f'{member} BeamNG evaluation completed')
 
     def _run_simulation(self, nodes: RoadNodes) -> SimulationData:
         """Runs the simulation on a given road. Initializes connection with BeamNG, creates a simulation
@@ -145,7 +138,7 @@ if __name__ == '__main__':
     for i in range(12):
         mbr = BeamNGMember.from_dict(seed_storage.load_json_by_index(i))
         mbr.clear_evaluation()
-        inst.evaluate([mbr])
+        inst.evaluate(mbr)
         print(mbr)
 
     inst.bng.beamng_close()

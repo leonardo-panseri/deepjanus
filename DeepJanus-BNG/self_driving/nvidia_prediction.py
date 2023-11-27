@@ -1,6 +1,6 @@
 import numpy as np
 
-from beamng_config import BeamNGConfig
+from self_driving.beamng_config import BeamNGConfig
 from self_driving.simulation_data import SimulationDataRecord
 from udacity_integration.udacity_utils import preprocess
 

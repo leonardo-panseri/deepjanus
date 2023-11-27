@@ -1,20 +1,22 @@
-import itertools
 import json
 from typing import List
 
 from deap import creator
 
 from core.archive import Archive
+from core.evaluator import Evaluator
 from core.folders import FOLDERS, delete_folder_recursively
 from core.log import get_logger
 from core.member import Member
 from core.metrics import get_radius_seed, get_diameter
+from core.mutator import Mutator
 from core.problem import Problem
 from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_evaluator import BeamNGEvaluator, BeamNGLocalEvaluator
+from self_driving.beamng_evaluator import BeamNGLocalEvaluator
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_individual_set_store import BeamNGIndividualSetStore
 from self_driving.beamng_member import BeamNGMember
+from self_driving.beamng_mutator import BeamNGRoadMutator
 from self_driving.road_generator import RoadGenerator
 
 log = get_logger(__file__)
@@ -23,25 +25,36 @@ log = get_logger(__file__)
 class BeamNGProblem(Problem):
     def __init__(self, config: BeamNGConfig, archive: Archive):
         self.config: BeamNGConfig = config
-        self._evaluator: BeamNGEvaluator = None
         super().__init__(config, archive)
+
         self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
         delete_folder_recursively(self.experiment_path)
+
+        self._evaluator: Evaluator | None = None
+        self._mutator: Mutator | None = None
+
+    def deap_individual_class(self):
+        return BeamNGIndividual
 
     def deap_generate_individual(self):
         seed = self.seed_pool.get_seed()
         road1 = seed.clone()
-        road2 = seed.clone().mutate()
-        road1.config = self.config
-        road2.config = self.config
-        individual: BeamNGIndividual = creator.Individual(road1, road2, self.config, self.archive)
-        individual.seed = seed
-        log.info(f'generated {individual}')
+        road2 = seed.clone()
+        road2.mutate(self.get_mutator())
 
+        # Need to use the DEAP creator to instantiate new individual
+        individual: BeamNGIndividual = self.individual_creator(road1, road2, seed)
+
+        log.info(f'generated {individual}')
         return individual
 
-    def deap_evaluate_individual(self, individual: BeamNGIndividual):
-        return individual.evaluate()
+    def member_class(self):
+        return BeamNGMember
+
+    def generate_random_member(self, name: str = None) -> Member:
+        result = RoadGenerator(num_control_nodes=self.config.NUM_CONTROL_NODES,
+                               seg_length=self.config.SEG_LENGTH).generate(name=name)
+        return result
 
     def on_iteration(self, idx, pop: List[BeamNGIndividual], logbook):
         # self.archive.process_population(pop)
@@ -65,49 +78,24 @@ class BeamNGProblem(Problem):
         BeamNGIndividualSetStore(gen_path.joinpath('population')).save(pop)
         BeamNGIndividualSetStore(gen_path.joinpath('archive')).save(self.archive)
 
-    def generate_random_member(self) -> Member:
-        result = RoadGenerator(num_control_nodes=self.config.NUM_CONTROL_NODES,
-                               seg_length=self.config.SEG_LENGTH).generate()
-        result.config = self.config
-        result.problem = self
-        return result
-
-    def deap_individual_class(self):
-        return BeamNGIndividual
-
-    def member_class(self):
-        return BeamNGMember
-
-    def reseed(self, pop, offspring):
-        if len(self.archive) > 0:
-            archived_seeds = [i.seed for i in self.archive]
-            for i in range(len(pop)):
-                if pop[i].seed in archived_seeds:
-                    ind1 = self.deap_generate_individual()
-                    log.info(f'reseed rem {pop[i]}')
-                    pop[i] = ind1
-
-    def get_evaluator(self):
-        if self._evaluator:
-            return self._evaluator
-        ev_name = self.config.BEAMNG_EVALUATOR
-        # if ev_name == BeamNGConfig.EVALUATOR_FAKE:
-        #     from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
-        #     self._evaluator = BeamNGFakeEvaluator(self.config)
-        if ev_name == BeamNGConfig.EVALUATOR_LOCAL_BEAMNG:
-            self._evaluator = BeamNGLocalEvaluator(self.config)
-        # elif ev_name == BeamNGConfig.EVALUATOR_REMOTE_BEAMNG:
-        #     from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
-        #     self._evaluator = BeamNGRemoteEvaluator(self.config)
-        else:
-            raise NotImplemented(self.config.BEAMNG_EVALUATOR)
+    def get_evaluator(self) -> Evaluator:
+        if not self._evaluator:
+            ev_name = self.config.BEAMNG_EVALUATOR
+            # if ev_name == BeamNGConfig.EVALUATOR_FAKE:
+            #     from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
+            #     self._evaluator = BeamNGFakeEvaluator(self.config)
+            if ev_name == BeamNGConfig.EVALUATOR_LOCAL_BEAMNG:
+                self._evaluator = BeamNGLocalEvaluator(self.config)
+            # elif ev_name == BeamNGConfig.EVALUATOR_REMOTE_BEAMNG:
+            #     from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
+            #     self._evaluator = BeamNGRemoteEvaluator(self.config)
+            else:
+                raise NotImplemented(self.config.BEAMNG_EVALUATOR)
 
         return self._evaluator
 
-    def pre_evaluate_members(self, individuals: List[BeamNGIndividual]):
-        # return
-        # the following code does not work as wanted or expected!
-        all_members = list(itertools.chain(*[(ind.m1, ind.m2) for ind in individuals]))
-        log.info('----evaluation warmup')
-        self.get_evaluator().evaluate(all_members)
-        log.info('----warmpup completed')
+    def get_mutator(self) -> Mutator:
+        if not self._mutator:
+            self._mutator = BeamNGRoadMutator(-int(self.config.MUTATION_EXTENT), int(self.config.MUTATION_EXTENT))
+
+        return self._mutator

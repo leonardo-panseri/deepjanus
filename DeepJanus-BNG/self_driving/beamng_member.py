@@ -1,42 +1,48 @@
 import hashlib
-import random
-from typing import Tuple, Dict
 
-from self_driving.beamng_config import BeamNGConfig
 from core.member import Member
-from self_driving.catmull_rom import catmull_rom
-from self_driving.road_bbox import RoadBoundingBox
 from self_driving.beamng_wrappers import RoadNodes
-from self_driving.road_polygon import RoadPolygon
 from self_driving.edit_distance_polyline import iterative_levenshtein
-
-Tuple4F = Tuple[float, float, float, float]
-Tuple2F = Tuple[float, float]
+from self_driving.road_bbox import RoadBoundingBox
+from self_driving.road_polygon import RoadPolygon
 
 
 class BeamNGMember(Member):
-    """A class representing a road returned by the RoadGenerator."""
-    counter = 0
+    counter = 1
 
     def __init__(self, control_nodes: RoadNodes, sample_nodes: RoadNodes, num_spline_nodes: int,
-                 road_bbox: RoadBoundingBox):
-        super().__init__()
-        BeamNGMember.counter += 1
-        self.name = f'mbr{str(BeamNGMember.counter)}'
-        self.name_ljust = self.name.ljust(7)
+                 road_bbox: RoadBoundingBox, name: str = None):
+        """Creates a DeepJanus-BNG member. Parameter 'name' can be passed to create clones of existing members,
+        disabling the automatic incremental names."""
+        super().__init__(name if name else f'mbr{str(BeamNGMember.counter)}')
+        if not name:
+            BeamNGMember.counter += 1
+
+        self.num_spline_nodes = num_spline_nodes
         self.control_nodes = control_nodes
         self.sample_nodes = sample_nodes
-        self.num_spline_nodes = num_spline_nodes
         self.road_bbox = road_bbox
-        self.config: BeamNGConfig = None
-        self.problem: 'BeamNGProblem' = None
+
+    def is_valid(self):
+        """Checks if the road represented by this member has a valid shape."""
+        return (RoadPolygon.from_nodes(self.sample_nodes).is_valid() and
+                self.road_bbox.contains(RoadPolygon.from_nodes(self.control_nodes[1:-1])))
 
     def clone(self):
-        res = BeamNGMember(list(self.control_nodes), list(self.sample_nodes), self.num_spline_nodes, self.road_bbox)
-        res.config = self.config
-        res.problem = self.problem
-        res.distance_to_boundary = self.distance_to_boundary
+        # Do not pass self.name, as we use this to create the offspring
+        res = BeamNGMember(list(self.control_nodes), list(self.sample_nodes), self.num_spline_nodes,
+                           RoadBoundingBox(self.road_bbox.bbox.bounds))
+
+        res.distance_to_frontier = self.distance_to_frontier
         return res
+
+    def distance(self, other: 'BeamNGMember'):
+        return iterative_levenshtein(self.sample_nodes, other.sample_nodes)
+
+    def to_tuple(self) -> tuple[float, float]:
+        import numpy as np
+        barycenter = np.mean(np.asarray(self.control_nodes), axis=0)[:2]
+        return barycenter
 
     def to_dict(self) -> dict:
         return {
@@ -44,135 +50,27 @@ class BeamNGMember(Member):
             'sample_nodes': self.sample_nodes,
             'num_spline_nodes': self.num_spline_nodes,
             'road_bbox_size': self.road_bbox.bbox.bounds,
-            'distance_to_boundary': self.distance_to_boundary
+            'distance_to_frontier': self.distance_to_frontier
         }
 
     @classmethod
-    def from_dict(cls, dict: Dict):
-        road_bbox = RoadBoundingBox(dict['road_bbox_size'])
-        res = BeamNGMember([tuple(t) for t in dict['control_nodes']],
-                           [tuple(t) for t in dict['sample_nodes']],
-                           dict['num_spline_nodes'], road_bbox)
-        res.distance_to_boundary = dict['distance_to_boundary']
+    def from_dict(cls, d: dict, name: str = None) -> 'BeamNGMember':
+        road_bbox = RoadBoundingBox(d['road_bbox_size'])
+        res = BeamNGMember([tuple(t) for t in d['control_nodes']],
+                           [tuple(t) for t in d['sample_nodes']],
+                           d['num_spline_nodes'], road_bbox, name)
+        res.distance_to_frontier = d['distance_to_frontier']
         return res
 
-    def evaluate(self):
-        if self.needs_evaluation():
-            self.problem.get_evaluator().evaluate([self])
-            print('eval mbr', self)
+    def __eq__(self, other):
+        if isinstance(other, BeamNGMember):
+            return self.control_nodes == other.control_nodes
+        return False
 
-        assert not self.needs_evaluation()
+    def __ne__(self, other):
+        if isinstance(other, BeamNGMember):
+            return self.control_nodes != other.control_nodes
+        return True
 
-    def needs_evaluation(self):
-        return self.distance_to_boundary is None
-
-    def clear_evaluation(self):
-        self.distance_to_boundary = None
-
-    def is_valid(self):
-        return (RoadPolygon.from_nodes(self.sample_nodes).is_valid() and
-                self.road_bbox.contains(RoadPolygon.from_nodes(self.control_nodes[1:-1])))
-
-    def distance(self, other: 'BeamNGMember'):
-        return iterative_levenshtein(self.sample_nodes, other.sample_nodes)
-
-    def to_tuple(self):
-        import numpy as np
-        barycenter = np.mean(self.control_nodes, axis=0)[:2]
-        return barycenter
-
-    def mutate(self, node=None) -> 'BeamNGMember':
-        RoadMutator(self, lower_bound=-int(self.problem.config.MUTATION_EXTENT),
-                    upper_bound=int(self.problem.config.MUTATION_EXTENT)).mutate(node=node)
-        self.distance_to_boundary = None
-        return self
-
-    def hex_hash(self):
+    def member_hash(self):
         return hashlib.sha256(str([tuple(node) for node in self.control_nodes]).encode('UTF-8')).hexdigest()
-
-    def __repr__(self):
-        eval_boundary = 'na'
-        if self.distance_to_boundary:
-            eval_boundary = str(self.distance_to_boundary)
-            if self.distance_to_boundary > 0:
-                eval_boundary = '+' + eval_boundary
-            eval_boundary = '~' + eval_boundary
-        eval_boundary = eval_boundary[:7].ljust(7)
-        h = self.hex_hash()[-5:]
-        return f'{self.name_ljust} h={h} b={eval_boundary}'
-
-
-class RoadMutator:
-    NUM_UNDO_ATTEMPTS = 20
-
-    def __init__(self, road: BeamNGMember, lower_bound=-2, upper_bound=2):
-        self.road = road
-        self.lower_bound = lower_bound
-        self.higher_bound = upper_bound
-
-    def mutate_gene(self, index: int, xy_prob=0.5) -> Tuple[int, int]:
-        gene = list(self.road.control_nodes[index])
-        # Choose the mutation extent
-        mut_value = random.randint(self.lower_bound, self.higher_bound)
-        # Avoid to choose 0
-        if mut_value == 0:
-            mut_value += 1
-        c = 0
-        if random.random() < xy_prob:
-            c = 1
-        gene[c] += mut_value
-        self.road.control_nodes[index] = tuple(gene)
-        self.road.sample_nodes = catmull_rom(self.road.control_nodes, self.road.num_spline_nodes)
-        return c, mut_value
-
-    def undo_mutation(self, index: int, c, mut_value):
-        gene = list(self.road.control_nodes[index])
-        gene[c] -= mut_value
-        self.road.control_nodes[index] = tuple(gene)
-        self.road.sample_nodes = catmull_rom(self.road.control_nodes, self.road.num_spline_nodes)
-
-    def mutate(self, num_undo_attempts=10, node=None):
-        backup_nodes = list(self.road.control_nodes)
-        attempted_genes = set()
-        n = len(self.road.control_nodes) - 2
-
-        def next_gene_index() -> int:
-            if len(attempted_genes) == n:
-                return -1
-            i = random.randint(3, n-3)
-            while i in attempted_genes:
-                i = random.randint(3, n-3)
-            attempted_genes.add(i)
-            assert 3 <= i <= n-3
-            return i
-
-        def find_valid_mutate(index: int) -> bool:
-            c, mut_value = self.mutate_gene(index)
-
-            attempt = 0
-
-            is_mutation_valid = self.road.is_valid()
-            while not is_mutation_valid and attempt < num_undo_attempts:
-                self.undo_mutation(index, c, mut_value)
-                c, mut_value = self.mutate_gene(index)
-                attempt += 1
-                is_mutation_valid = self.road.is_valid()
-            return is_mutation_valid
-
-        if node:
-            if not find_valid_mutate(node):
-                raise ValueError("This road control node cannot be mutated")
-        else:
-            gene_index = next_gene_index()
-
-            while gene_index != -1:
-                if find_valid_mutate(gene_index):
-                    break
-                else:
-                    gene_index = next_gene_index()
-
-            if gene_index == -1:
-                raise ValueError("No gene can be mutated")
-
-        assert self.road.is_valid()
-        assert self.road.control_nodes != backup_nodes

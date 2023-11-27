@@ -54,7 +54,7 @@ class _BeamNGIndividualCompositeMembersStore:
         ml, mr = ind.members_by_distance_to_boundary()
 
         def plot(member: BeamNGMember, ax):
-            ax.set_title(f'dist to bound ~ {np.round(member.distance_to_boundary, 2)}', fontsize=12)
+            ax.set_title(f'dist to bound ~ {np.round(member.distance_to_frontier, 2)}', fontsize=12)
             road_points = RoadPoints.from_nodes(member.sample_nodes)
             road_points.plot_on_ax(ax)
 

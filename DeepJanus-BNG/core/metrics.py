@@ -1,10 +1,10 @@
 import numpy as np
 
-from core.individual import Individual
+from core.archive import Archive
 from core.member import Member
 
 
-def get_radius_seed(solution: list[Individual]):
+def get_radius_seed(solution: Archive):
     """Calculates the distance between each member outside the frontier and the seed (mindist metric)"""
     if len(solution) == 0:
         return None

@@ -36,7 +36,7 @@ def load_individual(storage: FolderStorage, individual_index: int, problem: Beam
     # Check which member is inside the frontier and which is outside
     # Assuming that we have only individuals at the frontier in the storage
     m1_inside: bool
-    if individual.m1.distance_to_boundary < 0:
+    if individual.m1.distance_to_frontier < 0:
         member_inside = individual.m2
         member_outside = individual.m1
         m1_inside = False
@@ -70,11 +70,11 @@ def compare_individual_with_original(member_inside: BeamNGMember, member_outside
     :return: a ComparisonResult value representing the outcome
     """
     result = ComparisonResult.SAME
-    if member_inside.distance_to_boundary < 0 < member_outside.distance_to_boundary:
+    if member_inside.distance_to_frontier < 0 < member_outside.distance_to_frontier:
         result = ComparisonResult.SWITCHED
-    elif member_inside.distance_to_boundary > 0 and member_outside.distance_to_boundary > 0:
+    elif member_inside.distance_to_frontier > 0 and member_outside.distance_to_frontier > 0:
         result = ComparisonResult.BOTH_INSIDE
-    elif member_inside.distance_to_boundary < 0 and member_outside.distance_to_boundary < 0:
+    elif member_inside.distance_to_frontier < 0 and member_outside.distance_to_frontier < 0:
         result = ComparisonResult.BOTH_OUTSIDE
 
     return result
@@ -116,18 +116,18 @@ def generate_neighborhood(member_inside: BeamNGMember, member_outside: BeamNGMem
 
             # Check if the new road obtained through mutation is equal to another one in the neighborhood
             # or in the members of the original individual
-            same_road = new_mbr.hex_hash() in other_mutations
+            same_road = new_mbr.member_hash() in other_mutations
 
             attempts += 1
             if attempts == MAX_ATTEMPTS:
                 raise Exception(f'Cannot generate neighborhood of size {size}')
 
-        other_mutations[new_mbr.hex_hash()] = True
+        other_mutations[new_mbr.member_hash()] = True
         neighborhood.append(new_mbr)
 
     neighborhood_in = []
     neighborhood_out = []
-    all_members = {member_inside.hex_hash(): True, member_outside.hex_hash(): True}
+    all_members = {member_inside.member_hash(): True, member_outside.member_hash(): True}
     for _ in range(size):
         gen_mutation(member_inside, neighborhood_in, all_members)
         gen_mutation(member_outside, neighborhood_out, all_members)
@@ -184,7 +184,7 @@ def explore_neighborhood(individuals: List[int]):
             mbr = nbh_in[mbr_idx]
             mbr.evaluate()
 
-            if mbr.distance_to_boundary < 0:
+            if mbr.distance_to_frontier < 0:
                 outside_frontier_in += 1
 
         outside_frontier_out = 0
@@ -195,7 +195,7 @@ def explore_neighborhood(individuals: List[int]):
             mbr = nbh_out[mbr_idx]
             mbr.evaluate()
 
-            if mbr.distance_to_boundary < 0:
+            if mbr.distance_to_frontier < 0:
                 outside_frontier_out += 1
 
         # Calculate simulation time for this individual

@@ -1,11 +1,10 @@
 from typing import List, Tuple
 import numpy as np
 
+from self_driving.beamng_wrappers import RoadNodes
+
 AngleLength = Tuple[float, float]
 ListOfAngleLength = List[AngleLength]
-
-Point = Tuple[float, float]
-ListOfPoints = List[Point]
 
 
 def _calc_cost_discrete(u: AngleLength, v: AngleLength):
@@ -79,14 +78,14 @@ def _calc_angle_distance(v0, v1):
     return at_1 - at_0
 
 
-def _calc_dist_angle(points: ListOfPoints) -> ListOfAngleLength:
+def _calc_dist_angle(points: RoadNodes) -> ListOfAngleLength:
     assert len(points) >= 2, f'at least two points are needed'
 
     def vector(idx):
         return np.subtract(points[idx + 1], points[idx])
 
     n = len(points) - 1
-    result: ListOfAngleLength = [None] * (n)
+    result: ListOfAngleLength = [(0, 0)] * n
     b = vector(0)
     for i in range(n):
         a = b
@@ -97,7 +96,7 @@ def _calc_dist_angle(points: ListOfPoints) -> ListOfAngleLength:
     return result
 
 
-def iterative_levenshtein(s: ListOfPoints, t: ListOfPoints):
+def iterative_levenshtein(s: RoadNodes, t: RoadNodes):
     s_da = _calc_dist_angle(s)
     t_da = _calc_dist_angle(t)
     return _iterative_levenshtein_dist_angle(s_da, t_da)

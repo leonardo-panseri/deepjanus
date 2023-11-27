@@ -1,13 +1,18 @@
+import os.path
 import random
 
 from core.folders import SeedStorage
-from core.problem import Problem
 from core.member import Member
+
+# Workaround for keeping type hinting while avoiding circular imports
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.problem import Problem
 
 
 class SeedPool:
     """Base class for implementing seed pools"""
-    def __init__(self, problem: Problem, sequential=True):
+    def __init__(self, problem: 'Problem', sequential=True):
         """
         Creates a seed pool for a problem.
         :param problem: the representation of the problem that DeepJanus needs to solve
@@ -15,7 +20,7 @@ class SeedPool:
         """
         self.problem = problem
         self.sequential = sequential
-        self.counter = -1
+        self.counter = 0
 
     def __len__(self):
         raise NotImplemented()
@@ -39,7 +44,7 @@ class SeedPoolRandom(SeedPool):
     def __init__(self, problem, n):
         super().__init__(problem)
         self.n = n
-        self.seeds = [problem.generate_random_member() for _ in range(self.n)]
+        self.seeds = [problem.generate_random_member(f"seed{i}") for i in range(self.n)]
 
     def __len__(self):
         return self.n
@@ -50,7 +55,7 @@ class SeedPoolRandom(SeedPool):
 
 class SeedPoolFolder(SeedPool):
     """Seed pool that loads members from their serialized representation in a folder, either sequentially or randomly"""
-    def __init__(self, problem: Problem, sequential: bool, folder_name: str):
+    def __init__(self, problem: 'Problem', sequential: bool, folder_name: str):
         super().__init__(problem, sequential)
         self.storage = SeedStorage(folder_name)
         self.file_path_list = self.storage.all_files()
@@ -64,7 +69,8 @@ class SeedPoolFolder(SeedPool):
         path = self.file_path_list[item]
         result: Member = self.cache.get(path, None)
         if not result:
-            result = self.problem.member_class().from_dict(self.storage.load_json_by_path(path))
+            result = self.problem.member_class().from_dict(self.storage.load_json_by_path(path),
+                                                           os.path.basename(path).replace(".json", ""))
             self.cache[path] = result
         result.problem = self.problem
         return result

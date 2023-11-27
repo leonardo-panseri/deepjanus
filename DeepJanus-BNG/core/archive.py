@@ -18,16 +18,6 @@ def closest_elements(elements_set: set[T], obj: T, distance_fun: Callable[[T, T]
     return result
 
 
-def evaluate_sparseness(ind: Individual, pop: set[Individual]):
-    """Calculates the minimum distance that the individual have from each other individual in a group."""
-    elements = pop - {ind}
-    if len(elements) == 0:
-        return 1.0
-
-    closest_element_dist = closest_elements(elements, ind, lambda a, b: a.distance(b))[0]
-    return closest_element_dist[1]
-
-
 class Archive(set):
     """Base class representing the archive of non-dominated individuals"""
     def process_population(self, pop: Iterable[Individual]):
@@ -36,6 +26,15 @@ class Archive(set):
         :param pop: the population to process
         """
         raise NotImplemented()
+
+    def evaluate_sparseness(self, ind: Individual):
+        """Calculates the minimum distance that the individual have from each other individual in a group."""
+        elements = self - {ind}
+        if len(elements) == 0:
+            return 1.0
+
+        closest_element_dist = closest_elements(elements, ind, lambda a, b: a.distance(b))[0]
+        return closest_element_dist[1]
 
 
 class GreedyArchive(Archive):

@@ -35,6 +35,9 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     # Their fitness will be evaluated by the bi-objective fitness function defined above
     creator.create("Individual", problem.deap_individual_class(), fitness=creator.FitnessMulti)
 
+    # Save the reference to the individual creator
+    problem.individual_creator = creator.Individual
+
     # Toolbox that will contain all operators needed by DeepJanus evolutionary algorithm
     toolbox = base.Toolbox()
     problem.toolbox = toolbox
@@ -109,7 +112,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
             del ind.fitness.values
 
         # Repopulate by substituting descendants of seeds that already generated a solution
-        toolbox.repopulate(pop, offspring)
+        toolbox.repopulate(pop)
 
         # Evaluate the individuals
         individuals_to_eval = offspring + pop

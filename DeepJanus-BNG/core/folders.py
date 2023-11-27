@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 from time import sleep
@@ -33,6 +34,7 @@ def delete_folder_recursively(path: str | Path):
 
 class Folders:
     """Class containing paths to all folders needed by DeepJanus"""
+
     def __init__(self, core_folder: os.PathLike):
         """
         Initializes paths based on the location of core module.
@@ -53,6 +55,7 @@ FOLDERS: Folders = Folders(os.path.dirname(__file__))
 
 class FolderStorage:
     """Class for interfacing with a folder containing DeepJanus JSON serialized data"""
+
     def __init__(self, path: Path, mask: str):
         """
         Create an interface for storing and loading data in a folder. The folder will be created if it does not
@@ -65,9 +68,14 @@ class FolderStorage:
         path.mkdir(parents=True, exist_ok=True)
 
     def all_files(self) -> list[str]:
-        """Gets a list of absolute paths for all files contained in the folder."""
+        """Gets a list of absolute paths for all files contained in the folder sorted in alphabetical order."""
+
+        def natural_keys(text):
+            """Keys for natural ordering of file names containing digits"""
+            return [int(c) if c.isdigit() else c for c in re.split(r'(\d+)', text)]
+
         expanded = [os.path.join(self.folder, filename) for filename in os.listdir(self.folder)]
-        return [path for path in expanded if os.path.isfile(path)]
+        return sorted([path for path in expanded if os.path.isfile(path)], key=natural_keys)
 
     def get_path_by_index(self, index: int) -> Path:
         """Get the path to the file with the given index, using the mask to generate the file name."""
@@ -106,5 +114,6 @@ class FolderStorage:
 
 class SeedStorage(FolderStorage):
     """Shorthand for creating a FolderStorage for a seed pool"""
+
     def __init__(self, subfolder: str):
         super().__init__(FOLDERS.member_seeds.joinpath(subfolder), 'seed{}.json')

@@ -101,14 +101,14 @@ class RoadGenerator:
                 condition = False
         return nodes
 
-    def generate(self, visualise=False) -> BeamNGMember:
+    def generate(self, visualise=False, name: str = None) -> BeamNGMember:
         control_nodes = self.generate_control_nodes(visualise)
         sample_nodes = catmull_rom(control_nodes, self.num_spline_nodes)
-        road = BeamNGMember(control_nodes, sample_nodes, self.num_spline_nodes, self.road_bbox)
+        road = BeamNGMember(control_nodes, sample_nodes, self.num_spline_nodes, self.road_bbox, name)
         while not road.is_valid():
             control_nodes = self.generate_control_nodes(visualise)
             sample_nodes = catmull_rom(control_nodes, self.num_spline_nodes)
-            road = BeamNGMember(control_nodes, sample_nodes, self.num_spline_nodes, self.road_bbox)
+            road = BeamNGMember(control_nodes, sample_nodes, self.num_spline_nodes, self.road_bbox, name)
         return road
 
     def _get_initial_point(self) -> Point:
