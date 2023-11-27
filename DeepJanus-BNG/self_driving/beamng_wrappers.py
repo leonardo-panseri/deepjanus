@@ -6,7 +6,6 @@ from beamngpy import angle_to_quat, Vehicle, Scenario, BeamNGpy
 from beamngpy.sensors import GForces, Electrics, Damage, Timer, Camera
 from beamngpy.vehicle import Sensors
 
-from self_driving.beamng_tig_maps import maps
 from self_driving.beamng_waypoint import BeamNGWaypoint
 from self_driving.decal_road import DecalRoad
 from self_driving.utils import get_node_coords
@@ -144,16 +143,12 @@ class BeamNGRoad:
         self.decal_road: DecalRoad = DecalRoad('street_1').add_4d_points(road_nodes)
         self.road_points: RoadPoints = RoadPoints().add_middle_nodes(road_nodes)
         self.waypoint_goal = BeamNGWaypoint('waypoint_goal', get_node_coords(road_nodes[-1]))
-        self.install()
 
     def vehicle_start_pose(self):
         return self.road_points.vehicle_start_pose()
 
     def decal_to_json(self):
         return self.decal_road.to_json()
-
-    def install(self):
-        maps.beamng_map.generated().write_items(self.decal_to_json() + '\n' + self.waypoint_goal.to_json())
 
 
 class RoadPoints:

@@ -10,6 +10,7 @@ from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
+from self_driving.beamng_map_utils import map_utils
 from self_driving.beamng_wrappers import RoadNodes
 from self_driving.nvidia_prediction import NvidiaPrediction
 from self_driving.simulation_data import SimulationData
@@ -63,8 +64,7 @@ class BeamNGLocalEvaluator(Evaluator):
         if not self.bng:
             self.bng = BeamNGInterface(self.config)
 
-        # TODO Fix this (path is relative to where this function is called)
-        # maps.install_map_if_needed()
+        map_utils.install_map_if_needed(self.config.BEAMNG_USER_DIR)
         self.bng.setup_road(nodes)
 
         self.bng.setup_vehicle(True)

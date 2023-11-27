@@ -1,3 +1,5 @@
+import os
+
 from core.config import Config
 
 
@@ -22,6 +24,8 @@ class BeamNGConfig(Config):
         # Maximum speed that the car is allowed to drive (in km/h)
         self.MAX_SPEED = 25
 
+        # BeamNG user data directory
+        self.BEAMNG_USER_DIR = os.path.join(os.getenv('LOCALAPPDATA'), 'BeamNG.tech', '0.30')
         # Host for the BeamNG instance
         self.BEAMNG_HOST = 'localhost'
         # Port for the BeamNG instance

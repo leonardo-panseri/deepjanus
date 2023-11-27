@@ -1,3 +1,4 @@
+import os
 import subprocess
 import traceback
 
@@ -9,7 +10,7 @@ from core.folders import SeedStorage
 from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
-from self_driving.beamng_tig_maps import LEVEL_NAME
+from self_driving.beamng_map_utils import LEVEL_NAME, map_utils
 from self_driving.beamng_wrappers import BeamNGRoad, BeamNGVehicle, RoadNodes
 from self_driving.simulation_data import SimulationParams
 
@@ -28,7 +29,9 @@ class BeamNGInterface:
         if road_nodes:
             self.setup_road(road_nodes)
 
-        self._bng = BeamNGpy(config.BEAMNG_HOST, config.BEAMNG_PORT)
+        # Remove the BeamNG version from the user path, as it will be added automatically by BeamNG
+        user_path = os.path.dirname(config.BEAMNG_USER_DIR)
+        self._bng = BeamNGpy(config.BEAMNG_HOST, config.BEAMNG_PORT, user=user_path)
 
         self.vehicle: BeamNGVehicle | None = None
 
@@ -42,6 +45,7 @@ class BeamNGInterface:
     def setup_road(self, road_nodes: RoadNodes):
         """Sets up the list of nodes that represent the road to simulate."""
         self.road = BeamNGRoad(road_nodes)
+        map_utils.install_road(self.road)
 
     def setup_vehicle(self, cameras=False) -> BeamNGVehicle:
         """Sets up the vehicle to use for the simulation."""

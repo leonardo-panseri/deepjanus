@@ -8,13 +8,12 @@ from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_wrappers import BeamNGVehicleCameras
 from self_driving.road_generator import RoadGenerator
-from self_driving.beamng_tig_maps import maps
 from self_driving.beamng_waypoint import BeamNGWaypoint
 from self_driving.decal_road import DecalRoad
 from udacity_integration.training_data_collector_and_writer import TrainingDataCollectorAndWriter
 from self_driving.utils import get_node_coords
 
-maps.install_map_if_needed()
+# maps.install_map_if_needed()
 STEPS = 5
 
 # x is -y and *angle direction is reversed*
