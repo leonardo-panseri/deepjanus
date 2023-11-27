@@ -1,5 +1,3 @@
-import matplotlib.animation as animation
-import numpy as np
 import matplotlib.pyplot as plt
 
 from core.folders import SeedStorage
@@ -8,6 +6,7 @@ from self_driving.beamng_wrappers import RoadPoints
 
 
 class BeamNGRoadImagery:
+
     def __init__(self, road_points: RoadPoints):
         self.road_points = road_points
         self._fig, self._ax = None, None

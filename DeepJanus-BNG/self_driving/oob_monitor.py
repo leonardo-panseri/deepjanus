@@ -7,6 +7,7 @@ from self_driving.beamng_wrappers import BeamNGVehicle
 
 
 class OutOfBoundsMonitor:
+
     def __init__(self, road_polygon: RoadPolygon, vehicle_state_reader: BeamNGVehicle):
         assert isinstance(vehicle_state_reader, BeamNGVehicle)
         assert isinstance(road_polygon, RoadPolygon)

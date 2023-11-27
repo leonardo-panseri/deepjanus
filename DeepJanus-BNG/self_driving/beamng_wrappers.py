@@ -138,6 +138,7 @@ List2DTuple = list[tuple[float, float]]
 
 
 class BeamNGRoad:
+
     def __init__(self, road_nodes: RoadNodes):
         self.road_nodes: RoadNodes = road_nodes
         self.decal_road: DecalRoad = DecalRoad('street_1').add_4d_points(road_nodes)

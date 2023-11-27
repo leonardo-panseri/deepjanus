@@ -22,6 +22,7 @@ SimulationParams = namedtuple('SimulationParameters', ['iteration_steps', 'fps_l
 
 
 class SimulationInfo:
+
     start_time: str
     end_time: str
     success: bool
@@ -32,6 +33,7 @@ class SimulationInfo:
 
 
 class SimulationData:
+
     f_info = 'info'
     f_params = 'params'
     f_road = 'road'

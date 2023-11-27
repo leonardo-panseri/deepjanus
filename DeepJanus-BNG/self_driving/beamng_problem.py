@@ -23,6 +23,7 @@ log = get_logger(__file__)
 
 
 class BeamNGProblem(Problem):
+
     def __init__(self, config: BeamNGConfig, archive: Archive):
         self.config: BeamNGConfig = config
         super().__init__(config, archive)

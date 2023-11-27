@@ -3,6 +3,7 @@ from core.config import Config
 
 class BeamNGConfig(Config):
     """Extension of the base DeepJanus config for BeamNG-specific parameters."""
+
     EVALUATOR_LOCAL_BEAMNG = 'EVALUATOR_LOCAL_BEAMNG'
 
     def __init__(self):

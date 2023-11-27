@@ -6,6 +6,7 @@ from self_driving.utils import points_distance
 
 
 class SimulationDataCollector:
+
     def __init__(self, bng: BeamNGInterface, simulation_name: str = None):
         self.bng = bng
         self.name = simulation_name

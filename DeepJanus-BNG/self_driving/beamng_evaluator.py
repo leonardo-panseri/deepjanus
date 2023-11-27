@@ -20,6 +20,7 @@ log = get_logger(__file__)
 
 class BeamNGLocalEvaluator(Evaluator):
     """Executes a local BeamNG instance and uses it to evaluate members."""
+
     def __init__(self, config: BeamNGConfig):
         self.config = config
         self.bng: BeamNGInterface | None = None

@@ -4,6 +4,7 @@ from typing import Tuple, List
 
 
 class DecalRoad:
+
     DEFAULT_MATERIAL = 'tig_road_rubber_sticky'
 
     def __init__(self, name,

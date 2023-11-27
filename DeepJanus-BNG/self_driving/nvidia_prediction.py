@@ -6,6 +6,7 @@ from udacity_integration.udacity_utils import preprocess
 
 
 class NvidiaPrediction:
+
     def __init__(self, model, config: BeamNGConfig):
         self.model = model
         self.config = config

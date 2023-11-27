@@ -7,6 +7,7 @@ LEVEL_NAME = 'tig'
 
 
 class BeamNGMainFolder:
+
     def __init__(self, path):
         self.path = os.path.realpath(path)
 
@@ -16,6 +17,7 @@ class BeamNGMainFolder:
 
 
 class MapFolder:
+
     def __init__(self, path):
         self.path = path
         self.tig_version_json_path = os.path.join(path, 'tig-version.json')
@@ -56,6 +58,7 @@ class MapFolder:
 
 
 class LevelsFolder:
+
     def __init__(self, path):
         self.path = os.path.realpath(path)
 
@@ -68,6 +71,7 @@ class LevelsFolder:
 
 
 class Maps:
+
     beamng_map: MapFolder
     source_map: MapFolder
 

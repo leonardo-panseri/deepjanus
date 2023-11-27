@@ -20,6 +20,7 @@ def closest_elements(elements_set: set[T], obj: T, distance_fun: Callable[[T, T]
 
 class Archive(set):
     """Base class representing the archive of non-dominated individuals"""
+
     def process_population(self, pop: Iterable[Individual]):
         """
         Processes a new population to decide which individuals to store in the archive.
@@ -39,6 +40,7 @@ class Archive(set):
 
 class GreedyArchive(Archive):
     """Archive that stores every individual at the frontier"""
+
     def process_population(self, pop: Iterable[Individual]):
         for candidate in pop:
             if candidate.distance_to_frontier < 0:
@@ -47,6 +49,7 @@ class GreedyArchive(Archive):
 
 class SmartArchive(Archive):
     """Archive that stores only individuals that are distant at least a configurable threshold from each other"""
+
     def __init__(self, archive_threshold):
         super().__init__()
         self.ARCHIVE_THRESHOLD = archive_threshold

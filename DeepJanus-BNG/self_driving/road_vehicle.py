@@ -6,6 +6,7 @@ from self_driving.beamng_wrappers import BeamNGVehicle, RoadPoints
 
 
 class RoadVehicle:
+
     def __init__(self, vehicle_state_reader: BeamNGVehicle, road: RoadPoints):
         self.road = road
         self.vehicle_state_reader = vehicle_state_reader

@@ -19,6 +19,7 @@ log = get_logger(__file__)
 
 class BeamNGInterface:
     """Manages the BeamNGpy instance and the connection to the simulator"""
+
     def __init__(self, config: BeamNGConfig, road_nodes: RoadNodes = None):
         """Initializes the interface to the BeamNG simulator. The simulator will not be opened until a call to
         beamng_bring_up() is made."""

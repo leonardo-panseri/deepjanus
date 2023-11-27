@@ -1,5 +1,6 @@
 class Config:
     """Class storing all DeepJanus parameters that can be tweaked during experiments."""
+
     # Seed pool strategy: create randomized individuals and use them as seeds
     GEN_RANDOM = 'GEN_RANDOM'
     # Seed pool strategy: pick random individuals from seed pool

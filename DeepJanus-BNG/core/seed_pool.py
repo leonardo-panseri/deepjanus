@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class SeedPool:
     """Base class for implementing seed pools"""
+
     def __init__(self, problem: 'Problem', sequential=True):
         """
         Creates a seed pool for a problem.
@@ -41,6 +42,7 @@ class SeedPool:
 
 class SeedPoolRandom(SeedPool):
     """Seed pool that generates n random members and then accesses them sequentially"""
+
     def __init__(self, problem, n):
         super().__init__(problem)
         self.n = n
@@ -55,6 +57,7 @@ class SeedPoolRandom(SeedPool):
 
 class SeedPoolFolder(SeedPool):
     """Seed pool that loads members from their serialized representation in a folder, either sequentially or randomly"""
+
     def __init__(self, problem: 'Problem', sequential: bool, folder_name: str):
         super().__init__(problem, sequential)
         self.storage = SeedStorage(folder_name)

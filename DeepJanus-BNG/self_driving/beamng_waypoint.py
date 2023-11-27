@@ -3,6 +3,7 @@ import uuid
 
 
 class BeamNGWaypoint:
+
     def __init__(self, name, position, persistentId=None):
         self.name = name
         self.position = position

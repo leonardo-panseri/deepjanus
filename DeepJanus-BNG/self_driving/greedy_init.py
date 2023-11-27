@@ -10,6 +10,7 @@ def get_spine(member):
     spine = json.loads(open(member).read())['sample_nodes']
     return spine
 
+
 def get_min_distance_from_set(ind, solution):
     distances = list()
     ind_spine = get_spine(ind)
@@ -18,6 +19,7 @@ def get_min_distance_from_set(ind, solution):
         distances.append(iterative_levenshtein(ind_spine, road_spine))
     distances.sort()
     return distances[0]
+
 
 path = r'C:\Users\tig\Documents\deepjanus2020\data\member_seeds\test_roads_bad_130/*.json'
 #path2 = r'C:\Users\tig\Documents\deepjanus2020\data\member_seeds\test_roads_bad_/*.json'
