@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import traceback
 
@@ -11,7 +10,7 @@ from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_tig_maps import LEVEL_NAME
-from self_driving.beamng_wrappers import BeamNGRoad, BeamNGPose, BeamNGVehicle, BeamNGVehicleCameras, RoadNodes
+from self_driving.beamng_wrappers import BeamNGRoad, BeamNGVehicle, BeamNGVehicleCameras, RoadNodes
 from self_driving.simulation_data import SimulationParams
 
 log = get_logger(__file__)
@@ -32,8 +31,6 @@ class BeamNGInterface:
         self._bng = BeamNGpy(config.BEAMNG_HOST, config.BEAMNG_PORT)
 
         self.vehicle: BeamNGVehicle | None = None
-        self.vehicle_start_pose = BeamNGPose()
-        self.car_cameras: BeamNGVehicleCameras | None = None
 
         self.scenario: Scenario | None = None
         self.camera: Camera | None = None
