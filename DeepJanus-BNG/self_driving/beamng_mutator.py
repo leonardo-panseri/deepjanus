@@ -7,6 +7,7 @@ from self_driving.catmull_rom import catmull_rom
 
 class BeamNGRoadMutator(Mutator):
     """Mutation strategy for DeepJanus-BNG members"""
+
     NUM_UNDO_ATTEMPTS = 20
 
     def __init__(self, lower_bound: int, upper_bound: int):
@@ -14,19 +15,19 @@ class BeamNGRoadMutator(Mutator):
         self.higher_bound = upper_bound
 
     def mutate(self, member: BeamNGMember):
+        """Mutates a DeepJanus-BNG member: picks a random road control node (excluding the first
+        and last three) and adds a random value in the range [lower_bound,upper_bound]. If the road sampled from the
+        new control nodes is not valid, tries modifying a different control node."""
         original_nodes = tuple(member.control_nodes)
-        attempted_genes = set()
-        n = len(member.control_nodes) - 2
+
+        genes_to_mutate = list(range(3, len(original_nodes) - 3))
 
         def next_gene_index() -> int:
-            if len(attempted_genes) == n:
+            if not genes_to_mutate:
                 return -1
-            i = random.randint(3, n - 3)
-            while i in attempted_genes:
-                i = random.randint(3, n - 3)
-            attempted_genes.add(i)
-            assert 3 <= i <= n - 3
-            return i
+            gene = random.choice(genes_to_mutate)
+            genes_to_mutate.remove(gene)
+            return gene
 
         def find_valid_mutate(index: int) -> bool:
             coord_index, mut_value = self.mutate_gene(member, index)
