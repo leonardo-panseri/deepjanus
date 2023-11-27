@@ -9,7 +9,7 @@ from self_driving.beamng_member import BeamNGMember
 from self_driving.catmull_rom import catmull_rom
 from self_driving.road_bbox import RoadBoundingBox
 from self_driving.road_polygon import RoadPolygon
-from self_driving.beamng_road_visualizer import plot_road_polygon, plot_road_bbox
+
 
 Tuple4F = Tuple[float, float, float, float]
 Tuple2F = Tuple[float, float]
@@ -62,9 +62,9 @@ class RoadGenerator:
                 budget = self.num_control_nodes - i
                 assert budget >= 1
 
-                if visualise:
-                    fig = plot_road_bbox(self.road_bbox)
-                    plot_road_polygon(road_polygon, title="RoadPolygon i=%s" % i, fig=fig)
+                # if visualise:
+                #     fig = plot_road_bbox(self.road_bbox)
+                #     plot_road_polygon(road_polygon, title="RoadPolygon i=%s" % i, fig=fig)
 
                 intersect_boundary = self.road_bbox.intersects_boundary(road_polygon.polygons[-1])
                 is_valid = road_polygon.is_valid() and (((i==0) and intersect_boundary) or ((i>0) and not intersect_boundary))
@@ -79,9 +79,9 @@ class RoadGenerator:
                     intersect_boundary = self.road_bbox.intersects_boundary(road_polygon.polygons[-1])
                     is_valid = road_polygon.is_valid() and (
                                 ((i == 0) and intersect_boundary) or ((i > 0) and not intersect_boundary))
-                    if visualise:
-                        fig = plot_road_bbox(self.road_bbox)
-                        plot_road_polygon(road_polygon, title="RoadPolygon i=%s" % i, fig=fig)
+                    # if visualise:
+                    #     fig = plot_road_bbox(self.road_bbox)
+                    #     plot_road_polygon(road_polygon, title="RoadPolygon i=%s" % i, fig=fig)
 
                 if is_valid:
                     i += 1
@@ -148,9 +148,8 @@ if __name__ == "__main__":
 
     road = RoadGenerator(num_control_nodes=NODES, max_angle=MAX_ANGLE, seg_length=SEG_LENGTH,
                  num_spline_nodes=NUM_SPLINE_NODES).generate(visualise=False)
-    from self_driving.beamng_road_visualizer import plot_road
 
-    plot_road(road, save=True)
+    # plot_road(road, save=True)
 
     import json
 

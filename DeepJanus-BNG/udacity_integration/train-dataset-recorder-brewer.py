@@ -133,9 +133,7 @@ if __name__ == '__main__':
     road = RoadGenerator(num_control_nodes=NODES, max_angle=MAX_ANGLE, seg_length=SEG_LENGTH,
                          num_spline_nodes=NUM_SPLINE_NODES).generate(visualise=False)
 
-    from self_driving.beamng_road_visualizer import plot_road
-
-    plot_road(road, save=True)
+    # plot_road(road, save=True)
 
     street = DecalRoad('street_1', drivability=1, material='').add_4d_points(road.sample_nodes)
 
