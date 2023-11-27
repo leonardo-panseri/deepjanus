@@ -29,7 +29,6 @@ class BeamNGInterface:
             self.setup_road(road_nodes)
 
         self._bng = BeamNGpy(config.BEAMNG_HOST, config.BEAMNG_PORT)
-        logging.getLogger('beamngpy').setLevel(config.BEAMNG_LOG_LVL)
 
         self.vehicle: BeamNGVehicle | None = None
         self.vehicle_start_pose = BeamNGPose()

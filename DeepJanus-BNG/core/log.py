@@ -15,11 +15,23 @@ class LogSetup:
     def use_ini(self, ini_path):
         """Set the INI file from which to load the logging configurations."""
         self._log_ini = IniFile(ini_path)
+
         fmt = (self._log_ini
                .get_option_or_create('config', 'format',
                                      r'[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s'))
         date_fmt = self._log_ini.get_option_or_create('config', 'date_format', '%H:%M:%S')
-        logging.basicConfig(format=fmt, datefmt=date_fmt)
+
+        log = logging.getLogger("deepjanus")
+        # If package 'rich' is installed, use its formatter
+        try:
+            from rich.logging import RichHandler
+            terminal_handler = RichHandler()
+            log.addHandler(terminal_handler)
+        except ModuleNotFoundError:
+            terminal_handler = logging.StreamHandler()
+            terminal_handler.setFormatter(logging.Formatter(fmt, date_fmt))
+            log.addHandler(terminal_handler)
+
         for logger in self._all_loggers:
             self._setup_log_level(logger)
 
@@ -36,8 +48,8 @@ class LogSetup:
         :param logger_name_path: the path of the Python file that will use this logger (__file__)
         :return: the created logger
         """
-        logger_name = os.path.basename(logger_name_path)
-        log = logging.getLogger(logger_name)
+        logger_name = os.path.basename(logger_name_path).replace(".py", "")
+        log = logging.getLogger(f'deepjanus.{logger_name}')
         self._all_loggers.add(log)
         self._setup_log_level(log)
         return log

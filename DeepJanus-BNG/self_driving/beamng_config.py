@@ -25,8 +25,6 @@ class BeamNGConfig(Config):
         self.BEAMNG_HOST = 'localhost'
         # Port for the BeamNG instance
         self.BEAMNG_PORT = 12345
-        # Log level for BeamNGpy
-        self.BEAMNG_LOG_LVL = 'INFO'
         # How many steps should the simulator advance at each iteration
         self.BEAMNG_STEPS = 5
         # How many frames should the simulator try to render in a second
