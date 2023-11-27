@@ -223,10 +223,6 @@ class RoadPoints:
         res = BeamNGPose(pos=tuple(origin + v) + (p1[2],), rot=(0, 0, deg[0]))
         return res
 
-    def new_imagery(self):
-        from .beamng_road_imagery import BeamNGRoadImagery
-        return BeamNGRoadImagery(self)
-
     def plot_on_ax(self, ax):
         def _plot_xy(points, color, linewidth):
             tup = list(zip(*points))

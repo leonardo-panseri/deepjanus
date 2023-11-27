@@ -5,8 +5,9 @@ from collections import namedtuple
 from pathlib import Path
 from typing import List
 
-from core import folders
-from self_driving.beamng_road_imagery import BeamNGRoadImagery
+from matplotlib import pyplot as plt
+
+from self_driving.beamng_wrappers import RoadPoints
 from self_driving.decal_road import DecalRoad
 from core.folders import FOLDERS, delete_folder_recursively
 
@@ -88,9 +89,11 @@ class SimulationData:
             gen2 = (sep.join([str(d[key]) for key in SimulationDataRecordProperties]) + '\n' for d in gen)
             f.writelines(gen2)
 
-        road_imagery = BeamNGRoadImagery.from_sample_nodes(self.road.nodes)
-        road_imagery.save(self.path_road_img.with_suffix('.jpg'))
-        road_imagery.save(self.path_road_img.with_suffix('.svg'))
+        # TODO move this after refactoring roads
+        fig, ax = plt.subplots()
+        RoadPoints().add_middle_nodes(self.road.nodes).plot_on_ax(ax)
+        ax.axis('equal')
+        fig.savefig(self.path_road_img.with_suffix('.svg'))
 
     def load(self) -> 'SimulationData':
         with open(self.path_json, 'r') as f:

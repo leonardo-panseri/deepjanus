@@ -1,7 +1,11 @@
 import hashlib
 
+from matplotlib import pyplot as plt
+from matplotlib.axis import Axis
+from matplotlib.figure import Figure
+
 from core.member import Member
-from self_driving.beamng_wrappers import RoadNodes
+from self_driving.beamng_wrappers import RoadNodes, RoadPoints
 from self_driving.edit_distance_polyline import iterative_levenshtein
 from self_driving.road_bbox import RoadBoundingBox
 from self_driving.road_polygon import RoadPolygon
@@ -76,3 +80,14 @@ class BeamNGMember(Member):
 
     def member_hash(self):
         return hashlib.sha256(str([tuple(node) for node in self.control_nodes]).encode('UTF-8')).hexdigest()
+
+    def to_image(self, ax: Axis = None):
+        """Draws an image  of the"""
+        # TODO move this after refactoring roads
+        fig: Figure | None = None
+        if not ax:
+            fig, ax = plt.subplots()
+        RoadPoints().add_middle_nodes(self.sample_nodes).plot_on_ax(ax)
+        ax.axis('equal')
+        return fig, ax
+
