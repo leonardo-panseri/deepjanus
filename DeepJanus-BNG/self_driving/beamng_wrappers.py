@@ -1,3 +1,5 @@
+import json
+import uuid
 from collections import namedtuple
 
 import numpy as np
@@ -6,7 +8,6 @@ from beamngpy import angle_to_quat, Vehicle, Scenario, BeamNGpy
 from beamngpy.sensors import GForces, Electrics, Damage, Timer, Camera
 from beamngpy.vehicle import Sensors
 
-from self_driving.beamng_waypoint import BeamNGWaypoint
 from self_driving.decal_road import DecalRoad
 from self_driving.utils import get_node_coords
 
@@ -228,3 +229,21 @@ class RoadPoints:
         _plot_xy(self.left, 'white', linewidth=1)
         _plot_xy(self.right, 'white', linewidth=1)
         ax.axis('equal')
+
+
+class BeamNGWaypoint:
+
+    def __init__(self, name, position, persistentId=None):
+        self.name = name
+        self.position = position
+        self.persistentId = persistentId if persistentId else str(uuid.uuid4())
+
+    def to_json(self):
+        obj = {}
+        obj['name'] = self.name
+        obj['class'] = 'BeamNGWaypoint'
+        obj['persistentId'] = self.persistentId
+        obj['__parent'] = 'generated'
+        obj['position'] = self.position
+        obj['scale'] = [4, 4, 4]
+        return json.dumps(obj)
