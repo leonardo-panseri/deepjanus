@@ -1,12 +1,11 @@
 import numpy as np
 
-RoadNodes = list[tuple[float, float, float, float]]
-List2DTuple = list[tuple[float, float]]
 Point2D = tuple[float, float]
+Point3D = tuple[float, float, float]
 Point4D = tuple[float, float, float, float]
 
 
-def get_node_coords(node):
+def get_node_coords(node: Point4D) -> Point3D:
     return node[0], node[1], node[2]
 
 

@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 
-from self_driving.utils import RoadNodes
+from self_driving.utils import Point4D
 
 AngleLength = Tuple[float, float]
 ListOfAngleLength = List[AngleLength]
@@ -78,7 +78,7 @@ def _calc_angle_distance(v0, v1):
     return at_1 - at_0
 
 
-def _calc_dist_angle(points: RoadNodes) -> ListOfAngleLength:
+def _calc_dist_angle(points: list[Point4D]) -> ListOfAngleLength:
     assert len(points) >= 2, f'at least two points are needed'
 
     def vector(idx):
@@ -96,7 +96,7 @@ def _calc_dist_angle(points: RoadNodes) -> ListOfAngleLength:
     return result
 
 
-def iterative_levenshtein(s: RoadNodes, t: RoadNodes):
+def iterative_levenshtein(s: list[Point4D], t: list[Point4D]):
     s_da = _calc_dist_angle(s)
     t_da = _calc_dist_angle(t)
     return _iterative_levenshtein_dist_angle(s_da, t_da)

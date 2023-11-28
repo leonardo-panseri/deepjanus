@@ -7,7 +7,7 @@ import numpy as np
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_vehicles import BeamNGVehicleCameras
-from self_driving.beamng_roads import BeamNGWaypoint, DecalRoad
+from self_driving.beamng_roads import BeamNGWaypoint, DecalRoad, BeamNGRoad
 from self_driving.road_generator import RoadGenerator
 from udacity_integration.training_data_collector_and_writer import TrainingDataCollectorAndWriter
 from self_driving.utils import get_node_coords
@@ -15,13 +15,14 @@ from self_driving.utils import get_node_coords
 # maps.install_map_if_needed()
 STEPS = 5
 
+
 # x is -y and *angle direction is reversed*
-def get_rotation(road: DecalRoad):
+def get_rotation(road: BeamNGRoad):
     v1 = road.nodes[0][:2]
     v2 = road.nodes[1][:2]
     v = np.subtract(v1, v2)
     deg = np.degrees(np.arctan2([v[0]], [v[1]]))
-    return (0, 0, deg)
+    return 0, 0, deg
 
 
 def get_script_point(p1, p2) -> Tuple[Tuple, Tuple]:
@@ -71,7 +72,8 @@ def distance(p1, p2):
     return np.linalg.norm(np.subtract(get_node_coords(p1), get_node_coords(p2)))
 
 
-def run_sim(street_1: DecalRoad):
+def run_sim(street_1: BeamNGRoad):
+    # TODO fix simulation code
     brewer = BeamNGInterface(BeamNGConfig(), road_nodes=street_1.nodes)
     waypoint_goal = BeamNGWaypoint('waypoint_goal', get_node_coords(street_1.nodes[-1]))
 
@@ -121,20 +123,11 @@ def run_sim(street_1: DecalRoad):
 
 
 if __name__ == '__main__':
-    NODES = 20
-    MAX_ANGLE = 80
-    # MAX_ANGLE = 130
-    # MAX_ANGLE = 60
-    NUM_SPLINE_NODES = 20
-    SEG_LENGTH = 25
-
-    road = RoadGenerator(num_control_nodes=NODES, max_angle=MAX_ANGLE, seg_length=SEG_LENGTH,
-                         num_spline_nodes=NUM_SPLINE_NODES).generate(visualise=False)
+    cnt_nodes, smp_nodes, _ = RoadGenerator(num_control_nodes=20, max_angle=80, seg_length=25,
+                                            num_spline_nodes=20).generate()
 
     # plot_road(road, save=True)
 
-    street = DecalRoad('street_1', drivability=1, material='').add_4d_points(road.sample_nodes)
-
-
+    street = BeamNGRoad(smp_nodes, material='')
 
     run_sim(street)

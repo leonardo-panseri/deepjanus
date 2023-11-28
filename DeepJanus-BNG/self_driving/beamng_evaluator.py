@@ -3,7 +3,6 @@ import time
 import traceback
 
 import numpy as np
-from keras.src.saving.saving_api import load_model
 
 from core.evaluator import Evaluator
 from core.folders import FOLDERS, SeedStorage
@@ -12,7 +11,7 @@ from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_map_utils import map_utils
-from self_driving.utils import RoadNodes
+from self_driving.beamng_roads import BeamNGRoad
 from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
 from udacity_integration.udacity_utils import preprocess
@@ -51,14 +50,14 @@ class BeamNGLocalEvaluator(Evaluator):
                 log.info(f'{member} BeamNG evaluation start')
             if attempt > 2:
                 time.sleep(5)
-            sim = self._run_simulation(member.sample_nodes)
+            sim = self._run_simulation(member.road)
             if sim.info.success:
                 break
 
         member.distance_to_frontier = sim.min_oob_distance()
         log.info(f'{member} BeamNG evaluation completed')
 
-    def _run_simulation(self, nodes: RoadNodes) -> SimulationData:
+    def _run_simulation(self, road: BeamNGRoad) -> SimulationData:
         """Runs the simulation on a given road. Initializes connection with BeamNG, creates a simulation
         of the road with a single vehicle and loops. In the loop captures images from the vehicle camera and feeds them
         to the ML model, then send the controls to the simulation. The loop will break if the end of the road is
@@ -67,7 +66,7 @@ class BeamNGLocalEvaluator(Evaluator):
             self.bng = BeamNGInterface(self.config)
 
         map_utils.install_map_if_needed(self.config.BEAMNG_USER_DIR)
-        self.bng.setup_road(nodes)
+        self.bng.setup_road(road)
 
         self.bng.setup_vehicle(True)
 
@@ -85,6 +84,7 @@ class BeamNGLocalEvaluator(Evaluator):
             self.bng.beamng_step(1)
 
             if not self.model:
+                from keras.src.saving.saving_api import load_model
                 self.model = load_model(self.model_file)
 
             iterations_count = 1000
@@ -133,6 +133,8 @@ class BeamNGLocalEvaluator(Evaluator):
         self.bng.beamng_stop_scenario()
 
     def predict(self, image, car_state: SimulationDataRecord):
+        """Uses the loaded model to predict the next steering command for the vehicle from the image
+        captured by the camera."""
         try:
             image = np.asarray(image)
 

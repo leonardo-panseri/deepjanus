@@ -13,7 +13,6 @@ from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_map_utils import LEVEL_NAME, map_utils
 from self_driving.beamng_vehicles import BeamNGVehicle
 from self_driving.beamng_roads import BeamNGRoad
-from self_driving.utils import RoadNodes
 from self_driving.simulation_data import SimulationParams
 
 log = get_logger(__file__)
@@ -22,14 +21,14 @@ log = get_logger(__file__)
 class BeamNGInterface:
     """Manages the BeamNGpy instance and the connection to the simulator"""
 
-    def __init__(self, config: BeamNGConfig, road_nodes: RoadNodes = None):
+    def __init__(self, config: BeamNGConfig, road: BeamNGRoad = None):
         """Initializes the interface to the BeamNG simulator. The simulator will not be opened until a call to
         beamng_bring_up() is made."""
         self.config = config
 
         self.road: BeamNGRoad | None = None
-        if road_nodes:
-            self.setup_road(road_nodes)
+        if road:
+            self.setup_road(road)
 
         # Remove the BeamNG version from the user path, as it will be added automatically by BeamNG
         user_path = os.path.dirname(config.BEAMNG_USER_DIR)
@@ -44,10 +43,10 @@ class BeamNGInterface:
 
         self.simulation_count = 0
 
-    def setup_road(self, road_nodes: RoadNodes):
+    def setup_road(self, road: BeamNGRoad):
         """Sets up the list of nodes that represent the road to simulate."""
-        self.road = BeamNGRoad(road_nodes)
-        map_utils.install_road(self.road)
+        self.road = road
+        map_utils.install_road(road)
 
     def setup_vehicle(self, cameras=False) -> BeamNGVehicle:
         """Sets up the vehicle to use for the simulation."""
@@ -139,7 +138,7 @@ if __name__ == '__main__':
     seed_storage = SeedStorage('population_HQ1')
     member = BeamNGMember.from_dict(seed_storage.load_json_by_index(0))
 
-    brewer.setup_road(member.sample_nodes)
+    brewer.setup_road(member.road)
     brewer.setup_vehicle()
 
     brewer.beamng_bring_up()

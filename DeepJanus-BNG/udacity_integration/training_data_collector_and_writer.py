@@ -4,7 +4,8 @@ from typing import List, Dict
 
 from beamngpy import Vehicle, BeamNGpy
 
-from self_driving.beamng_roads import DecalRoad, RoadPolygon
+from self_driving.beamng_roads import BeamNGRoad
+from self_driving.road_generator import RoadPolygon
 from self_driving.oob_monitor import OutOfBoundsMonitor
 from self_driving.beamng_vehicles import BeamNGVehicle, BeamNGVehicleCameras
 
@@ -14,7 +15,7 @@ CSV_idx: Dict[str, int] = {k: v for v, k in enumerate(CSV_header)}
 
 class TrainingDataCollectorAndWriter:
 
-    def __init__(self, vehicle: Vehicle, beamng: BeamNGpy, road: DecalRoad, cameras: BeamNGVehicleCameras):
+    def __init__(self, vehicle: Vehicle, beamng: BeamNGpy, road: BeamNGRoad, cameras: BeamNGVehicleCameras):
 
         self.vehicle_state_reader = BeamNGVehicle(vehicle, beamng, additional_sensors=cameras.cameras_array)
         self.oob_monitor = OutOfBoundsMonitor(RoadPolygon.from_nodes(road.nodes), self.vehicle_state_reader)

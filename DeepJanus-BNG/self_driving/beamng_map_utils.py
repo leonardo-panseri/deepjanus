@@ -44,7 +44,7 @@ class MapFolder:
     def install_road(self, road: 'BeamNGRoad'):
         """Sets up the road to be simulated in the map."""
         with open(os.path.join(self.path, 'main/MissionGroup/generated/items.level.json'), 'w') as f:
-            f.write(road.decal_road.to_json() + '\n' + road.waypoint_goal.to_json())
+            f.write(road.to_json() + '\n' + road.waypoint_goal.to_json())
 
 
 class LevelsFolder:

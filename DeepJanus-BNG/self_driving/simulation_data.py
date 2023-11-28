@@ -7,7 +7,7 @@ from typing import List
 
 from matplotlib import pyplot as plt
 
-from self_driving.beamng_roads import RoadPoints, DecalRoad
+from self_driving.beamng_roads import BeamNGRoad
 from core.folders import FOLDERS, delete_folder_recursively
 
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',
@@ -47,7 +47,7 @@ class SimulationData:
         self.path_road_img: Path = self.path_root.joinpath('road')
         self.id: str = None
         self.params: SimulationParams = None
-        self.road: DecalRoad = None
+        self.road: BeamNGRoad | None = None
         self.states: SimulationDataRecord = None
         self.info: SimulationInfo = None
 
@@ -57,7 +57,7 @@ class SimulationData:
     def n(self):
         return len(self.states)
 
-    def set(self, params: SimulationParams, road: DecalRoad,
+    def set(self, params: SimulationParams, road: BeamNGRoad,
             states: SimulationDataRecords, info: SimulationInfo = None):
         self.params = params
         self.road = road
@@ -88,10 +88,8 @@ class SimulationData:
             gen2 = (sep.join([str(d[key]) for key in SimulationDataRecordProperties]) + '\n' for d in gen)
             f.writelines(gen2)
 
-        # TODO move this after refactoring roads
         fig, ax = plt.subplots()
-        RoadPoints().add_middle_nodes(self.road.nodes).plot_on_ax(ax)
-        ax.axis('equal')
+        self.road.to_image(ax)
         fig.savefig(self.path_road_img.with_suffix('.svg'))
 
     def load(self) -> 'SimulationData':
@@ -102,7 +100,7 @@ class SimulationData:
         info.__dict__ = obj.get(self.f_info, {})
         self.set(
             SimulationParams(**obj[self.f_params]),
-            DecalRoad.from_dict(obj[self.f_road]),
+            BeamNGRoad.from_dict(obj[self.f_road]),
             [SimulationDataRecord(**r) for r in obj[self.f_records]],
             info=info)
         return self

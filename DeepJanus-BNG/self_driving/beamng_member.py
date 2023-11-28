@@ -5,8 +5,9 @@ from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
 from core.member import Member
-from self_driving.beamng_roads import RoadPoints, RoadBoundingBox, RoadPolygon
-from self_driving.utils import RoadNodes
+from self_driving.beamng_roads import BeamNGRoad
+from self_driving.road_generator import RoadGenerationBoundary, RoadPolygon
+from self_driving.utils import Point4D
 from self_driving.edit_distance_polyline import iterative_levenshtein
 
 
@@ -15,52 +16,50 @@ class BeamNGMember(Member):
 
     counter = 1
 
-    def __init__(self, control_nodes: RoadNodes, sample_nodes: RoadNodes, num_spline_nodes: int,
-                 road_bbox: RoadBoundingBox, name: str = None):
+    def __init__(self, control_nodes: list[Point4D], sample_nodes: list[Point4D], num_spline_nodes: int,
+                 generation_boundary: RoadGenerationBoundary, name: str = None):
         """Creates a DeepJanus-BNG member. Parameter 'name' can be passed to create clones of existing members,
         disabling the automatic incremental names."""
         super().__init__(name if name else f'mbr{str(BeamNGMember.counter)}')
         if not name:
             BeamNGMember.counter += 1
 
-        self.num_spline_nodes = num_spline_nodes
-        self.control_nodes = control_nodes
-        self.sample_nodes = sample_nodes
-        self.road_bbox = road_bbox
+        self.road = BeamNGRoad(sample_nodes, control_nodes, num_spline_nodes)
+        self.generation_boundary = generation_boundary
 
     def is_valid(self):
-        """Checks if the road represented by this member has a valid shape."""
-        return (RoadPolygon.from_nodes(self.sample_nodes).is_valid() and
-                self.road_bbox.contains(RoadPolygon.from_nodes(self.control_nodes[1:-1])))
+        """Checks if the road represented by this member has a valid shape and is inside the generation boundary."""
+        return (RoadPolygon(self.road).is_valid() and
+                self.generation_boundary.contains(RoadPolygon.from_nodes(self.road.control_nodes[1:-1])))
 
     def clone(self):
         # Do not pass self.name, as we use this to create the offspring
-        res = BeamNGMember(list(self.control_nodes), list(self.sample_nodes), self.num_spline_nodes,
-                           RoadBoundingBox(self.road_bbox.bbox.bounds))
+        res = BeamNGMember(list(self.road.control_nodes), list(self.road.nodes), self.road.num_spline_nodes,
+                           RoadGenerationBoundary(self.generation_boundary.bbox.bounds))
 
         res.distance_to_frontier = self.distance_to_frontier
         return res
 
     def distance(self, other: 'BeamNGMember'):
-        return iterative_levenshtein(self.sample_nodes, other.sample_nodes)
+        return iterative_levenshtein(self.road.nodes, other.road.nodes)
 
     def to_tuple(self) -> tuple[float, float]:
         import numpy as np
-        barycenter = np.mean(np.asarray(self.control_nodes), axis=0)[:2]
+        barycenter = np.mean(np.asarray(self.road.control_nodes), axis=0)[:2]
         return barycenter
 
     def to_dict(self) -> dict:
         return {
-            'control_nodes': self.control_nodes,
-            'sample_nodes': self.sample_nodes,
-            'num_spline_nodes': self.num_spline_nodes,
-            'road_bbox_size': self.road_bbox.bbox.bounds,
+            'control_nodes': self.road.control_nodes,
+            'sample_nodes': self.road.nodes,
+            'num_spline_nodes': self.road.num_spline_nodes,
+            'road_bbox_size': self.generation_boundary.bbox.bounds,
             'distance_to_frontier': self.distance_to_frontier
         }
 
     @classmethod
     def from_dict(cls, d: dict, name: str = None) -> 'BeamNGMember':
-        road_bbox = RoadBoundingBox(d['road_bbox_size'])
+        road_bbox = RoadGenerationBoundary(d['road_bbox_size'])
         res = BeamNGMember([tuple(t) for t in d['control_nodes']],
                            [tuple(t) for t in d['sample_nodes']],
                            d['num_spline_nodes'], road_bbox, name)
@@ -69,24 +68,21 @@ class BeamNGMember(Member):
 
     def __eq__(self, other):
         if isinstance(other, BeamNGMember):
-            return self.control_nodes == other.control_nodes
+            return self.road.control_nodes == other.road.control_nodes
         return False
 
     def __ne__(self, other):
         if isinstance(other, BeamNGMember):
-            return self.control_nodes != other.control_nodes
+            return self.road.control_nodes != other.road.control_nodes
         return True
 
     def member_hash(self):
-        return hashlib.sha256(str([tuple(node) for node in self.control_nodes]).encode('UTF-8')).hexdigest()
+        return hashlib.sha256(str([tuple(node) for node in self.road.control_nodes]).encode('UTF-8')).hexdigest()
 
     def to_image(self, ax: Axis = None):
-        """Draws an image  of the"""
-        # TODO move this after refactoring roads
+        """Plots the shape of the road for the member in a matplotlib figure."""
         fig: Figure | None = None
         if not ax:
             fig, ax = plt.subplots()
-        RoadPoints().add_middle_nodes(self.sample_nodes).plot_on_ax(ax)
-        ax.axis('equal')
+        self.road.to_image(ax)
         return fig, ax
-

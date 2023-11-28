@@ -1,7 +1,6 @@
 from core.archive import Archive
 from core.evaluator import Evaluator
 from core.log import get_logger
-from core.member import Member
 from core.mutator import Mutator
 from core.problem import Problem
 from self_driving.beamng_config import BeamNGConfig
@@ -40,9 +39,10 @@ class BeamNGProblem(Problem):
         return BeamNGMember
 
     def generate_random_member(self, name: str = None) -> BeamNGMember:
-        result = RoadGenerator(num_control_nodes=self.config.NUM_CONTROL_NODES,
-                               seg_length=self.config.SEG_LENGTH).generate(name=name)
-        return result
+        control_nodes, sample_nodes, gen_boundary = RoadGenerator(
+            num_control_nodes=self.config.NUM_CONTROL_NODES,
+            seg_length=self.config.SEG_LENGTH).generate()
+        return BeamNGMember(control_nodes, sample_nodes, RoadGenerator.NUM_SPLINE_NODES, gen_boundary, name)
 
     def get_evaluator(self) -> Evaluator:
         if not self._evaluator:

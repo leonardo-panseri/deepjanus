@@ -58,7 +58,7 @@ class LogSetup:
 log_setup = LogSetup()
 
 
-def configure(ini_path: Path):
+def configure_logging(ini_path: Path):
     """Sets up the logger for DeepJanus to use configurations from the file."""
     log_setup.use_ini(ini_path)
 

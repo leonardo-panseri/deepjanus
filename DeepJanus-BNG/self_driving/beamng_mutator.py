@@ -2,7 +2,6 @@ import random
 
 from core.mutator import Mutator
 from self_driving.beamng_member import BeamNGMember
-from self_driving.curve_interpolation import catmull_rom
 
 
 class BeamNGRoadMutator(Mutator):
@@ -18,7 +17,7 @@ class BeamNGRoadMutator(Mutator):
         """Mutates a DeepJanus-BNG member: picks a random road control node (excluding the first
         and last three) and adds a random value in the range [lower_bound,upper_bound]. If the road sampled from the
         new control nodes is not valid, tries modifying a different control node."""
-        original_nodes = tuple(member.control_nodes)
+        original_nodes = list(member.road.control_nodes)
 
         genes_to_mutate = list(range(3, len(original_nodes) - 3))
 
@@ -53,11 +52,11 @@ class BeamNGRoadMutator(Mutator):
         if gene_index == -1:
             raise ValueError("No gene can be mutated")
 
-        assert member.control_nodes != original_nodes
+        assert member.road.control_nodes != original_nodes
 
     def mutate_gene(self, member: BeamNGMember, index: int, xy_prob=0.5) -> tuple[int, int]:
         """Mutates a road control node of a member."""
-        gene = list(member.control_nodes[index])
+        gene = list(member.road.control_nodes[index])
         # Choose the mutation extent
         mut_value = random.randint(self.lower_bound, self.higher_bound)
         # Avoid to choose 0
@@ -67,14 +66,12 @@ class BeamNGRoadMutator(Mutator):
         if random.random() < xy_prob:
             coord_index = 1
         gene[coord_index] += mut_value
-        member.control_nodes[index] = tuple(gene)
-        member.sample_nodes = catmull_rom(member.control_nodes, member.num_spline_nodes)
+        member.road.mutate_node(index, tuple(gene))
         return coord_index, mut_value
 
     @classmethod
     def undo_mutation(cls, member: BeamNGMember, index: int, coord_index: int, mut_value: int):
         """Removes a previously applied mutation."""
-        gene = list(member.control_nodes[index])
+        gene = list(member.road.control_nodes[index])
         gene[coord_index] -= mut_value
-        member.control_nodes[index] = tuple(gene)
-        member.sample_nodes = catmull_rom(member.control_nodes, member.num_spline_nodes)
+        member.road.mutate_node(index, tuple(gene))

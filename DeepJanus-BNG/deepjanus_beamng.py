@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from core import nsga2
 from core.archive import SmartArchive
 from core.folders import FOLDERS, SeedStorage
-from core.log import get_logger
+from core.log import get_logger, configure_logging
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     cfg = BeamNGConfig()
     prob = BeamNGProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
-    log.configure(FOLDERS.log_ini)
+    configure_logging(FOLDERS.log_ini)
 
     if args.seeds:
         cfg_lq = BeamNGConfig()

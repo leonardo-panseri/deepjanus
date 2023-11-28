@@ -1,6 +1,6 @@
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.oob_monitor import OutOfBoundsMonitor
-from self_driving.beamng_roads import RoadPolygon
+from self_driving.road_generator import RoadPolygon
 from self_driving.simulation_data import SimulationDataRecords, SimulationData, SimulationDataRecord
 from self_driving.utils import points_distance
 
@@ -11,11 +11,11 @@ class SimulationDataCollector:
         self.bng = bng
         self.name = simulation_name
 
-        self.oob_monitor = OutOfBoundsMonitor(RoadPolygon.from_nodes(self.bng.road.road_nodes), self.bng.vehicle)
+        self.oob_monitor = OutOfBoundsMonitor(RoadPolygon.from_nodes(self.bng.road.nodes), self.bng.vehicle)
 
         self.states: SimulationDataRecords = []
         self.simulation_data: SimulationData = SimulationData(simulation_name)
-        self.simulation_data.set(self.bng.params, self.bng.road.decal_road, self.states)
+        self.simulation_data.set(self.bng.params, self.bng.road, self.states)
         self.simulation_data.clean()
 
     def collect_current_data(self, oob_bb=True, wrt="right"):
