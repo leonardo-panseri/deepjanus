@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from self_driving.beamng_config import BeamNGConfig
 
 if TYPE_CHECKING:
-    from self_driving.beamng_wrappers import BeamNGRoad
+    from self_driving.beamng_roads import BeamNGRoad
 
 log = get_logger(__file__)
 

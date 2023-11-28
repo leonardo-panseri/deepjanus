@@ -1,6 +1,6 @@
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.oob_monitor import OutOfBoundsMonitor
-from self_driving.road_polygon import RoadPolygon
+from self_driving.beamng_roads import RoadPolygon
 from self_driving.simulation_data import SimulationDataRecords, SimulationData, SimulationDataRecord
 from self_driving.utils import points_distance
 

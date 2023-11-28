@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-Point2D = tuple[float, float]
-Point4D = tuple[float, float, float, float]
+from self_driving.utils import Point2D, Point4D
 
 
 def catmull_rom_spline(p0: Point2D, p1: Point2D, p2: Point2D, p3: Point2D, num_points=20):

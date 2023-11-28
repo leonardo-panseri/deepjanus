@@ -5,10 +5,9 @@ from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
 from core.member import Member
-from self_driving.beamng_wrappers import RoadNodes, RoadPoints
+from self_driving.beamng_roads import RoadPoints, RoadBoundingBox, RoadPolygon
+from self_driving.utils import RoadNodes
 from self_driving.edit_distance_polyline import iterative_levenshtein
-from self_driving.road_bbox import RoadBoundingBox
-from self_driving.road_polygon import RoadPolygon
 
 
 class BeamNGMember(Member):

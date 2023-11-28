@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 
-from self_driving.beamng_wrappers import RoadNodes
+from self_driving.utils import RoadNodes
 
 AngleLength = Tuple[float, float]
 ListOfAngleLength = List[AngleLength]

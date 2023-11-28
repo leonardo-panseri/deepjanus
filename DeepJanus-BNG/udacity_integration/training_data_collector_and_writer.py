@@ -4,10 +4,9 @@ from typing import List, Dict
 
 from beamngpy import Vehicle, BeamNGpy
 
-from self_driving.decal_road import DecalRoad
+from self_driving.beamng_roads import DecalRoad, RoadPolygon
 from self_driving.oob_monitor import OutOfBoundsMonitor
-from self_driving.road_polygon import RoadPolygon
-from self_driving.beamng_wrappers import BeamNGVehicle, BeamNGVehicleCameras
+from self_driving.beamng_vehicles import BeamNGVehicle, BeamNGVehicleCameras
 
 CSV_header = ['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed']
 CSV_idx: Dict[str, int] = {k: v for v, k in enumerate(CSV_header)}

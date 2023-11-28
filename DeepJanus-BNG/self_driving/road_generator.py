@@ -7,9 +7,7 @@ import numpy as np
 
 from self_driving.beamng_member import BeamNGMember
 from self_driving.curve_interpolation import catmull_rom
-from self_driving.road_bbox import RoadBoundingBox
-from self_driving.road_polygon import RoadPolygon
-
+from self_driving.beamng_roads import RoadBoundingBox, RoadPolygon
 
 Tuple4F = Tuple[float, float, float, float]
 Tuple2F = Tuple[float, float]

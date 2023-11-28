@@ -7,8 +7,7 @@ from typing import List
 
 from matplotlib import pyplot as plt
 
-from self_driving.beamng_wrappers import RoadPoints
-from self_driving.decal_road import DecalRoad
+from self_driving.beamng_roads import RoadPoints, DecalRoad
 from core.folders import FOLDERS, delete_folder_recursively
 
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',

@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from core.individual import Individual
 from core.log import get_logger
 from self_driving.beamng_member import BeamNGMember
-from self_driving.beamng_wrappers import RoadPoints
+from self_driving.beamng_roads import RoadPoints
 
 log = get_logger(__file__)
 

@@ -11,7 +11,9 @@ from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_map_utils import LEVEL_NAME, map_utils
-from self_driving.beamng_wrappers import BeamNGRoad, BeamNGVehicle, RoadNodes
+from self_driving.beamng_vehicles import BeamNGVehicle
+from self_driving.beamng_roads import BeamNGRoad
+from self_driving.utils import RoadNodes
 from self_driving.simulation_data import SimulationParams
 
 log = get_logger(__file__)

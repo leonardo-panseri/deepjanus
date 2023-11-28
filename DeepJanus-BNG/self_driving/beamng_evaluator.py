@@ -12,7 +12,7 @@ from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_map_utils import map_utils
-from self_driving.beamng_wrappers import RoadNodes
+from self_driving.utils import RoadNodes
 from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
 from udacity_integration.udacity_utils import preprocess
