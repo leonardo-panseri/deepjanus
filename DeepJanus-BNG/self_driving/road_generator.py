@@ -6,7 +6,7 @@ from shapely.geometry import Point
 import numpy as np
 
 from self_driving.beamng_member import BeamNGMember
-from self_driving.catmull_rom import catmull_rom
+from self_driving.curve_interpolation import catmull_rom
 from self_driving.road_bbox import RoadBoundingBox
 from self_driving.road_polygon import RoadPolygon
 
@@ -141,21 +141,22 @@ class RoadGenerator:
 
 
 if __name__ == "__main__":
-    NODES = 10
-    MAX_ANGLE = 130
-    NUM_SPLINE_NODES = 20
-    SEG_LENGTH = 25
+    nodes = 10
+    num_spline_nodes = 20
 
-    road = RoadGenerator(num_control_nodes=NODES, max_angle=MAX_ANGLE, seg_length=SEG_LENGTH,
-                 num_spline_nodes=NUM_SPLINE_NODES).generate(visualise=False)
+    road = RoadGenerator(num_control_nodes=nodes, num_spline_nodes=num_spline_nodes).generate()
 
-    # plot_road(road, save=True)
+    from self_driving.curve_interpolation import plot_catmull_rom
 
-    import json
+    c = [(n[0], n[1]) for n in road.sample_nodes]
+    p = [(n[0], n[1]) for n in road.control_nodes]
+    plot_catmull_rom(c, p)
 
-    path = "rough"
-    with open(path, 'w') as f:
-        dumps = json.dumps(road.to_dict())
-        f.write(dumps)
+    # import json
+    #
+    # path = "rough"
+    # with open(path, 'w') as f:
+    #     dumps = json.dumps(road.to_dict())
+    #     f.write(dumps)
 
 

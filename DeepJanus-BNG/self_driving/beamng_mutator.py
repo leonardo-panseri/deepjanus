@@ -2,7 +2,7 @@ import random
 
 from core.mutator import Mutator
 from self_driving.beamng_member import BeamNGMember
-from self_driving.catmull_rom import catmull_rom
+from self_driving.curve_interpolation import catmull_rom
 
 
 class BeamNGRoadMutator(Mutator):
