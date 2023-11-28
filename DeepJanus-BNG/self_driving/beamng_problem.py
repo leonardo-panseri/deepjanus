@@ -39,7 +39,7 @@ class BeamNGProblem(Problem):
     def member_class(self):
         return BeamNGMember
 
-    def generate_random_member(self, name: str = None) -> Member:
+    def generate_random_member(self, name: str = None) -> BeamNGMember:
         result = RoadGenerator(num_control_nodes=self.config.NUM_CONTROL_NODES,
                                seg_length=self.config.SEG_LENGTH).generate(name=name)
         return result
