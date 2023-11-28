@@ -2,6 +2,7 @@ import os
 import time
 import traceback
 
+import numpy as np
 from keras.src.saving.saving_api import load_model
 
 from core.evaluator import Evaluator
@@ -12,9 +13,9 @@ from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_map_utils import map_utils
 from self_driving.beamng_wrappers import RoadNodes
-from self_driving.nvidia_prediction import NvidiaPrediction
-from self_driving.simulation_data import SimulationData
+from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
+from udacity_integration.udacity_utils import preprocess
 
 log = get_logger(__file__)
 
@@ -31,6 +32,7 @@ class BeamNGLocalEvaluator(Evaluator):
             raise Exception(f'File {self.model_file} does not exist!')
 
         self.model = None
+        self.speed_limit = config.MAX_SPEED
 
     def evaluate(self, member: BeamNGMember) -> None:
         if not member.needs_evaluation():
@@ -84,7 +86,6 @@ class BeamNGLocalEvaluator(Evaluator):
 
             if not self.model:
                 self.model = load_model(self.model_file)
-            predict = NvidiaPrediction(self.model, self.config)
 
             iterations_count = 1000
             idx = 0
@@ -105,7 +106,7 @@ class BeamNGLocalEvaluator(Evaluator):
                 img = self.bng.vehicle.cameras.capture_image_center()
                 # img.save(f"../img/{datetime.now().strftime('%d-%m_%H-%M-%S-%f')[:-3]}.jpg")
 
-                steering_angle, throttle = predict.predict(img, vehicle_state)
+                steering_angle, throttle = self.predict(img, vehicle_state)
                 self.bng.vehicle.control(throttle=throttle, steering=steering_angle, brake=0)
 
                 self.bng.beamng_step()
@@ -130,6 +131,26 @@ class BeamNGLocalEvaluator(Evaluator):
     def _end_simulation(self):
         """Terminates the simulation of a road, readying the simulator for the next one."""
         self.bng.beamng_stop_scenario()
+
+    def predict(self, image, car_state: SimulationDataRecord):
+        try:
+            image = np.asarray(image)
+
+            image = preprocess(image)
+            image = np.array([image])
+
+            steering_angle = float(self.model.predict(image, batch_size=1))
+
+            speed = car_state.vel_kmh
+            if speed > self.speed_limit:
+                self.speed_limit = self.config.MIN_SPEED  # slow down
+            else:
+                self.speed_limit = self.config.MAX_SPEED
+            throttle = 1.0 - steering_angle ** 2 - (speed / self.speed_limit) ** 2
+            return steering_angle, throttle
+        except Exception as ex:
+            log.error('Cannot predict steering angle:')
+            traceback.print_exception(type(ex), ex, ex.__traceback__)
 
 
 if __name__ == '__main__':
