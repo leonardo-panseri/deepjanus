@@ -5,7 +5,7 @@ from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.shapely_roads import RoadGenerator
-from udacity_integration.training_data_collector import TrainingDataCollector
+from training.training_data_collector import TrainingDataCollector
 from self_driving.points import Point4D, Point2D, points_distance
 
 log = get_logger(__file__)

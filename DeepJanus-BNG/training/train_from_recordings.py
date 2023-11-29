@@ -9,8 +9,8 @@ from keras.layers import Lambda, Conv2D, Dropout, Dense, Flatten
 import os
 
 from core.folders import FOLDERS
-from udacity_integration.batch_generator import Generator
-from udacity_integration.udacity_utils import INPUT_SHAPE
+from training.batch_generator import Generator
+from training.udacity_utils import INPUT_SHAPE
 
 np.random.seed(0)
 
