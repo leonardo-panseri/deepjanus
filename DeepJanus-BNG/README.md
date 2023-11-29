@@ -37,8 +37,8 @@ When the run is finished, the tool produces the following outputs in the `data/e
 Run `python deepjanus_beamng.py`
 
 ### Train a New Predictor ###
-* Run `python deepjanus_beamng.py generate-training`  to generate a new training set;
-* Run `python deepjanus_beamng.py train`  to train the ML model.
+* Run `python deepjanus_beamng.py generate-training`  to generate a new training set
+* Run `python deepjanus_beamng.py train`  to train the ML model
 
 ### Generate New Seeds ###
 Run `python deepjanus_beamng.py -s`
@@ -72,4 +72,4 @@ Important files:
 - `training/train_dataser_recorder.py`: Dataset generator, builds random roads and simulate a vehicle driving on them, collecting data
 - `training/train_from_recordings.py`: ML model training, builds an ML model for the steering angle prediction problem and trains it with generated data
 
-Other files are utilities
+Other files are utilities.
