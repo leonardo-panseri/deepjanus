@@ -107,12 +107,12 @@ class BeamNGVehicleCameras:
         # self.cam_left: Camera | None = None
         # self.cam_right: Camera | None = None
 
-    def setup_cameras(self, bng: BeamNGpy, direction=(0, -1, 0), fov=120, resolution=(320, 160), y=-2.2, z=1.0):
+    def setup_cameras(self, bng: BeamNGpy, direction=(0, -1, 0), fov=120, resolution=(320, 160), y=-2.2, z=1.3):
         """Creates cameras in the simulation. Note that the simulation must be up and running for this to
         succeed."""
-        self.cam_center = Camera('cam_center', bng, self.vehicle, pos=(-0.3, y, z),
+        self.cam_center = Camera('cam_center', bng, self.vehicle, pos=(-0.388, y, z),
                                  dir=direction, field_of_view_y=fov, resolution=resolution,
-                                 requested_update_time=0.1, is_using_shared_memory=True, is_render_annotations=False,
+                                 requested_update_time=0.01, is_using_shared_memory=True, is_render_annotations=False,
                                  is_render_depth=False, is_streaming=True)
         # self.cam_left = Camera('cam_left', self.bng, self.vehicle, pos=(-1.3, y, z),
         #                        dir=direction, field_of_view_y=fov, resolution=resolution,
