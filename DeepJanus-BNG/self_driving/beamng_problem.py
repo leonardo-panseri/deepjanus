@@ -8,7 +8,7 @@ from self_driving.beamng_evaluator import BeamNGLocalEvaluator
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_mutator import BeamNGRoadMutator
-from self_driving.road_generator import RoadGenerator
+from self_driving.shapely_roads import RoadGenerator
 
 log = get_logger(__file__)
 

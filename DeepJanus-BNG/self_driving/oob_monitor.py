@@ -2,7 +2,7 @@ from typing import Tuple, Union
 
 from shapely.geometry import Point, Polygon
 
-from self_driving.road_generator import RoadPolygon
+from self_driving.shapely_roads import RoadPolygon
 from self_driving.beamng_vehicles import BeamNGVehicle
 
 

@@ -8,7 +8,7 @@ from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_vehicles import BeamNGVehicleCameras
 from self_driving.beamng_roads import BeamNGWaypoint, DecalRoad, BeamNGRoad
-from self_driving.road_generator import RoadGenerator
+from self_driving.shapely_roads import RoadGenerator
 from udacity_integration.training_data_collector_and_writer import TrainingDataCollectorAndWriter
 from self_driving.utils import get_node_coords
 

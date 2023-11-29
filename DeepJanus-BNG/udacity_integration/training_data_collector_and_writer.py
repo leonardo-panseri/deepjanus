@@ -5,7 +5,7 @@ from typing import List, Dict
 from beamngpy import Vehicle, BeamNGpy
 
 from self_driving.beamng_roads import BeamNGRoad
-from self_driving.road_generator import RoadPolygon
+from self_driving.shapely_roads import RoadPolygon
 from self_driving.oob_monitor import OutOfBoundsMonitor
 from self_driving.beamng_vehicles import BeamNGVehicle, BeamNGVehicleCameras
 

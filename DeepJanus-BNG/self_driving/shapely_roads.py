@@ -10,10 +10,11 @@ from self_driving.utils import Point4D, Point2D
 
 
 class RoadPolygon:
-    """Represents the road as a geometrical object (a polygon or a sequence of polygons)."""
+    """Represents the road as a Shapely geometrical object (a polygon or a sequence of polygons)."""
 
     @classmethod
     def from_nodes(cls, nodes: list[Point4D]):
+        """Builds a road polygon from road nodes."""
         return RoadPolygon(BeamNGRoad(nodes))
 
     def __init__(self, road: BeamNGRoad):
@@ -33,7 +34,7 @@ class RoadPolygon:
         self.num_polygons = len(self.polygons)
 
     def _compute_polygons(self) -> list[Polygon]:
-        """Creates and returns a list of Polygon objects that represent the road.
+        """Creates a list of Polygon objects that represent the road.
         Each polygon represents a segment of the road. Two objects adjacent in
         the returned list represent adjacent segments of the road."""
         polygons = []
@@ -65,25 +66,21 @@ class RoadPolygon:
         return Polygon(road_poly)
 
     def _compute_polyline(self) -> LineString:
-        """Computes and returns a LineString representing the polyline
-        of the spin (or middle) of the road."""
+        """Computes a LineString representing the polyline of the spin (or middle) of the road."""
         return LineString([(n[0], n[1]) for n in self.road.nodes])
 
     def _compute_right_polyline(self) -> LineString:
-        """Computes and returns a LineString representing the polyline
-        of the spin (or middle) of the right lane of the road."""
+        """Computes a LineString representing the polyline of the spin (or middle) of the right lane of the road."""
         return LineString([((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2) for p1, p2 in
                            zip(self.road.nodes, self.road.lane_marker_right)])
 
     def _compute_left_polyline(self) -> LineString:
-        """Computes and returns a LineString representing the polyline
-        of the spin (or middle) of the left lane of the road."""
+        """Computes a LineString representing the polyline of the spin (or middle) of the left lane of the road."""
         return LineString([((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2) for p1, p2 in
                            zip(self.road.lane_marker_left, self.road.nodes)])
 
     def _get_neighbouring_polygons(self, i: int) -> list[int]:
-        """Returns the indices of the neighbouring polygons of the polygon
-        with index i."""
+        """Returns the indices of the neighbouring polygons of the polygon with index i."""
         if self.num_polygons == 1:
             assert i == 0
             return []
@@ -202,6 +199,9 @@ class RoadGenerator:
         assert self.generation_boundary.intersects_sides(self._get_initial_point())
 
     def generate_control_nodes(self, attempts=NUM_UNDO_ATTEMPTS) -> list[Point4D]:
+        """Generates control nodes that can be interpolated to obtain the shape of the road.
+        Note that this will return the control nodes plus the two extra nodes needed by the current Catmull-Rom model.
+        These two extra nodes will be the first and the last of the returned nodes."""
         nodes = []
         # The road generation ends when there are the control nodes plus the two extra nodes
         # needed by the current Catmull-Rom model
@@ -258,6 +258,9 @@ class RoadGenerator:
         return nodes
 
     def generate(self):
+        """Generates a random road and returns the control nodes, the sample nodes, and the generation boundary.
+        Note that because of the Catmull-Rom model the control nodes will consist of two extra nodes, one at the start,
+        and one at the end."""
         control_nodes = self.generate_control_nodes()
         sample_nodes = catmull_rom(control_nodes, self.num_spline_nodes)
         while (not RoadPolygon.from_nodes(sample_nodes).is_valid() and
@@ -267,16 +270,19 @@ class RoadGenerator:
         return control_nodes, sample_nodes, self.generation_boundary
 
     def _get_initial_point(self) -> Point:
+        """Gets the 2D point representing the initial road node."""
         return Point(self.initial_node[0], self.initial_node[1])
 
     def _get_initial_control_node(self) -> Point4D:
+        """Gets the 4D point representing the first valid road control node."""
         x0, y0, z, width = self.initial_node
         x, y = self._get_next_xy(x0, y0, 270)
         assert not(self.generation_boundary.bbox.contains(Point(x, y)))
 
         return x, y, z, width
 
-    def _get_next_node(self, first_node, second_node: Point4D, max_angle) -> Point4D:
+    def _get_next_node(self, first_node: Point4D, second_node: Point4D, max_angle: int) -> Point4D:
+        """Gets the next node constrained by 'max_angle'."""
         v = np.subtract(second_node, first_node)
         start_angle = int(np.degrees(np.arctan2(v[1], v[0])))
         angle = randint(start_angle - max_angle, start_angle + max_angle)
@@ -285,10 +291,12 @@ class RoadGenerator:
         return x1, y1, z0, width0
 
     def _get_next_xy(self, x0: float, y0: float, angle: float) -> Point2D:
+        """Gets the next 2D point constrained by 'angle'."""
         angle_rad = math.radians(angle)
         return x0 + self.seg_length * math.cos(angle_rad), y0 + self.seg_length * math.sin(angle_rad)
 
-    def _get_next_max_angle(self, i: int, threshold=NUM_INITIAL_SEGMENTS_THRESHOLD) -> float:
+    def _get_next_max_angle(self, i: int, threshold=NUM_INITIAL_SEGMENTS_THRESHOLD) -> int:
+        """Gets the next angle to constrain node generation."""
         if i < threshold or i == self.num_control_nodes - 1:
             return 0
         else:
