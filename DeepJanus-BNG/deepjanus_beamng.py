@@ -11,7 +11,7 @@ from core.log import get_logger, configure_logging
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
-from udacity_integration import train_dataset_recorder, train_from_recordings
+from training import train_dataset_recorder, train_from_recordings
 
 log = get_logger(__file__)
 

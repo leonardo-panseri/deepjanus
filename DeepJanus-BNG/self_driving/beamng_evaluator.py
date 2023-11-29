@@ -13,7 +13,7 @@ from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
-from udacity_integration.udacity_utils import preprocess
+from training.udacity_utils import preprocess
 
 log = get_logger(__file__)
 
