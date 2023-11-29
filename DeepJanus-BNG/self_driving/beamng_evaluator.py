@@ -113,7 +113,7 @@ class BeamNGLocalEvaluator(Evaluator):
 
             sim_data_collector.get_simulation_data().end(success=True)
         except Exception as ex:
-            sim_data_collector.get_simulation_data().end(success=False, exception=ex)
+            sim_data_collector.get_simulation_data().end(success=False)
             traceback.print_exception(type(ex), ex, ex.__traceback__)
         finally:
             if self.config.SAVE_SIM_DATA:

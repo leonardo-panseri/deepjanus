@@ -8,12 +8,13 @@ from self_driving.utils import points_distance
 
 
 class SimulationDataCollector:
+    """Utility to collect all relevant data about a simulation"""
 
     def __init__(self, bng: BeamNGInterface, simulation_name: str = None):
         self.bng = bng
         self.name = simulation_name
 
-        self.oob_monitor = OutOfBoundsMonitor(RoadPolygon.from_nodes(self.bng.road.nodes), self.bng.vehicle)
+        self.oob_monitor = OutOfBoundsMonitor(RoadPolygon(self.bng.road), self.bng.vehicle)
 
         self.states: SimulationDataRecords = []
         self.simulation_data: SimulationData = SimulationData(simulation_name)
@@ -21,8 +22,8 @@ class SimulationDataCollector:
         self.simulation_data.clean()
 
     def collect_current_data(self, oob_bb=True, lane: Literal['right', 'left'] = 'right'):
-        """If oob_bb is True, then the out-of-bound (OOB) examples are calculated
-        using the bounding box of the car."""
+        """Collects the data about the current state of the simulation.
+        If oob_bb is True, then the out-of-bound monitor will use the bounding box of the car."""
         self.bng.vehicle.update_state()
         car_state = self.bng.vehicle.get_state()
 
@@ -41,9 +42,11 @@ class SimulationDataCollector:
         return sim_data_record
 
     def get_simulation_data(self) -> SimulationData:
+        """Gets the simulation data."""
         return self.simulation_data
 
     def take_car_picture_if_needed(self):
+        """Takes a picture of the car and saves it on disk if the vehicle is out of bounds."""
         last_state = self.states[-1]
         if last_state.is_oob:
             img_path = self.simulation_data.path_root.joinpath(f'oob_camera_shot{last_state.oob_counter}.jpg')
@@ -55,4 +58,5 @@ class SimulationDataCollector:
                 self.bng.capture_image(cam_pos, cam_dir).save(str(img_path))
 
     def save(self):
+        """Saves the simulation data to disk."""
         self.simulation_data.save()

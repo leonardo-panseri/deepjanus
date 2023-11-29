@@ -3,7 +3,6 @@ import json
 import uuid
 from collections import namedtuple
 from pathlib import Path
-from typing import List
 
 from matplotlib import pyplot as plt
 
@@ -16,12 +15,13 @@ SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforc
                                   'max_oob_percentage', 'oob_distance', 'dist_from_goal']
 
 SimulationDataRecord = namedtuple('SimulationDataRecord', SimulationDataRecordProperties)
-SimulationDataRecords = List[SimulationDataRecord]
+SimulationDataRecords = list[SimulationDataRecord]
 
 SimulationParams = namedtuple('SimulationParameters', ['iteration_steps', 'fps_limit'])
 
 
 class SimulationInfo:
+    """Container for generic information about a simulation"""
 
     start_time: str
     end_time: str
@@ -33,6 +33,7 @@ class SimulationInfo:
 
 
 class SimulationData:
+    """Container for all data about a simulation"""
 
     f_info = 'info'
     f_params = 'params'
@@ -45,20 +46,22 @@ class SimulationData:
         self.path_json: Path = self.path_root.joinpath('simulation.full.json')
         self.path_partial: Path = self.path_root.joinpath('simulation.partial.tsv')
         self.path_road_img: Path = self.path_root.joinpath('road')
-        self.id: str = None
-        self.params: SimulationParams = None
+        self.id: str | None = None
+        self.params: SimulationParams | None = None
         self.road: BeamNGRoad | None = None
-        self.states: SimulationDataRecord = None
-        self.info: SimulationInfo = None
+        self.states: SimulationDataRecord | None = None
+        self.info: SimulationInfo | None = None
 
         assert len(self.name) >= 3, 'the simulation name must be a string of at least 3 character'
 
     @property
     def n(self):
+        """Returns the number of recorded simulation states."""
         return len(self.states)
 
     def set(self, params: SimulationParams, road: BeamNGRoad,
             states: SimulationDataRecords, info: SimulationInfo = None):
+        """Sets data about the current simulation."""
         self.params = params
         self.road = road
         if info:
@@ -69,9 +72,11 @@ class SimulationData:
         self.states = states
 
     def clean(self):
+        """Removes all data about the simulation stored on disk."""
         delete_folder_recursively(self.path_root)
 
     def save(self):
+        """Saves data about the simulation on disk."""
         self.path_root.mkdir(parents=True, exist_ok=True)
         with open(self.path_json, 'w') as f:
             f.write(json.dumps({
@@ -93,6 +98,7 @@ class SimulationData:
         fig.savefig(self.path_road_img.with_suffix('.svg'))
 
     def load(self) -> 'SimulationData':
+        """Loads data about the simulation from disk."""
         with open(self.path_json, 'r') as f:
             obj = json.loads(f.read())
         info = SimulationInfo()
@@ -105,13 +111,13 @@ class SimulationData:
             info=info)
         return self
 
-    def complete(self) -> bool:
-        return self.path_json.exists()
-
     def min_oob_distance(self) -> float:
+        """Finds the minimum distance from the lane bounds during the simulation. This will return a negative
+        value if the vehicle has gone out of lane bounds."""
         return min(state.oob_distance for state in self.states)
 
     def start(self):
+        """Records the start of the simulation."""
         self.info.success = None
         self.info.start_time = str(datetime.datetime.now())
         try:
@@ -120,11 +126,10 @@ class SimulationData:
         except Exception as ex:
             self.info.computer_name = str(ex)
 
-    def end(self, success: bool, exception=None):
+    def end(self, success: bool):
+        """Records the end of the simulation."""
         self.info.end_time = str(datetime.datetime.now())
         self.info.success = success
-        if exception:
-            self.exception_str = str(exception)
 
 
 if __name__ == '__main__':
@@ -132,6 +137,3 @@ if __name__ == '__main__':
         sim1 = SimulationData('/'.join(s)).load()
         if len(sim1.states) == 0:
             print(sim1.name)
-    # sim2 = SimulationData('group1/sim_road12_round2').load()
-    # print(sim1.max_oob_distance())
-    # print(sim2.max_oob_distance())
