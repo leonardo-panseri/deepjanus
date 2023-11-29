@@ -6,7 +6,6 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Lambda, Conv2D, Dropout, Dense, Flatten
-import argparse
 import os
 
 from core.folders import FOLDERS
@@ -105,19 +104,8 @@ def plot_dataset(y):
     plt.show()
 
 
-def main():
+def main(args):
     """Loads train/validation data set and trains the model."""
-    parser = argparse.ArgumentParser(description='Behavioral Cloning Training Program')
-    parser.add_argument('-d', help='data directory', dest='data_dir', type=str, default='.')
-    parser.add_argument('-t', help='test size fraction', dest='test_size', type=float, default=0.2)
-    parser.add_argument('-k', help='drop out probability', dest='keep_prob', type=float, default=0.5)
-    parser.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=200)
-    parser.add_argument('-b', help='batch size', dest='batch_size', type=int, default=128)
-    parser.add_argument('-o', help='save best models only', dest='save_best_only', action='store_true',
-                        default=False)
-    parser.add_argument('-l', help='learning rate', dest='learning_rate', type=float, default=1.0e-4)
-    args = parser.parse_args()
-
     print('-' * 30)
     print('Parameters')
     print('-' * 30)

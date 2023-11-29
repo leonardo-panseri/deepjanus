@@ -1,6 +1,6 @@
 from keras.utils import Sequence
 import numpy as np
-from udacity_utils import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS, load_image, augment, preprocess
+from udacity_integration.udacity_utils import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS, load_image, augment, preprocess
 
 
 class Generator(Sequence):

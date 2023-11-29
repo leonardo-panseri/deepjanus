@@ -1,11 +1,14 @@
 import numpy as np
 
+from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.shapely_roads import RoadGenerator
 from udacity_integration.training_data_collector import TrainingDataCollector
 from self_driving.points import Point4D, Point2D, points_distance
+
+log = get_logger(__file__)
 
 
 def calculate_script(road_points: list[Point4D]) -> tuple[list[dict[str, float]], list[Point2D]]:
@@ -46,7 +49,7 @@ def calculate_script(road_points: list[Point4D]) -> tuple[list[dict[str, float]]
 
 def run_sim(config: BeamNGConfig, road: BeamNGRoad):
     """Runs a simulation on the given road."""
-    script, script_points = calculate_script(rd.nodes)
+    script, script_points = calculate_script(road.nodes)
 
     bng = BeamNGInterface(config)
 
@@ -74,8 +77,15 @@ def run_sim(config: BeamNGConfig, road: BeamNGRoad):
         bng.beamng_close()
 
 
-if __name__ == '__main__':
-    cnt_nodes, smp_nodes, _ = RoadGenerator(num_control_nodes=20).generate()
-    rd = BeamNGRoad(smp_nodes, cnt_nodes)
+def main(iterations):
+    for _ in range(iterations):
+        log.info('Generating road...')
+        cnt_nodes, smp_nodes, _ = RoadGenerator(num_control_nodes=20).generate()
+        rd = BeamNGRoad(smp_nodes, cnt_nodes)
 
-    run_sim(BeamNGConfig(), rd)
+        log.info('Running simulation...')
+        run_sim(BeamNGConfig(), rd)
+
+
+if __name__ == '__main__':
+    main(12)
