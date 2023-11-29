@@ -8,7 +8,7 @@ from core.member import Member
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.shapely_roads import RoadGenerationBoundary, RoadPolygon
 from self_driving.utils import Point4D
-from self_driving.edit_distance_polyline import iterative_levenshtein
+from self_driving.levenshtein_distance import iterative_levenshtein
 
 
 class BeamNGMember(Member):
