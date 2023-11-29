@@ -10,7 +10,6 @@ from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
-from self_driving.beamng_map_utils import map_utils
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
@@ -65,7 +64,6 @@ class BeamNGLocalEvaluator(Evaluator):
         if not self.bng:
             self.bng = BeamNGInterface(self.config)
 
-        map_utils.install_map_if_needed(self.config.BEAMNG_USER_DIR)
         self.bng.setup_road(road)
 
         self.bng.setup_vehicle(True)
@@ -103,7 +101,7 @@ class BeamNGLocalEvaluator(Evaluator):
                 if vehicle_state.is_oob:
                     break
 
-                img = self.bng.vehicle.cameras.capture_image_center()
+                img = self.bng.vehicle.capture_image_front()
                 # img.save(f"../img/{datetime.now().strftime('%d-%m_%H-%M-%S-%f')[:-3]}.jpg")
 
                 steering_angle, throttle = self.predict(img, vehicle_state)

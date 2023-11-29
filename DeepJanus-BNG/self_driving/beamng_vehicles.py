@@ -68,6 +68,11 @@ class BeamNGVehicle:
         """Gets the bounding box of the vehicle."""
         return self.vehicle.get_bbox()
 
+    def capture_image_front(self) -> Image:
+        """Captures an image from the front-facing camera mounted on the vehicle."""
+        assert self.cameras, 'Vehicle cameras are disabled'
+        return self.cameras.capture_image_center()
+
     def update_state(self):
         """Polls sensors and updates the state of the vehicle."""
         self.vehicle.poll_sensors()

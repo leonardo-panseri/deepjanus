@@ -45,6 +45,7 @@ class BeamNGInterface:
 
     def setup_road(self, road: BeamNGRoad):
         """Sets up the list of nodes that represent the road to simulate."""
+        map_utils.install_map_if_needed(self.config.BEAMNG_USER_DIR)
         self.road = road
         map_utils.install_road(road)
 
