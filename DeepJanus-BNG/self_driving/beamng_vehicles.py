@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import Literal
 
 import numpy as np
 from PIL import Image
@@ -29,7 +30,7 @@ VehicleState = namedtuple('VehicleState',
 class BeamNGVehicle:
     """Encapsulates a BeamNGpy vehicle, providing all necessary methods to interact with it and retrieve its state"""
 
-    def __init__(self, cameras=False):
+    def __init__(self, all_cameras=False):
         self.vehicle = Vehicle('ego_vehicle', model='etk800', licence='TIG', color='Red')
         self.vehicle.attach_sensor('gforces', GForces())
         self.vehicle.attach_sensor('electrics', Electrics())
@@ -38,9 +39,7 @@ class BeamNGVehicle:
 
         self.start_pose: BeamNGPose = BeamNGPose()
 
-        self.cameras: BeamNGVehicleCameras | None = None
-        if cameras:
-            self.cameras = BeamNGVehicleCameras(self.vehicle)
+        self.cameras: BeamNGVehicleCameras = BeamNGVehicleCameras(self.vehicle, all_cameras)
 
         self.sensors: Sensors | None = None
         self.state: VehicleState | None = None
@@ -51,8 +50,7 @@ class BeamNGVehicle:
                              rot_quat=self.start_pose.rot_quaternion())
 
     def setup_cameras(self, bng: BeamNGpy):
-        """Sets up vehicle-mounted cameras. If this vehicle was instantiated with flag camera=False, this method
-        does nothing."""
+        """Sets up vehicle-mounted cameras."""
         if self.cameras:
             self.cameras.setup_cameras(bng)
 
@@ -68,10 +66,9 @@ class BeamNGVehicle:
         """Gets the bounding box of the vehicle."""
         return self.vehicle.get_bbox()
 
-    def capture_image_front(self) -> Image:
-        """Captures an image from the front-facing camera mounted on the vehicle."""
-        assert self.cameras, 'Vehicle cameras are disabled'
-        return self.cameras.capture_image_center()
+    def capture_image(self, camera: Literal['center', 'left', 'right'] = 'center') -> Image:
+        """Captures an image from one of the front-facing cameras mounted on the vehicle."""
+        return self.cameras.capture_image(camera)
 
     def update_state(self):
         """Polls sensors and updates the state of the vehicle."""
@@ -105,28 +102,42 @@ class BeamNGVehicle:
 class BeamNGVehicleCameras:
     """Encapsulates cameras mounted on a vehicle, providing all necessary methods to interact with them"""
 
-    def __init__(self, vehicle: Vehicle):
+    def __init__(self, vehicle: Vehicle, all_cameras=False):
         self.vehicle = vehicle
+        self.all_cameras = all_cameras
 
         self.cam_center: Camera | None = None
-        # self.cam_left: Camera | None = None
-        # self.cam_right: Camera | None = None
+        if all_cameras:
+            self.cam_left: Camera | None = None
+            self.cam_right: Camera | None = None
 
-    def setup_cameras(self, bng: BeamNGpy, direction=(0, -1, 0), fov=120, resolution=(320, 160), y=-2.2, z=1.3):
+    def setup_cameras(self, bng: BeamNGpy, direction=(0, -1, 0), fov=120, resolution=(320, 160), y=-2.2, z=1.294):
         """Creates cameras in the simulation. Note that the simulation must be up and running for this to
         succeed."""
         self.cam_center = Camera('cam_center', bng, self.vehicle, pos=(-0.388, y, z),
                                  dir=direction, field_of_view_y=fov, resolution=resolution,
                                  requested_update_time=0.01, is_using_shared_memory=True, is_render_annotations=False,
                                  is_render_depth=False, is_streaming=True)
-        # self.cam_left = Camera('cam_left', self.bng, self.vehicle, pos=(-1.3, y, z),
-        #                        dir=direction, field_of_view_y=fov, resolution=resolution,
-        #                        requested_update_time=0.1)
-        # self.cam_right = Camera('cam_right', self.bng, self.vehicle, pos=(0.4, self.y, self.z),
-        #                         dir=direction, field_of_view_y=fov, resolution=resolution,
-        #                         requested_update_time=0.1)
+        if self.all_cameras:
+            self.cam_left = Camera('cam_left', bng, self.vehicle, pos=(-1.682, y, z),
+                                   dir=direction, field_of_view_y=fov, resolution=resolution,
+                                   requested_update_time=0.01, is_using_shared_memory=True,
+                                   is_render_annotations=False, is_render_depth=False, is_streaming=True)
+            self.cam_right = Camera('cam_right',  bng, self.vehicle, pos=(0.518, y, z),
+                                    dir=direction, field_of_view_y=fov, resolution=resolution,
+                                    requested_update_time=0.01, is_using_shared_memory=True,
+                                    is_render_annotations=False, is_render_depth=False, is_streaming=True)
 
-    def capture_image_center(self) -> Image:
-        """Captures an image from the central camera."""
-        return Image.fromarray(self.cam_center
-                               .stream_colour(320 * 160 * 4).reshape(160, 320, 4)).convert('RGB')
+    def capture_image(self, camera: Literal['center', 'left', 'right'] = 'center') -> Image:
+        """Captures an image from on of the cameras."""
+        cam: Camera | None = None
+        if camera == 'center':
+            cam = self.cam_center
+        else:
+            assert self.all_cameras, f'Camera {camera} is not enabled for this vehicle'
+            if camera == 'left':
+                cam = self.cam_left
+            else:
+                cam = self.cam_right
+
+        return Image.fromarray(cam.stream_colour(320 * 160 * 4).reshape(160, 320, 4)).convert('RGB')

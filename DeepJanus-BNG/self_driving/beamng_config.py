@@ -33,7 +33,8 @@ class BeamNGConfig(Config):
         # How many steps should the simulator advance at each iteration
         self.BEAMNG_STEPS = 5
         # How many frames should the simulator try to render in a second
-        self.BEAMNG_FPS = 30
+        # This will influence the duration of a step: 1 step will be 1/fps
+        self.BEAMNG_FPS = 20
         # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks
         # Set to -1 to disable
         self.BEAMNG_RESTART_AFTER = 22

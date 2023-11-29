@@ -49,9 +49,10 @@ class BeamNGInterface:
         self.road = road
         map_utils.install_road(road)
 
-    def setup_vehicle(self, cameras=False) -> BeamNGVehicle:
-        """Sets up the vehicle to use for the simulation."""
-        self.vehicle = BeamNGVehicle(cameras)
+    def setup_vehicle(self, all_cameras=False) -> BeamNGVehicle:
+        """Sets up the vehicle to use for the simulation. Parameter 'all_cameras' can be set to True if
+        additional cameras moved to the left and right of the vehicle are needed."""
+        self.vehicle = BeamNGVehicle(all_cameras)
 
         if self.road:
             self.vehicle.start_pose = self.road.vehicle_start_pose()

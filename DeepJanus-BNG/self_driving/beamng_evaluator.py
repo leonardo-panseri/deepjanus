@@ -66,7 +66,7 @@ class BeamNGLocalEvaluator(Evaluator):
 
         self.bng.setup_road(road)
 
-        self.bng.setup_vehicle(True)
+        self.bng.setup_vehicle()
 
         simulation_id = time.strftime('%Y-%m-%d--%H-%M-%S', time.localtime())
         name = self.config.SIM_NAME.replace('$(id)', simulation_id)
@@ -101,7 +101,7 @@ class BeamNGLocalEvaluator(Evaluator):
                 if vehicle_state.is_oob:
                     break
 
-                img = self.bng.vehicle.capture_image_front()
+                img = self.bng.vehicle.capture_image()
                 # img.save(f"../img/{datetime.now().strftime('%d-%m_%H-%M-%S-%f')[:-3]}.jpg")
 
                 steering_angle, throttle = self.predict(img, vehicle_state)

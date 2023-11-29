@@ -48,6 +48,7 @@ class Folders:
         self.experiments: Path = self.data.joinpath('experiments').absolute()
         self.simulations: Path = self.data.joinpath('simulations').absolute()
         self.trained_models_colab: Path = self.data.joinpath('trained_models_colab').absolute()
+        self.training_recordings: Path = self.data.joinpath('training_recordings').absolute()
 
 
 FOLDERS: Folders = Folders(os.path.dirname(__file__))
