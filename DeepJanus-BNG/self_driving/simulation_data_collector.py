@@ -1,3 +1,5 @@
+from typing import Literal
+
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.oob_monitor import OutOfBoundsMonitor
 from self_driving.shapely_roads import RoadPolygon
@@ -18,13 +20,14 @@ class SimulationDataCollector:
         self.simulation_data.set(self.bng.params, self.bng.road, self.states)
         self.simulation_data.clean()
 
-    def collect_current_data(self, oob_bb=True, wrt="right"):
+    def collect_current_data(self, oob_bb=True, lane: Literal['right', 'left'] = 'right'):
         """If oob_bb is True, then the out-of-bound (OOB) examples are calculated
         using the bounding box of the car."""
         self.bng.vehicle.update_state()
         car_state = self.bng.vehicle.get_state()
 
-        is_oob, oob_counter, max_oob_percentage, oob_distance = self.oob_monitor.get_oob_info(oob_bb=oob_bb, wrt=wrt)
+        is_oob, oob_counter, max_oob_percentage, oob_distance = self.oob_monitor.is_out_of_bounds(oob_bb=oob_bb,
+                                                                                                  lane=lane)
 
         dist_from_goal = points_distance(car_state.pos, self.bng.road.waypoint_goal.position)
 
