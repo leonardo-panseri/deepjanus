@@ -1,4 +1,6 @@
 import json
+import signal
+import sys
 
 from matplotlib import pyplot as plt
 
@@ -14,6 +16,13 @@ log = get_logger(__file__)
 
 
 def execute_deepjanus(problem: BeamNGProblem):
+    def signal_handler(sig, frame):
+        print('Run interrupted by user')
+        problem.get_evaluator().bng.beamng_close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
     nsga2.main(problem)
 
     # Needed?
@@ -78,4 +87,3 @@ if __name__ == '__main__':
         generate_seeds(prob, prob_lq)
     else:
         execute_deepjanus(prob)
-

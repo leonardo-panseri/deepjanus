@@ -76,7 +76,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     # ####################
 
     # Generate initial population
-    log.info("### Initializing population....")
+    log.info("### Initializing population...")
     pop = toolbox.population(n=config.POP_SIZE)
 
     # Evaluate the initial population

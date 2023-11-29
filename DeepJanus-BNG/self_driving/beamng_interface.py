@@ -4,6 +4,7 @@ import traceback
 
 from PIL import Image
 from beamngpy import BeamNGpy, Scenario
+from beamngpy.logging import BNGError, BNGDisconnectedError
 from beamngpy.sensors import Camera
 
 from core.folders import SeedStorage
@@ -112,6 +113,8 @@ class BeamNGInterface:
         """Stops and exits the simulation scenario without closing the simulator."""
         try:
             self._bng.stop_scenario()
+        except BNGError:
+            pass  # No scenario is loaded
         except Exception as ex:
             log.warning('Cannot stop BeamNG scenario:')
             traceback.print_exception(type(ex), ex, ex.__traceback__)
@@ -129,6 +132,8 @@ class BeamNGInterface:
         if self._bng:
             try:
                 self._bng.close()
+            except BNGDisconnectedError:
+                pass  # We want to disconnect
             except Exception as ex:
                 log.warning('Cannot close BeamNG instance:')
                 traceback.print_exception(type(ex), ex, ex.__traceback__)
