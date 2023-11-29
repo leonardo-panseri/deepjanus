@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from core.log import get_logger
 from self_driving.beamng_vehicles import BeamNGPose
 from self_driving.curve_interpolation import catmull_rom
-from self_driving.utils import get_node_coords, Point3D, Point4D, Point2D
+from self_driving.points import to_3d_point, Point3D, Point4D, Point2D
 
 log = get_logger(__file__)
 
@@ -44,7 +44,7 @@ class BeamNGRoad:
         self.lane_marker_right: list[Point2D] = [(.0, .0)] * len(nodes)
         self.recalculate_lane_markers()
 
-        self.waypoint_goal = BeamNGWaypoint('waypoint_goal', get_node_coords(nodes[-1]))
+        self.waypoint_goal = BeamNGWaypoint('waypoint_goal', to_3d_point(nodes[-1]))
 
         self.persistent_id = str(uuid.uuid4())
 

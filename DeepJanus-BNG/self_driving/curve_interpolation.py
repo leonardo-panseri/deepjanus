@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from self_driving.utils import Point2D, Point4D
+from self_driving.points import Point2D, Point4D
 
 
 def catmull_rom_spline(p0: Point2D, p1: Point2D, p2: Point2D, p3: Point2D, num_points=20):

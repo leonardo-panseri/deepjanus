@@ -10,7 +10,7 @@ from self_driving.beamng_vehicles import BeamNGVehicleCameras
 from self_driving.beamng_roads import BeamNGWaypoint, DecalRoad, BeamNGRoad
 from self_driving.shapely_roads import RoadGenerator
 from udacity_integration.training_data_collector_and_writer import TrainingDataCollectorAndWriter
-from self_driving.utils import get_node_coords
+from self_driving.points import to_3d_point
 
 # maps.install_map_if_needed()
 STEPS = 5
@@ -69,13 +69,13 @@ def calculate_script(road_points):
 
 
 def distance(p1, p2):
-    return np.linalg.norm(np.subtract(get_node_coords(p1), get_node_coords(p2)))
+    return np.linalg.norm(np.subtract(to_3d_point(p1), to_3d_point(p2)))
 
 
 def run_sim(street_1: BeamNGRoad):
     # TODO fix simulation code
     brewer = BeamNGInterface(BeamNGConfig(), road_nodes=street_1.nodes)
-    waypoint_goal = BeamNGWaypoint('waypoint_goal', get_node_coords(street_1.nodes[-1]))
+    waypoint_goal = BeamNGWaypoint('waypoint_goal', to_3d_point(street_1.nodes[-1]))
 
     vehicle = brewer.setup_vehicle()
     camera = brewer.setup_scenario_camera()

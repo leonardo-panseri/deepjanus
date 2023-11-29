@@ -6,7 +6,7 @@ import numpy as np
 
 from self_driving.beamng_roads import BeamNGRoad, log
 from self_driving.curve_interpolation import catmull_rom
-from self_driving.utils import Point4D, Point2D
+from self_driving.points import Point4D, Point2D
 
 
 class RoadPolygon:
