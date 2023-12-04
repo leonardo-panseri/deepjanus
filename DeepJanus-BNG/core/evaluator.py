@@ -7,6 +7,6 @@ if TYPE_CHECKING:
 class Evaluator:
     """Base class for implementing strategies to evaluate members"""
 
-    def evaluate(self, member: 'Member') -> None:
-        """Evaluates a member and prepares it for fitness functions calculation."""
+    def evaluate(self, member: 'Member') -> bool:
+        """Evaluates a member and returns if it satisfies the requirements of the problem."""
         raise NotImplemented()

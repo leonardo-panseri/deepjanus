@@ -43,8 +43,8 @@ class GreedyArchive(Archive):
 
     def process_population(self, pop: Iterable[Individual]):
         for candidate in pop:
-            if candidate.distance_to_frontier < 0:
-                self.add(candidate)
+            # TODO: Check if a threshold for distance_to_frontier is needed for considering adding a candidate
+            self.add(candidate)
 
 
 class SmartArchive(Archive):
@@ -57,29 +57,30 @@ class SmartArchive(Archive):
     def process_population(self, pop: Iterable[Individual]):
         for candidate in pop:
             assert candidate.distance_to_frontier, candidate.name
-            if candidate.distance_to_frontier < 0:
-                if len(self) == 0:
-                    self._add(candidate)
-                    log.debug('add initial individual')
-                else:
-                    # uses semantic_distance to exploit behavioral information
-                    closest_archived, candidate_archived_distance = \
-                        closest_elements(self, candidate, lambda a, b: a.semantic_distance(b))[0]
-                    closest_archived: Individual
+            # TODO: Check if a threshold for distance_to_frontier is needed for considering adding a candidate
+            if len(self) == 0:
+                self._add(candidate)
+                log.debug('Add initial individual')
+            else:
+                # uses semantic_distance to exploit behavioral information
+                closest_archived, candidate_archived_distance = \
+                    closest_elements(self, candidate, lambda a, b: a.distance(b))[0]
+                closest_archived: Individual
 
-                    if candidate_archived_distance > self.ARCHIVE_THRESHOLD:
-                        log.debug('candidate is far from any archived individual')
+                if candidate_archived_distance > self.ARCHIVE_THRESHOLD:
+                    log.debug('Candidate is far from any archived individual')
+                    self._add(candidate)
+                else:
+                    log.debug('Candidate is very close to an archived individual')
+                    # Compare fitness values for 'Distance to Frontier' and keep in the archive the closest individual
+                    if candidate.fitness.values[1] < closest_archived.fitness.values[1]:
+                        log.debug('Candidate is better than archived')
                         self._add(candidate)
+                        self.remove(closest_archived)
+                        log.info('Archive rem ', closest_archived)
                     else:
-                        log.debug('candidate is very close to an archived individual')
-                        if candidate.members_distance < closest_archived.members_distance:
-                            log.debug('candidate is better than archived')
-                            self._add(candidate)
-                            self.remove(closest_archived)
-                            log.info('archive rem ', closest_archived)
-                        else:
-                            log.debug('archived is better than candidate')
+                        log.debug('Archived is better than candidate')
 
     def _add(self, candidate):
         self.add(candidate)
-        log.info('archive add ', candidate)
+        log.info('Archive add ', candidate)

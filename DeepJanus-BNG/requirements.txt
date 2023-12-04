@@ -4,7 +4,7 @@ tensorflow
 keras
 deap
 opencv-python
-beamngpy
+beamngpy==1.27.1
 numpy
 matplotlib
 Pillow

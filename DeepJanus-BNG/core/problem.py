@@ -7,7 +7,7 @@ from core.folders import FOLDERS, delete_folder_recursively
 from core.individual import Individual
 from core.log import get_logger
 from core.member import Member
-from core.metrics import get_radius_seed, get_diameter
+from core.metrics import calculate_seed_radius, calculate_diameter
 from core.mutator import Mutator
 from core.seed_pool import SeedPoolFolder, SeedPoolRandom
 
@@ -43,7 +43,13 @@ class Problem:
 
     def deap_generate_individual(self) -> Individual:
         """Generates a new individual from the seed pool."""
-        raise NotImplemented()
+        seed = self.seed_pool.get_seed()
+
+        # Need to use the DEAP creator to instantiate new individual
+        individual: Individual = self.individual_creator(seed.clone(), seed)
+
+        log.info(f'Generated {individual}')
+        return individual
 
     def deap_evaluate_individual(self, individual: Individual):
         """Evaluates an individual of this problem."""
@@ -69,7 +75,7 @@ class Problem:
             for i in range(len(population)):
                 if population[i].seed in archived_seeds:
                     ind1 = self.deap_generate_individual()
-                    log.info(f'reseed rem {population[i]}')
+                    log.info(f'Reseed rem {population[i]}')
                     population[i] = ind1
 
     def on_iteration(self, idx, pop: list[Individual], logbook):
@@ -94,9 +100,8 @@ class Problem:
             report = {
                 'generations': idx + 1,
                 'archive_len': len(self.archive),
-                'radius': get_radius_seed(self.archive),
-                'diameter_out': get_diameter([ind.members_by_sign()[0] for ind in self.archive]),
-                'diameter_in': get_diameter([ind.members_by_sign()[1] for ind in self.archive])
+                'radius': calculate_seed_radius(self.archive),
+                'diameter': calculate_diameter(self.archive)
             }
             self.experiment_path.joinpath(f'report.json').write_text(json.dumps(report))
 

@@ -96,6 +96,7 @@ class SimulationData:
         fig, ax = plt.subplots()
         self.road.to_image(ax)
         fig.savefig(self.path_road_img.with_suffix('.svg'))
+        plt.close(fig)
 
     def load(self) -> 'SimulationData':
         """Loads data about the simulation from disk."""

@@ -47,6 +47,8 @@ class SimulationDataCollector:
 
     def take_car_picture_if_needed(self):
         """Takes a picture of the car and saves it on disk if the vehicle is out of bounds."""
+        if not self.states:
+            return
         last_state = self.states[-1]
         if last_state.is_oob:
             img_path = self.simulation_data.path_root.joinpath(f'oob_camera_shot{last_state.oob_counter}.jpg')

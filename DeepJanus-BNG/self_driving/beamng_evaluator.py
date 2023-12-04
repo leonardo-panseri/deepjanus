@@ -32,29 +32,30 @@ class BeamNGLocalEvaluator(Evaluator):
         self.model = None
         self.speed_limit = config.MAX_SPEED
 
-    def evaluate(self, member: BeamNGMember) -> None:
-        if not member.needs_evaluation():
-            log.info(f'{member} is already evaluated. skipping')
-            return
-
-        counter = 20
+    def evaluate(self, member: BeamNGMember, max_attempts=20) -> bool:
         attempt = 0
         while True:
             attempt += 1
-            if attempt == counter:
+            if attempt == max_attempts:
                 raise Exception('Exhausted attempts')
             if attempt > 1:
                 log.info(f'RETRYING TO run simulation, attempt {attempt}')
             else:
                 log.info(f'{member} BeamNG evaluation start')
-            if attempt > 2:
+            if attempt >= 2:
                 time.sleep(5)
             sim = self._run_simulation(member.road)
             if sim.info.success:
                 break
 
-        member.distance_to_frontier = sim.min_oob_distance()
+        # Requirement: do not go outside lane boundaries
+        satisfy_requirements = sim.min_oob_distance() > 0
+
+        # Update member here to ensure that log contains evaluation info
+        member.satisfy_requirements = satisfy_requirements
         log.info(f'{member} BeamNG evaluation completed')
+
+        return satisfy_requirements
 
     def _run_simulation(self, road: BeamNGRoad) -> SimulationData:
         """Runs the simulation on a given road. Initializes connection with BeamNG, creates a simulation
@@ -110,6 +111,8 @@ class BeamNGLocalEvaluator(Evaluator):
                 self.bng.beamng_step()
 
             sim_data_collector.get_simulation_data().end(success=True)
+        except ConnectionRefusedError:
+            log.warning('Looks like BeamNG simulator has been closed')
         except Exception as ex:
             sim_data_collector.get_simulation_data().end(success=False)
             traceback.print_exception(type(ex), ex, ex.__traceback__)
@@ -139,7 +142,7 @@ class BeamNGLocalEvaluator(Evaluator):
             image = preprocess(image)
             image = np.array([image])
 
-            steering_angle = float(self.model.predict(image, batch_size=1))
+            steering_angle = float(self.model.predict(image, batch_size=1, verbose=0))
 
             speed = car_state.vel_kmh
             if speed > self.speed_limit:

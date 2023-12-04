@@ -1,4 +1,5 @@
 import json
+import os
 import signal
 import sys
 
@@ -11,7 +12,6 @@ from core.log import get_logger, configure_logging
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
-from training import train_dataset_recorder, train_from_recordings
 
 log = get_logger(__file__)
 
@@ -31,10 +31,7 @@ def generate_seeds(problem1: BeamNGProblem, problem2: BeamNGProblem | None, fold
 
     def is_outside_frontier(member: BeamNGMember, problem: BeamNGProblem):
         member.clear_evaluation()
-        member.evaluate(problem.get_evaluator())
-        if member.distance_to_frontier is None or member.distance_to_frontier <= 0:
-            return True
-        return False
+        return not member.evaluate(problem.get_evaluator())
 
     while good_members_found < quantity:
         seed_index = good_members_found + 1
@@ -99,10 +96,11 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print(args)
     if args.subcmd == 'train':
+        from training import train_from_recordings
         train_from_recordings.main(args)
     elif args.subcmd == 'generate-training':
+        from training import train_dataset_recorder
         train_dataset_recorder.main(args.iterations)
     elif args.seeds:
         cfg_lq = BeamNGConfig()
@@ -111,4 +109,6 @@ if __name__ == '__main__':
         prob_lq = BeamNGProblem(cfg_lq, SmartArchive(cfg.ARCHIVE_THRESHOLD))
         generate_seeds(prob, prob_lq)
     else:
+        # Disable TensorFlow logs
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '4'
         execute_deepjanus(prob)

@@ -23,18 +23,6 @@ class BeamNGProblem(Problem):
     def deap_individual_class(self):
         return BeamNGIndividual
 
-    def deap_generate_individual(self):
-        seed = self.seed_pool.get_seed()
-        road1 = seed.clone()
-        road2 = seed.clone()
-        road2.mutate(self.get_mutator())
-
-        # Need to use the DEAP creator to instantiate new individual
-        individual: BeamNGIndividual = self.individual_creator(road1, road2, seed)
-
-        log.info(f'generated {individual}')
-        return individual
-
     def member_class(self):
         return BeamNGMember
 

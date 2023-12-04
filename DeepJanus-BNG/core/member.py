@@ -1,24 +1,35 @@
 from core.evaluator import Evaluator
+from core.log import get_logger
 from core.mutator import Mutator
+
+log = get_logger(__file__)
 
 
 class Member:
-    """Class representing a member of the population"""
+    """Class representing a member of an individual of the population"""
 
-    def __init__(self, name: str):
-        self.name: str = name
+    counter = 1
 
-        self.distance_to_frontier: float | None = None
+    def __init__(self, name: str = None):
+        self.name: str = name if name else f'mbr{str(Member.counter)}'
+        if not name:
+            Member.counter += 1
 
-    def clone(self):
-        """Creates a deep copy of the member."""
+        self.satisfy_requirements: bool | None = None
+
+    def clone(self, name: str = None) -> 'Member':
+        """Creates a deep copy of the member. The name of the new copy can be passed as a parameter."""
         raise NotImplemented()
 
-    def evaluate(self, evaluator: Evaluator):
-        """Evaluates the member."""
+    def evaluate(self, evaluator: Evaluator) -> bool | None:
+        """Evaluates the member and returns if it satisfies the requirements of the problem."""
         if self.needs_evaluation():
-            evaluator.evaluate(self)
+            self.satisfy_requirements = evaluator.evaluate(self)
+        else:
+            log.info(f'{self} is already evaluated, skipping')
+
         assert not self.needs_evaluation()
+        return self.satisfy_requirements
 
     def mutate(self, mutator: Mutator):
         """Mutates the member."""
@@ -31,11 +42,11 @@ class Member:
 
     def needs_evaluation(self):
         """Returns True if the member needs to be evaluated, False if it has already been evaluated."""
-        return self.distance_to_frontier is None
+        return self.satisfy_requirements is None
 
     def clear_evaluation(self):
         """Clears the results of evaluation for the member."""
-        self.distance_to_frontier = None
+        self.satisfy_requirements = None
 
     def to_tuple(self) -> tuple[float, float]:
         """Returns a 2D point representing the member, useful for visualization."""
@@ -61,13 +72,9 @@ class Member:
         """Returns a string identifying the member."""
         raise NotImplemented()
 
-    def __repr__(self):
-        frontier_eval = 'na'
-        if self.distance_to_frontier:
-            frontier_eval = str(self.distance_to_frontier)
-            if self.distance_to_frontier > 0:
-                frontier_eval = '+' + frontier_eval
-            frontier_eval = '~' + frontier_eval
-        frontier_eval = frontier_eval[:7].ljust(7)
+    def __str__(self):
+        reqs_eval = '/'
+        if self.satisfy_requirements is not None:
+            reqs_eval = 'Y' if self.satisfy_requirements else 'N'
         h = self.member_hash()[-5:]
-        return f'{self.name.ljust(7)} h={h} f={frontier_eval}'
+        return f'{self.name.ljust(7)} h={h} r={reqs_eval}'

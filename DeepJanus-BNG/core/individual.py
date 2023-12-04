@@ -1,14 +1,13 @@
-import random
+import math
 import timeit
+from statistics import NormalDist
+# Workaround for keeping type hinting while avoiding circular imports
+from typing import TYPE_CHECKING
 from typing import TypeVar, Generic
-
-from numpy import mean
 
 from core.log import get_logger
 from core.member import Member
 
-# Workaround for keeping type hinting while avoiding circular imports
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from core.problem import Problem
 
@@ -19,17 +18,21 @@ T = TypeVar('T', bound=Member)
 class Individual(Generic[T]):
     """Class representing an individual of the population"""
 
-    def __init__(self, name: str, m1: T, m2: T, seed: T = None):
-        self.name: str = name
+    counter = 1
 
-        self.m1: T = m1
-        self.m2: T = m2
+    def __init__(self, mbr: T, seed: T = None, neighbors: list[T] = None, name: str = None):
+        """Creates a DeepJanus individual. Parameter 'name' can be passed to create clones of existing individuals,
+        disabling the automatic incremental names."""
+        self.name: str = name if name else f'ind{str(Individual.counter)}'
+        if not name:
+            Individual.counter += 1
+
+        self.mbr: T = mbr
+        self.neighbors: list[T] = neighbors if neighbors else []
         self.seed: T | None = seed
 
-        self.members_distance: float | None = None
-
         self.sparseness: float | None = None
-        self.distance_to_frontier: float | None = None
+        self.distance_to_frontier: tuple[float, float] | None = None
 
     def clone(self, individual_creator) -> 'Individual':
         """Creates a deep copy of the individual using the provided DEAP creator."""
@@ -37,75 +40,88 @@ class Individual(Generic[T]):
 
     def evaluate(self, problem: 'Problem') -> tuple[float, float]:
         """Evaluates the individual and returns the two fitness values."""
-        assert self.m1 != self.m2
+        log.info(f'Starting evaluation of {self}')
         start = timeit.default_timer()
-
-        self.members_distance = self.m1.distance(self.m2)
-        stop = timeit.default_timer()
-        log.info(f'Time to mem dist: {stop - start}')
 
         self.sparseness = problem.archive.evaluate_sparseness(self)
         stop = timeit.default_timer()
         log.info(f'Time to sparseness: {stop - start}; archive len: {len(problem.archive)}')
 
-        self.m1.evaluate(problem.get_evaluator())
-        self.m2.evaluate(problem.get_evaluator())
+        unsafe_count = 0
+        if not self.mbr.evaluate(problem.get_evaluator()):
+            unsafe_count += 1
+
+        curr_neighbors = 0
+        max_neighbors = problem.config.MAX_NEIGHBORS
+        curr_err = 1
+        desired_error = problem.config.TARGET_ERROR
+
+        # Map to quickly check if neighbors are all different from each other
+        neighbors_hash = {}
+
+        confidence_level = problem.config.CONFIDENCE_LEVEL
+        lower_bound: float | None = None
+        upper_bound: float | None = None
+        while curr_neighbors < max_neighbors and curr_err > desired_error:
+            # Generate a neighbor different from all other neighbors
+            equal_nbr = True
+            nbr: Member | None = None
+            while equal_nbr:
+                nbr = self.mbr.clone(f'nbr{curr_neighbors + 1}_{self.name.replace("ind", "")}')
+                nbr.mutate(problem.get_mutator())
+                equal_nbr = nbr.member_hash() in neighbors_hash
+            neighbors_hash[nbr.member_hash()] = True
+            self.neighbors.append(nbr)
+
+            if not nbr.evaluate(problem.get_evaluator()):
+                unsafe_count += 1
+
+            curr_neighbors += 1
+
+            # Number of evaluated members, all generated neighbors plus the original member
+            evaluated = curr_neighbors + 1
+            # Calculate Wilson Confidence Interval based on the estimator
+            lower_bound, upper_bound = self._calculate_wilson_ci(unsafe_count / evaluated, evaluated, confidence_level)
+            curr_err = (upper_bound - lower_bound) / 2.
+            log.info(f'Neighbor {curr_neighbors} evaluated. CI is now [{lower_bound:.3f},{upper_bound:.3f}] '
+                     f'(err: +-{curr_err:.3f})')
+
+        self.distance_to_frontier = (lower_bound, upper_bound)
         stop = timeit.default_timer()
         log.info(f'Time to eval: {stop - start}')
 
         # Fitness function 'Quality of Individual'
-        ff1 = self.sparseness - (problem.config.K_SD * self.members_distance)
-        # Fitness function 'Closeness to Frontier'
-        distance_to_frontier = self.m1.distance_to_frontier * self.m2.distance_to_frontier
-        self.distance_to_frontier = distance_to_frontier if distance_to_frontier > 0 else -0.1
+        ff1 = self.sparseness
+        # Fitness function 'Distance to Frontier'
+        p_th = problem.config.PROBABILITY_THRESHOLD
+        ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
 
         stop = timeit.default_timer()
         log.info(f'Total Time: {stop - start}')
-        log.info(f'evaluated {self}')
-        return ff1, self.distance_to_frontier
+        log.info(f'Evaluated {self}')
+        return ff1, ff2
+
+    @classmethod
+    def _calculate_wilson_ci(cls, estimator: float, sample_size: int, confidence_level: float):
+        """Calculates the Wilson Confidence Interval for an estimator, given the sample size and the desired confidence
+        level. Returns a tuple containing the lower and upper bounds of the CI."""
+        z = NormalDist().inv_cdf((1 + confidence_level) / 2.)
+        gamma = (z * z) / sample_size
+        p = 1 / (1 + gamma) * (estimator + gamma / 2)
+        offset = z / (1 + gamma) * math.sqrt(estimator * (1 - estimator) / sample_size + gamma / (4 * sample_size))
+        lower_bound = p - offset
+        upper_bound = p + offset
+
+        return lower_bound, upper_bound
 
     def mutate(self, problem: 'Problem'):
         """Mutates the individual."""
-        member_to_mutate = self.m1 if random.randrange(2) == 0 else self.m2
-        members_not_equal = False
-        while not members_not_equal:
-            member_to_mutate.mutate(problem.get_mutator())
-            if self.m1 != self.m2:
-                members_not_equal = True
-        self.members_distance = None
-        log.info(f'mutated {member_to_mutate}')
+        self.mbr.mutate(problem.get_mutator())
+        log.info(f'Mutated {self.mbr}')
 
     def distance(self, i2: 'Individual') -> float:
         """Calculates the distance with another individual."""
-        i1 = self
-        a = i1.m1.distance(i2.m1)
-        b = i1.m1.distance(i2.m2)
-        c = i1.m2.distance(i2.m1)
-        d = i1.m2.distance(i2.m2)
-
-        dist = mean([min(a, b), min(c, d), min(a, c), min(b, d)])
-        return dist
-
-    def semantic_distance(self, i2: 'Individual') -> float:
-        """Calculates the distance with another individual exploiting semantic information."""
-        raise NotImplemented()
-
-    def members_by_sign(self) -> tuple[T, T]:
-        """Returns a tuple containing first the member outside the frontier, and second the member inside."""
-        result = self.members_by_distance_to_boundary()
-
-        assert result[0].distance_to_frontier < 0, str(result[0].distance_to_frontier) + ' ' + str(self)
-        assert result[1].distance_to_frontier >= 0, str(result[1].distance_to_frontier) + ' ' + str(self)
-        return result
-
-    def members_by_distance_to_boundary(self) -> tuple[T, T]:
-        """Returns a tuple containing the members sorted in ascending order by their distance to the frontier."""
-        msg = 'in order to use this distance metrics you need to evaluate the member'
-        assert self.m1.distance_to_frontier, msg
-        assert self.m2.distance_to_frontier, msg
-
-        result = sorted([self.m1, self.m2], key=lambda m: m.distance_to_frontier)
-        return tuple(result)
+        return self.mbr.distance(i2.mbr)
 
     def save(self, folder):
         """Saves a human-interpretable representation of the individual on disk."""
@@ -121,5 +137,18 @@ class Individual(Generic[T]):
         raise NotImplemented()
 
     def __str__(self):
-        dist = str(self.members_distance).ljust(4)[:4]
-        return f'{self.name.ljust(6)} dist={dist} m1[{self.m1}] m2[{self.m2}] seed[{self.seed}]'
+        frontier_eval = 'na'
+        if self.distance_to_frontier:
+            lb = f'{self.distance_to_frontier[0]:.3f}'
+            ub = f'{self.distance_to_frontier[1]:.3f}'
+
+            if self.distance_to_frontier[0] >= 0:
+                lb = '+' + lb
+            if self.distance_to_frontier[1] >= 0:
+                ub = '+' + ub
+
+            frontier_eval = f'[{lb},{ub}]'
+        # frontier_eval = frontier_eval.ljust(9)
+        return (f'{self.name.ljust(6)} mbr[{self.mbr}] nbh[n={len(self.neighbors)}; '
+                f'sr={len(list(filter(lambda n: n.satisfy_requirements, self.neighbors)))}] seed[{self.seed}] '
+                f'f{frontier_eval}')

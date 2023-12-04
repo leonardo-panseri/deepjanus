@@ -36,12 +36,12 @@ def load_individual(storage: FolderStorage, individual_index: int, problem: Beam
     # Check which member is inside the frontier and which is outside
     # Assuming that we have only individuals at the frontier in the storage
     m1_inside: bool
-    if individual.m1.distance_to_frontier < 0:
+    if individual.mbr.distance_to_frontier < 0:
         member_inside = individual.m2
-        member_outside = individual.m1
+        member_outside = individual.mbr
         m1_inside = False
     else:
-        member_inside = individual.m1
+        member_inside = individual.mbr
         member_outside = individual.m2
         m1_inside = True
 
