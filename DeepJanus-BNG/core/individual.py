@@ -44,8 +44,6 @@ class Individual(Generic[T]):
         start = timeit.default_timer()
 
         self.sparseness = problem.archive.evaluate_sparseness(self)
-        stop = timeit.default_timer()
-        log.info(f'Time to sparseness: {stop - start}; archive len: {len(problem.archive)}')
 
         unsafe_count = 0
         if not self.mbr.evaluate(problem.get_evaluator()):
@@ -59,6 +57,7 @@ class Individual(Generic[T]):
         # Map to quickly check if neighbors are all different from each other
         neighbors_hash = {}
 
+        # TODO: Parallelize? We could generate MAX_NEIGHBORS members at once and execute n of them in parallel
         confidence_level = problem.config.CONFIDENCE_LEVEL
         lower_bound: float | None = None
         upper_bound: float | None = None
@@ -83,12 +82,9 @@ class Individual(Generic[T]):
             # Calculate Wilson Confidence Interval based on the estimator
             lower_bound, upper_bound = self._calculate_wilson_ci(unsafe_count / evaluated, evaluated, confidence_level)
             curr_err = (upper_bound - lower_bound) / 2.
-            log.info(f'Neighbor {curr_neighbors} evaluated. CI is now [{lower_bound:.3f},{upper_bound:.3f}] '
-                     f'(err: +-{curr_err:.3f})')
+            log.info(f'CI is now [{lower_bound:.3f},{upper_bound:.3f}] (err: +-{curr_err:.3f})')
 
         self.distance_to_frontier = (lower_bound, upper_bound)
-        stop = timeit.default_timer()
-        log.info(f'Time to eval: {stop - start}')
 
         # Fitness function 'Quality of Individual'
         ff1 = self.sparseness
@@ -96,8 +92,8 @@ class Individual(Generic[T]):
         p_th = problem.config.PROBABILITY_THRESHOLD
         ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
 
-        stop = timeit.default_timer()
-        log.info(f'Total Time: {stop - start}')
+        minutes, seconds = divmod(timeit.default_timer() - start, 60)
+        log.info(f'Time for eval: {int(minutes):02}:{int(seconds):02}')
         log.info(f'Evaluated {self}')
         return ff1, ff2
 

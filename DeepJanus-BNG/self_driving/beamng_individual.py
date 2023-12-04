@@ -46,9 +46,9 @@ class BeamNGIndividual(Individual[BeamNGMember]):
             ax.set_title(f'{member}', fontsize=12)
             member.to_image(ax)
 
-        plot(self.mbr, gs[0, :])
+        plot(self.mbr, gs[0, 1])
         for i in range(nbh_size):
-            row = math.floor(i / num_cols)
+            row = math.floor(i / num_cols) + 1
             col = i % num_cols
             plot(self.neighbors[i], gs[row, col])
 

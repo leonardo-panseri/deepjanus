@@ -77,10 +77,10 @@ class SmartArchive(Archive):
                         log.debug('Candidate is better than archived')
                         self._add(candidate)
                         self.remove(closest_archived)
-                        log.info('Archive rem ', closest_archived)
+                        log.info(f'Archive rem {closest_archived}')
                     else:
                         log.debug('Archived is better than candidate')
 
     def _add(self, candidate):
         self.add(candidate)
-        log.info('Archive add ', candidate)
+        log.info(f'Archive add {candidate}')

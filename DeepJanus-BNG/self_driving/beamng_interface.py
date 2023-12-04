@@ -84,8 +84,9 @@ class BeamNGInterface:
         calls to step() are needed to actually simulate."""
         if not self._bng.connection:
             self._bng.open()
-            # Do not pipe BeamNG.tech stdout to Python stdout
-            self._bng.process.stdout = subprocess.DEVNULL
+            if self._bng.process:
+                # Do not pipe BeamNG.tech stdout to Python stdout
+                self._bng.process.stdout = subprocess.DEVNULL
 
         self.scenario = Scenario(LEVEL_NAME, f'{LEVEL_NAME}_scenario')
         if self.vehicle:

@@ -18,7 +18,7 @@ class Config:
         # Size of the population
         self.POP_SIZE = 12
         # Number of generations
-        self.NUM_GENERATIONS = 150
+        self.NUM_GENERATIONS = 100
 
         # Absolute value of bound for the mutation of a member
         self.MUTATION_EXTENT = 6.0
@@ -31,7 +31,6 @@ class Config:
         self.CONFIDENCE_LEVEL = 0.90
         # Target error for deciding when to stop neighborhood exploration
         self.TARGET_ERROR = 0.1
-        # TODO: Check if this is needed. We will have a fixed number of neighbors for all individuals given a target err
         # Maximum number of neighbors to generate for an individual
         self.MAX_NEIGHBORS = 20
 

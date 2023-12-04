@@ -1,4 +1,5 @@
 import random
+import timeit
 
 import numpy
 from deap import base
@@ -57,10 +58,10 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     # with the NSGA2 selection strategy explained above
     toolbox.register("offspring", tools.selTournamentDCD)
     # Method to update archive based on a new population
-    toolbox.register("update_archive", problem.archive.process_population)
+    toolbox.register("update_archive", problem.deap_update_archive)
     # Method to substitute individuals that are evolved from a seed that already generated a solution in the archive
     # with new individuals generated from another seed that has not generated a solution in the archive
-    toolbox.register("repopulate", problem.reseed)
+    toolbox.register("repopulate", problem.deap_repopulate)
 
     # Module to collect statistics for the fitness values of all individuals
     stats = tools.Statistics(lambda i: i.fitness.values)
@@ -75,65 +76,71 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     # DeepJanus algorithm
     # ####################
 
+    exp_start = timeit.default_timer()
+
+    # Customizable callback to execute actions at the start of the experiment
+    problem.on_experiment_start()
+
     # Generate initial population
     log.info("### Initializing population...")
     pop = toolbox.population(n=config.POP_SIZE)
 
-    # Evaluate the initial population
-    # Note: the fitness functions are all invalid before the first iteration since they have not been evaluated.
-    # individuals_to_eval = [ind for ind in pop if not ind.fitness.valid]
-    # TODO check if this is needed: problem.pre_evaluate_members(individuals_to_eval)
-    fitness = toolbox.map(toolbox.evaluate, pop)
-    for ind, fit in zip(pop, fitness):
-        ind.fitness.values = fit
-
-    # Initialize the archive
-    toolbox.update_archive(pop)
-
-    # This is just to assign the crowding distance to the individuals (no actual selection is done)
-    pop = toolbox.select(pop, len(pop))
-
-    # Calculate statistics for the initial generation
-    record = stats.compile(pop)
-    logbook.record(gen=0, evals=len(pop), **record)
-    log.info(f"Generation {0} stats:\n{logbook.stream}")
-
-    # Customizable callback to execute actions at each iteration (e.g., save data to file)
-    problem.on_iteration(0, pop, logbook)
-
     # Begin the generational process
-    for gen in range(1, config.NUM_GENERATIONS):
-        # Generate the offspring of the previous generation
-        offspring = [ind.clone() for ind in toolbox.offspring(pop, len(pop))]
+    for gen in range(config.NUM_GENERATIONS):
+        log.info(f"### Generation {gen}")
+        gen_start = timeit.default_timer()
 
-        # Mutate offspring
-        for ind in offspring:
-            toolbox.mutate(ind)
-            del ind.fitness.values
+        # Customizable callback to execute actions at the start of each iteration
+        problem.on_iteration_start(gen)
 
-        # Repopulate by substituting descendants of seeds that already generated a solution
-        toolbox.repopulate(pop)
+        if gen == 0:
+            # Evaluate the initial population
+            individuals_to_eval = pop
+        else:
+            # Generate the offspring of the previous generation
+            offspring = [ind.clone(problem.individual_creator) for ind in toolbox.offspring(pop, len(pop))]
 
-        # Evaluate the individuals
-        individuals_to_eval = offspring + pop
+            # Mutate offspring
+            for ind in offspring:
+                toolbox.mutate(ind)
+                del ind.fitness.values
+
+            # Repopulate by substituting descendants of seeds that already generated a solution
+            toolbox.repopulate(pop)
+
+            # Evaluate the individuals
+            individuals_to_eval = offspring + pop
+
         # TODO check if this is needed: problem.pre_evaluate_members(individuals_to_eval)
         fitness = toolbox.map(toolbox.evaluate, individuals_to_eval)
         for ind, fit in zip(individuals_to_eval, fitness):
             ind.fitness.values = fit
 
         # Update the archive
-        toolbox.update_archive(offspring + pop)
+        toolbox.update_archive(individuals_to_eval)
 
         # Select the next generation population
-        pop = toolbox.select(pop + offspring, config.POP_SIZE)
+        # For generation 0, this will only assign the crowding distance to the individuals (no actual selection is done)
+        pop = toolbox.select(individuals_to_eval, config.POP_SIZE)
 
         # Calculate statistics for the current generation
         record = stats.compile(pop)
         logbook.record(gen=gen, evals=len(individuals_to_eval), **record)
         log.info(f"Generation {gen} stats:\n{logbook.stream}")
 
-        # Customizable callback to execute actions at each iteration (e.g., save data to file)
-        problem.on_iteration(gen, pop, logbook)
+        # Customizable callback to execute actions at the end of each iteration
+        problem.on_iteration_end(record)
+
+        hours, remainder = divmod(timeit.default_timer() - gen_start, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        log.info(f"Time for generation {gen}: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
+
+    # Customizable callback to execute actions at the end of the experiment
+    problem.on_experiment_end(logbook)
+
+    hours, remainder = divmod(timeit.default_timer() - exp_start, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    log.info(f"Time for experiment: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
 
     return pop, logbook
 

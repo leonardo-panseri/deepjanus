@@ -37,6 +37,6 @@ class BeamNGConfig(Config):
         self.BEAMNG_FPS = 20
         # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks
         # Set to -1 to disable
-        self.BEAMNG_RESTART_AFTER = 22
+        self.BEAMNG_RESTART_AFTER = 20
         # Type of evaluator that runs the BeamNG simulations
         self.BEAMNG_EVALUATOR = self.EVALUATOR_LOCAL_BEAMNG
