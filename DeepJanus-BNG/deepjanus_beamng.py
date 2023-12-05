@@ -2,13 +2,14 @@ import json
 import os
 import signal
 import sys
+from datetime import datetime
 
 from matplotlib import pyplot as plt
 
 from core import nsga2
 from core.archive import SmartArchive
 from core.folders import FOLDERS, SeedStorage
-from core.log import get_logger, configure_logging
+from core.log import get_logger, log_setup
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
@@ -86,7 +87,9 @@ if __name__ == '__main__':
 
     cfg = BeamNGConfig()
     prob = BeamNGProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
-    configure_logging(FOLDERS.log_ini)
+    log_setup.use_ini(FOLDERS.log_ini)
+    log_setup.setup_log_file(prob.experiment_path
+                             .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
 
     def signal_handler(_, __):
         print('Run interrupted by user')

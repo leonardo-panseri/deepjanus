@@ -9,6 +9,7 @@ class LogSetup:
     """Class to configure logging for a DeepJanus instance"""
 
     def __init__(self):
+        self.base_logger = logging.getLogger("deepjanus")
         self._all_loggers: set[logging.Logger] = set()
         self._log_ini: IniFile | None = None
 
@@ -21,19 +22,24 @@ class LogSetup:
                                      r'[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s'))
         date_fmt = self._log_ini.get_option_or_create('config', 'date_format', '%H:%M:%S')
 
-        log = logging.getLogger("deepjanus")
         # If package 'rich' is installed, use its formatter
         try:
             from rich.logging import RichHandler
             terminal_handler = RichHandler()
-            log.addHandler(terminal_handler)
+            self.base_logger.addHandler(terminal_handler)
         except ModuleNotFoundError:
             terminal_handler = logging.StreamHandler()
             terminal_handler.setFormatter(logging.Formatter(fmt, date_fmt))
-            log.addHandler(terminal_handler)
+            self.base_logger.addHandler(terminal_handler)
 
         for logger in self._all_loggers:
             self._setup_log_level(logger)
+
+    def setup_log_file(self, file_path: Path):
+        """Configure DeepJanus logger to save logs to file."""
+        file_handler = logging.FileHandler(file_path, 'w')
+        file_handler.setFormatter(logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', '%H:%M:%S'))
+        self.base_logger.addHandler(file_handler)
 
     def _setup_log_level(self, logger: logging.Logger):
         if self._log_ini:
@@ -56,11 +62,6 @@ class LogSetup:
 
 
 log_setup = LogSetup()
-
-
-def configure_logging(ini_path: Path):
-    """Sets up the logger for DeepJanus to use configurations from the file."""
-    log_setup.use_ini(ini_path)
 
 
 def get_logger(logger_name_path: str):

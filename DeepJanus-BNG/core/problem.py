@@ -41,6 +41,7 @@ class Problem:
 
         self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
         delete_folder_recursively(self.experiment_path)
+        self.experiment_path.mkdir(parents=True, exist_ok=True)
 
         self.current_generation_path: Path | None = None
         self.current_population_path: Path | None = None
@@ -98,7 +99,6 @@ class Problem:
 
     def on_experiment_start(self):
         """Callback to execute actions at the start of the experiment."""
-        self.experiment_path.mkdir(parents=True, exist_ok=True)
         self.experiment_path.joinpath('config.json').write_text(json.dumps(self.config.__dict__))
 
     def on_experiment_end(self, logbook: tools.Logbook):
