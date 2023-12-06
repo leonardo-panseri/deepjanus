@@ -117,7 +117,3 @@ def main(args):
     plot_dataset(np.concatenate((data[2], data[3])))
     model = build_model(args)
     train_model(model, args, *data)
-
-
-if __name__ == '__main__':
-    main()

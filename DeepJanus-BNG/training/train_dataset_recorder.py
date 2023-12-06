@@ -85,7 +85,3 @@ def main(iterations):
 
         log.info('Running simulation...')
         run_sim(BeamNGConfig(), rd)
-
-
-if __name__ == '__main__':
-    main(12)
