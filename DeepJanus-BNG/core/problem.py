@@ -57,6 +57,7 @@ class Problem:
 
         # Need to use the DEAP creator to instantiate new individual
         individual: Individual = self.individual_creator(seed.clone(), seed)
+        individual.mutate(self)
 
         log.info(f'Generated {individual}')
         return individual
@@ -84,7 +85,6 @@ class Problem:
             archived_seeds = [i.seed for i in self.archive]
             for i in range(len(population)):
                 if population[i].seed in archived_seeds:
-                    # TODO: It should be at least mutated, and it should be generated from a non-archived seed
                     ind1 = self.deap_generate_individual()
                     log.info(f'Reseed rem {population[i]}')
                     population[i] = ind1

@@ -1,12 +1,22 @@
 import json
 import math
+import multiprocessing
+import threading
+import timeit
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from matplotlib import pyplot as plt
 
+from core.folders import FOLDERS
 from core.individual import Individual
 from core.log import get_logger
+from self_driving.beamng_config import BeamNGConfig
+from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
+
+if TYPE_CHECKING:
+    from self_driving.beamng_problem import BeamNGProblem
 
 log = get_logger(__file__)
 
@@ -71,3 +81,164 @@ class BeamNGIndividual(Individual[BeamNGMember]):
         ind: BeamNGIndividual = individual_creator(mbr, seed, neighbors, d['name'])
         ind.distance_to_frontier = d['frontier_dist']
         return ind
+
+    def evaluate(self, problem: 'BeamNGProblem') -> tuple[float, float]:
+        num_parallel = problem.config.PARALLEL_EVALS
+
+        # Check if we need to parallelize
+        if num_parallel < 2:
+            return super().evaluate(problem)
+
+        log.info(f'Starting evaluation of {self}')
+        start = timeit.default_timer()
+
+        self.sparseness = problem.archive.evaluate_sparseness(self)
+
+        unsafe_count = 0
+        # Evaluate original member
+        if not self.mbr.evaluate(problem.get_evaluator()):
+            unsafe_count += 1
+
+        curr_neighbors = 0
+        max_neighbors = problem.config.MAX_NEIGHBORS
+        curr_err = 0
+        desired_error = problem.config.TARGET_ERROR
+
+        # Empty map
+        self.neighbors_hash = {}
+
+        confidence_level = problem.config.CONFIDENCE_LEVEL
+        lower_bound: float | None = None
+        upper_bound: float | None = None
+
+        cond_exploration_complete = threading.Condition()
+        pool = multiprocessing.Pool(problem.config.PARALLEL_EVALS)
+
+        def neighbor_eval_completed(result: tuple[BeamNGMember, int]):
+            neighbor, index = result
+            # Log here, as logs from other processes won't be shown
+            log.info(f'{neighbor} BeamNG evaluation completed')
+
+            # Make sure that only one result can be processed at a time
+            with cond_exploration_complete:
+                nonlocal unsafe_count, curr_neighbors, lower_bound, upper_bound, curr_err
+                if not neighbor.satisfy_requirements:
+                    unsafe_count += 1
+
+                curr_neighbors += 1
+                self.neighbors.append(neighbor)
+
+                # Number of evaluated members, all generated neighbors plus the original member
+                evaluated = curr_neighbors + 1
+                # Calculate Wilson Confidence Interval based on the estimator
+                lower_bound, upper_bound = self._calculate_wilson_ci(unsafe_count / evaluated, evaluated,
+                                                                     confidence_level)
+                curr_err = (upper_bound - lower_bound) / 2.
+                log.info(f'Evaluated {curr_neighbors}. '
+                         f'CI is now [{lower_bound:.3f},{upper_bound:.3f}] (err: +-{curr_err:.3f})')
+
+                # If desired precision is reached or the maximum number of neighbors is reached, stop exploration
+                if curr_err <= desired_error or curr_neighbors == max_neighbors:
+                    pool.terminate()
+                    cond_exploration_complete.notify()
+                    return
+
+                # If the maximum number of neighbors have not been reached generate a new one and evaluate it
+                if curr_neighbors < max_neighbors:
+                    new_index = index + problem.config.PARALLEL_EVALS
+                    parallel_index = new_index % problem.config.PARALLEL_EVALS
+                    new_neighbor = self.generate_neighbor(problem, new_index)
+                    log.info(f'{new_neighbor} BeamNG evaluation start')
+                    pool.apply_async(eval_neighbor,
+                                     (new_neighbor, new_index, ports[parallel_index], userpaths[parallel_index]),
+                                     callback=neighbor_eval_completed, error_callback=log.error)
+
+        # Start evaluation of first n neighbors
+        ports = []
+        userpaths = []
+        for i in range(problem.config.PARALLEL_EVALS):
+            # Generate port where the instance of the simulator will run
+            port = problem.config.BEAMNG_PORT + i
+            ports.append(port)
+            # Generate user content folder that the instance of the simulator will use
+            # Instances need to have different user folders to avoid conflicts in accessing files
+            userpath = FOLDERS.simulations.joinpath('parallel', f'{i}', '0.30')
+            userpaths.append(str(userpath))
+            # Set the simulation to run without online features to prevent problems
+            cloud_settings = userpath.joinpath('settings', 'cloud')
+            cloud_settings.mkdir(parents=True, exist_ok=True)
+            cloud_settings.joinpath('settings.json').write_text(json.dumps({
+                "onlineFeatures": "disable",
+                "telemetry": "disable"
+            }))
+
+            # Create a config with the settings for the instance of the simulator
+            cfg = BeamNGConfig()
+            cfg.BEAMNG_PORT = ports[i]
+            cfg.BEAMNG_USER_DIR = userpaths[i]
+
+            # Launch the instance of the simulator
+            bng = BeamNGInterface(cfg)
+            bng.beamng_open()
+            bng.beamng_disconnect()
+
+            # Generate the initial neighbor that the instance of the simulator will evaluate
+            # and submit it to one process of the pool
+            nbr = self.generate_neighbor(problem, i)
+            log.info(f'{nbr} BeamNG evaluation start')
+            pool.apply_async(eval_neighbor, (nbr, i, ports[i], userpaths[i]),
+                             callback=neighbor_eval_completed, error_callback=lambda e: log.error(e))
+
+        # Wait for neighborhood exploration to end
+        with cond_exploration_complete:
+            cond_exploration_complete.wait()
+
+        # Close all the instances of BeamNG used for neighborhood evaluation, but the main one
+        for i in range(1, problem.config.PARALLEL_EVALS):
+            cfg = BeamNGConfig()
+            cfg.BEAMNG_PORT = ports[i]
+            bng = BeamNGInterface(cfg)
+            bng.beamng_open(launch=False)
+            bng.beamng_close()
+
+        pool.join()
+
+        self.distance_to_frontier = (lower_bound, upper_bound)
+
+        # Fitness function 'Quality of Individual'
+        ff1 = self.sparseness
+        # Fitness function 'Distance to Frontier'
+        p_th = problem.config.PROBABILITY_THRESHOLD
+        ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
+
+        minutes, seconds = divmod(timeit.default_timer() - start, 60)
+        log.info(f'Time for eval: {int(minutes):02}:{int(seconds):02}')
+        log.info(f'Evaluated {self}')
+        return ff1, ff2
+
+
+def eval_neighbor(neighbor: BeamNGMember, index: int, port: int, userpath: str):
+    """Function to execute in a subprocess to evaluate a neighbor."""
+    from self_driving.beamng_evaluator import BeamNGLocalEvaluator
+    # from core.log import log_setup
+    # from core.folders import FOLDERS
+
+    # log_setup.use_ini(FOLDERS.log_ini)
+
+    # print(f'nbr{index+1} evaluated on port {port}')
+    # import logging
+    # from rich.logging import RichHandler
+    # h = RichHandler(logging.INFO)
+    # h.setFormatter(logging.Formatter(rf'NBR{index+1} %(message)s'))
+    # logging.getLogger('beamngpy').addHandler(h)
+
+    # Create a config with settings to connect to the respective instance of the simulator
+    cfg = BeamNGConfig()
+    cfg.BEAMNG_PORT = port
+    cfg.BEAMNG_USER_DIR = userpath
+    # Evaluate the neighbor
+    evaluator = BeamNGLocalEvaluator(cfg)
+    neighbor.satisfy_requirements = evaluator.evaluate(neighbor)
+    # Close connection with the simulator
+    evaluator.bng.beamng_disconnect()
+    return neighbor, index

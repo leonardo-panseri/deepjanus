@@ -10,7 +10,6 @@ from beamngpy.sensors import Camera
 from core.folders import SeedStorage
 from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_map_utils import LEVEL_NAME, map_utils
 from self_driving.beamng_vehicles import BeamNGVehicle
 from self_driving.beamng_roads import BeamNGRoad
@@ -78,15 +77,20 @@ class BeamNGInterface:
 
         return self.camera.collect_ad_hoc_poll_request(req_id)['colour'].convert('RGB')
 
+    def beamng_open(self, launch=True):
+        """Opens the connection to the simulator. If parameter 'launch' is true, launches a new instance
+        of BeamNG and connects to it."""
+        if not self._bng.connection:
+            self._bng.open(launch=launch)
+            if self._bng.process:
+                # Do not pipe BeamNG.tech stdout to Python stdout
+                self._bng.process.stdout = subprocess.DEVNULL
+
     def beamng_bring_up(self):
         """Connects to the simulator, opening a new instance if necessary. Then, sets up the scenario (road, vehicle,
         and sensors) and loads it into the simulation. Note that the scenario will be in a paused state and subsequent
         calls to step() are needed to actually simulate."""
-        if not self._bng.connection:
-            self._bng.open()
-            if self._bng.process:
-                # Do not pipe BeamNG.tech stdout to Python stdout
-                self._bng.process.stdout = subprocess.DEVNULL
+        self.beamng_open()
 
         self.scenario = Scenario(LEVEL_NAME, f'{LEVEL_NAME}_scenario')
         if self.vehicle:
@@ -128,6 +132,15 @@ class BeamNGInterface:
                 self.beamng_close()
                 self.simulation_count = 0
 
+    def beamng_disconnect(self):
+        """Disconnects from the simulator."""
+        if self._bng:
+            try:
+                self._bng.disconnect()
+            except Exception as ex:
+                log.warning('Cannot disconnect from BeamNG instance:')
+                traceback.print_exception(type(ex), ex, ex.__traceback__)
+
     def beamng_close(self):
         """Closes the simulator."""
         if self._bng:
@@ -141,6 +154,8 @@ class BeamNGInterface:
 
 
 if __name__ == '__main__':
+    from self_driving.beamng_member import BeamNGMember
+
     brewer = BeamNGInterface(BeamNGConfig())
 
     seed_storage = SeedStorage('population_HQ1')

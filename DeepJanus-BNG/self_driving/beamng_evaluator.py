@@ -1,6 +1,7 @@
 import os
 import time
 import traceback
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -9,11 +10,13 @@ from core.folders import FOLDERS, SeedStorage
 from core.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
-from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
 from training.udacity_utils import preprocess
+
+if TYPE_CHECKING:
+    from self_driving.beamng_member import BeamNGMember
 
 log = get_logger(__file__)
 
@@ -32,7 +35,7 @@ class BeamNGLocalEvaluator(Evaluator):
         self.model = None
         self.speed_limit = config.MAX_SPEED
 
-    def evaluate(self, member: BeamNGMember, max_attempts=20) -> bool:
+    def evaluate(self, member: 'BeamNGMember', max_attempts=20) -> bool:
         attempt = 0
         while True:
             attempt += 1
@@ -157,6 +160,8 @@ class BeamNGLocalEvaluator(Evaluator):
 
 
 if __name__ == '__main__':
+    from self_driving.beamng_member import BeamNGMember
+
     inst = BeamNGLocalEvaluator(BeamNGConfig())
 
     seed_storage = SeedStorage('population_HQ1')

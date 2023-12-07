@@ -24,6 +24,10 @@ class BeamNGConfig(Config):
         # Maximum speed that the car is allowed to drive (in km/h)
         self.MAX_SPEED = 25
 
+        # Number of parallel instances of BeamNG to use to evaluate a neighborhood
+        # Set to 0 to disable parallel evaluation
+        self.PARALLEL_EVALS = 3
+
         # BeamNG user data directory
         self.BEAMNG_USER_DIR = os.path.join(os.getenv('LOCALAPPDATA'), 'BeamNG.tech', '0.30')
         # Host for the BeamNG instance

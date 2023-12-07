@@ -111,7 +111,6 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
             # Evaluate the individuals
             individuals_to_eval = offspring + pop
 
-        # TODO check if this is needed: problem.pre_evaluate_members(individuals_to_eval)
         fitness = toolbox.map(toolbox.evaluate, individuals_to_eval)
         for ind, fit in zip(individuals_to_eval, fitness):
             ind.fitness.values = fit

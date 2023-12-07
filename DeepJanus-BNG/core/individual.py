@@ -34,9 +34,23 @@ class Individual(Generic[T]):
         self.sparseness: float | None = None
         self.distance_to_frontier: tuple[float, float] | None = None
 
+        # Map to quickly check if neighbors are all different from each other
+        self.neighbors_hash = {}
+
     def clone(self, individual_creator) -> 'Individual':
         """Creates a deep copy of the individual using the provided DEAP creator."""
         raise NotImplemented()
+
+    def generate_neighbor(self, problem: 'Problem', index: int) -> Member:
+        """Generate a neighbor of this individual different from all other neighbors already generated."""
+        equal_nbr = True
+        nbr: Member | None = None
+        while equal_nbr:
+            nbr = self.mbr.clone(f'nbr{index + 1}_{self.name.replace("ind", "")}')
+            nbr.mutate(problem.get_mutator())
+            equal_nbr = nbr.member_hash() in self.neighbors_hash
+        self.neighbors_hash[nbr.member_hash()] = True
+        return nbr
 
     def evaluate(self, problem: 'Problem') -> tuple[float, float]:
         """Evaluates the individual and returns the two fitness values."""
@@ -46,6 +60,7 @@ class Individual(Generic[T]):
         self.sparseness = problem.archive.evaluate_sparseness(self)
 
         unsafe_count = 0
+        # Evaluate original member
         if not self.mbr.evaluate(problem.get_evaluator()):
             unsafe_count += 1
 
@@ -54,22 +69,15 @@ class Individual(Generic[T]):
         curr_err = 1
         desired_error = problem.config.TARGET_ERROR
 
-        # Map to quickly check if neighbors are all different from each other
-        neighbors_hash = {}
+        # Empty map
+        self.neighbors_hash = {}
 
-        # TODO: Parallelize? We could generate MAX_NEIGHBORS members at once and execute n of them in parallel
         confidence_level = problem.config.CONFIDENCE_LEVEL
         lower_bound: float | None = None
         upper_bound: float | None = None
         while curr_neighbors < max_neighbors and curr_err > desired_error:
             # Generate a neighbor different from all other neighbors
-            equal_nbr = True
-            nbr: Member | None = None
-            while equal_nbr:
-                nbr = self.mbr.clone(f'nbr{curr_neighbors + 1}_{self.name.replace("ind", "")}')
-                nbr.mutate(problem.get_mutator())
-                equal_nbr = nbr.member_hash() in neighbors_hash
-            neighbors_hash[nbr.member_hash()] = True
+            nbr: Member = self.generate_neighbor(problem, curr_neighbors)
             self.neighbors.append(nbr)
 
             if not nbr.evaluate(problem.get_evaluator()):
