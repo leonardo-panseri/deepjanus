@@ -13,7 +13,7 @@ from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.simulation_data import SimulationData, SimulationDataRecord
 from self_driving.simulation_data_collector import SimulationDataCollector
-from training.udacity_utils import preprocess
+from training.training_utils import preprocess
 
 if TYPE_CHECKING:
     from self_driving.beamng_member import BeamNGMember
@@ -86,7 +86,7 @@ class BeamNGLocalEvaluator(Evaluator):
             self.bng.beamng_step(1)
 
             if not self.model:
-                from keras.src.saving.saving_api import load_model
+                from keras.models import load_model
                 self.model = load_model(self.model_file)
 
             iterations_count = 1000

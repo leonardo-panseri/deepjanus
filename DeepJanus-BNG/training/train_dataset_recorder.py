@@ -78,10 +78,12 @@ def run_sim(config: BeamNGConfig, road: BeamNGRoad):
 
 
 def main(iterations):
-    for _ in range(iterations):
-        log.info('Generating road...')
+    for i in range(iterations):
+        log.info(f'Generating road {i}...')
         cnt_nodes, smp_nodes, _ = RoadGenerator(num_control_nodes=20).generate()
         rd = BeamNGRoad(smp_nodes, cnt_nodes)
 
         log.info('Running simulation...')
         run_sim(BeamNGConfig(), rd)
+
+        log.info(f'Done collecting data for road {i}')

@@ -26,7 +26,7 @@ class BeamNGConfig(Config):
 
         # Number of parallel instances of BeamNG to use to evaluate a neighborhood
         # Set to 0 to disable parallel evaluation
-        self.PARALLEL_EVALS = 3
+        self.PARALLEL_EVALS = 2
 
         # BeamNG user data directory
         self.BEAMNG_USER_DIR = os.path.join(os.getenv('LOCALAPPDATA'), 'BeamNG.tech', '0.30')

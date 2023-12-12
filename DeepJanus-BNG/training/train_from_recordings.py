@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
@@ -10,7 +9,7 @@ import os
 
 from core.folders import FOLDERS
 from training.batch_generator import Generator
-from training.udacity_utils import INPUT_SHAPE
+from training.training_utils import INPUT_SHAPE
 
 np.random.seed(0)
 
@@ -44,6 +43,7 @@ def load_data(args):
                 exit()
 
     try:
+        from sklearn.model_selection import train_test_split
         x_train, x_valid, y_train, y_valid = train_test_split(x, y, test_size=args.test_size, random_state=0)
     except TypeError:
         print("Missing header to csv files")
@@ -74,7 +74,7 @@ def build_model(args):
     return model
 
 
-def train_model(model, args, x_train, x_valid, y_train, y_valid):
+def train_model(model: Sequential, args, x_train, x_valid, y_train, y_valid):
     """Trains the model."""
     os.makedirs('trained_models', exist_ok=True)
     checkpoint = ModelCheckpoint('trained_models/self-driving-car-{epoch:03d}-2020.h5',

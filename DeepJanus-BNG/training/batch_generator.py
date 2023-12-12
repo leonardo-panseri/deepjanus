@@ -1,6 +1,6 @@
 from keras.utils import Sequence
 import numpy as np
-from training.udacity_utils import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS, load_image, augment, preprocess
+from training.training_utils import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS, load_image, augment, preprocess
 
 
 class Generator(Sequence):
@@ -25,9 +25,9 @@ class Generator(Sequence):
             steering_angle = steering_angles[i]
             # argumentation
             if self.is_training and np.random.rand() < 0.6:
-                image, steering_angle = augment(self.args.data_dir, center, left, right, steering_angle)
+                image, steering_angle = augment(center, left, right, steering_angle)
             else:
-                image = load_image(self.args.data_dir, center)
+                image = load_image(center)
             # add the image and steering angle to the batch
             images[i] = preprocess(image)
             steers[i] = steering_angle

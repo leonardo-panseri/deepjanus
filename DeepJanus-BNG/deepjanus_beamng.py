@@ -69,7 +69,6 @@ if __name__ == '__main__':
 
     parser_train = subparsers.add_parser('train', description='Lane-keeping assist system behavioral cloning '
                                                               'training program')
-    parser_train.add_argument('-d', help='data directory', dest='data_dir', type=str, default='.')
     parser_train.add_argument('-t', help='test size fraction', dest='test_size', type=float, default=0.2)
     parser_train.add_argument('-k', help='drop out probability', dest='keep_prob', type=float, default=0.5)
     parser_train.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=200)
@@ -113,5 +112,5 @@ if __name__ == '__main__':
         generate_seeds(prob, prob_lq)
     else:
         # Disable TensorFlow logs
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '4'
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
         execute_deepjanus(prob)

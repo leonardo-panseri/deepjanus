@@ -8,13 +8,10 @@ IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
 INPUT_SHAPE = (IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
 
 
-def load_image(data_dir, image_file):
+def load_image(image_path):
     """Load RGB images from a file."""
-    image_dir = data_dir
-    local_path = "/".join(image_file.split("/")[-4:-1]) + "/" + image_file.split("/")[-1]
-    img_path = "{0}/{1}".format(image_dir, local_path)
     try:
-        return mpimg.imread(img_path)
+        return mpimg.imread(image_path)
     except FileNotFoundError as e:
         raise e
 
@@ -42,14 +39,14 @@ def preprocess(image):
     return image
 
 
-def choose_image(data_dir, center, left, right, steering_angle):
+def choose_image(center, left, right, steering_angle):
     """Randomly choose an image from the center, left or right, and adjust the steering angle."""
     choice = np.random.choice(3)
     if choice == 0:
-        return load_image(data_dir, left), steering_angle + 0.2
+        return load_image(left), steering_angle + 0.2
     elif choice == 1:
-        return load_image(data_dir, right), steering_angle - 0.2
-    return load_image(data_dir, center), steering_angle
+        return load_image(right), steering_angle - 0.2
+    return load_image(center), steering_angle
 
 
 def random_flip(image, steering_angle):
@@ -106,10 +103,10 @@ def random_brightness(image):
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
 
-def augment(data_dir, center, left, right, steering_angle, range_x=100, range_y=10):
+def augment(center, left, right, steering_angle, range_x=100, range_y=10):
     """Generates an augmented image and adjust steering angle (the steering angle is associated with
     the center image)."""
-    image, steering_angle = choose_image(data_dir, center, left, right, steering_angle)
+    image, steering_angle = choose_image(center, left, right, steering_angle)
     image, steering_angle = random_flip(image, steering_angle)
     image, steering_angle = random_translate(image, steering_angle, range_x, range_y)
     image = random_shadow(image)
@@ -117,24 +114,20 @@ def augment(data_dir, center, left, right, steering_angle, range_x=100, range_y=
     return image, steering_angle
 
 
-def batch_generator(data_dir, image_paths, steering_angles, batch_size, is_training):
-    """Generates training image give image paths and associated steering angles."""
-    images = np.empty([batch_size, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS])
-    steers = np.empty(batch_size)
-    while True:
-        i = 0
-        for index in np.random.permutation(image_paths.shape[0]):
-            center, left, right = image_paths[index]
-            steering_angle = steering_angles[index]
-            # augmentation
-            if is_training and np.random.rand() < 0.6:
-                image, steering_angle = augment(data_dir, center, left, right, steering_angle)
-            else:
-                image = load_image(data_dir, center) 
-            # add the image and steering angle to the batch
-            images[i] = preprocess(image)
-            steers[i] = steering_angle
-            i += 1
-            if i == batch_size:
-                break
-        yield images, steers
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+
+    data = r'..\data\training_recordings\2023-12-08_19-30-32'
+    ct = data + r'\z00003_0.09701476693753461_center.jpg'
+    lt = data + r'\z00003_0.09701476693753461_left.jpg'
+    rt = data + r'\z00003_0.09701476693753461_right.jpg'
+    img, angle = augment(ct, lt, rt, 0.08609010383969817)
+    img = preprocess(img)
+    ax1.imshow(img)
+
+    img2 = load_image(ct)
+    img2 = preprocess(img2)
+    ax2.imshow(img2)
+
+    fig.show()
