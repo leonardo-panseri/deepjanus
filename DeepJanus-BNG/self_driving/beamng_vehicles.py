@@ -114,16 +114,16 @@ class BeamNGVehicleCameras:
     def setup_cameras(self, bng: BeamNGpy, direction=(0, -1, 0), fov=120, resolution=(320, 160), y=-2.2, z=1.294):
         """Creates cameras in the simulation. Note that the simulation must be up and running for this to
         succeed."""
-        self.cam_center = Camera('cam_center', bng, self.vehicle, pos=(-0.388, y, z),
+        self.cam_center = Camera('cam_center', bng, self.vehicle, pos=(.0, y, z),
                                  dir=direction, field_of_view_y=fov, resolution=resolution,
                                  requested_update_time=0.01, is_using_shared_memory=True, is_render_annotations=False,
                                  is_render_depth=False, is_streaming=True)
         if self.all_cameras:
-            self.cam_left = Camera('cam_left', bng, self.vehicle, pos=(-1.682, y, z),
+            self.cam_left = Camera('cam_left', bng, self.vehicle, pos=(1.382, y, z),
                                    dir=direction, field_of_view_y=fov, resolution=resolution,
                                    requested_update_time=0.01, is_using_shared_memory=True,
                                    is_render_annotations=False, is_render_depth=False, is_streaming=True)
-            self.cam_right = Camera('cam_right',  bng, self.vehicle, pos=(0.518, y, z),
+            self.cam_right = Camera('cam_right',  bng, self.vehicle, pos=(-1.3, y, z),
                                     dir=direction, field_of_view_y=fov, resolution=resolution,
                                     requested_update_time=0.01, is_using_shared_memory=True,
                                     is_render_annotations=False, is_render_depth=False, is_streaming=True)
