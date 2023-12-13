@@ -112,15 +112,31 @@ class BeamNGIndividual(Individual[BeamNGMember]):
         upper_bound: float | None = None
 
         cond_exploration_complete = threading.Condition()
-        pool = multiprocessing.Pool(problem.config.PARALLEL_EVALS)
+        # Put arguments for each worker in a multiprocess queue
+        # Each worker will initialize itself with a different set of arguments from the queue
+        args_queue = multiprocessing.Queue()
+        ports = []
+        userpaths = []
+        for i in range(problem.config.PARALLEL_EVALS):
+            # Generate port where the instance of the simulator will run
+            port = problem.config.BEAMNG_PORT + i
+            ports.append(port)
+            # Generate user content folder that the instance of the simulator will use
+            # Instances need to have different user folders to avoid conflicts in accessing files
+            userpath = FOLDERS.simulations.joinpath('beamng_parallel', f'{i}', '0.30')
+            userpath = str(userpath)
+            userpaths.append(userpath)
+
+            args_queue.put((i, port, userpath))
+        pool = multiprocessing.Pool(problem.config.PARALLEL_EVALS, init_worker, (args_queue, eval_neighbor))
 
         def neighbor_eval_completed(result: tuple[BeamNGMember, int]):
-            neighbor, index = result
-            # Log here, as logs from other processes won't be shown
-            log.info(f'{neighbor} BeamNG evaluation completed')
-
             # Make sure that only one result can be processed at a time
             with cond_exploration_complete:
+                neighbor, index = result
+                # Log here, as logs from other processes won't be shown
+                log.info(f'{neighbor} BeamNG evaluation completed')
+                
                 nonlocal unsafe_count, curr_neighbors, lower_bound, upper_bound, curr_err
                 if not neighbor.satisfy_requirements:
                     unsafe_count += 1
@@ -146,48 +162,21 @@ class BeamNGIndividual(Individual[BeamNGMember]):
                 # If the maximum number of neighbors have not been reached generate a new one and evaluate it
                 if curr_neighbors < max_neighbors:
                     new_index = index + problem.config.PARALLEL_EVALS
-                    parallel_index = new_index % problem.config.PARALLEL_EVALS
                     new_neighbor = self.generate_neighbor(problem, new_index)
                     log.info(f'{new_neighbor} BeamNG evaluation start')
-                    pool.apply_async(eval_neighbor,
-                                     (new_neighbor, new_index, ports[parallel_index], userpaths[parallel_index]),
-                                     callback=neighbor_eval_completed, error_callback=log.error)
+                    pool.apply_async(eval_neighbor, (new_neighbor, new_index),
+                                     callback=neighbor_eval_completed,
+                                     error_callback=lambda e: log.error(f'[NBR{new_index+1}] %s', e))
 
         # Start evaluation of first n neighbors
-        ports = []
-        userpaths = []
         for i in range(problem.config.PARALLEL_EVALS):
-            # Generate port where the instance of the simulator will run
-            port = problem.config.BEAMNG_PORT + i
-            ports.append(port)
-            # Generate user content folder that the instance of the simulator will use
-            # Instances need to have different user folders to avoid conflicts in accessing files
-            userpath = FOLDERS.simulations.joinpath('parallel', f'{i}', '0.30')
-            userpaths.append(str(userpath))
-            # Set the simulation to run without online features to prevent problems
-            cloud_settings = userpath.joinpath('settings', 'cloud')
-            cloud_settings.mkdir(parents=True, exist_ok=True)
-            cloud_settings.joinpath('settings.json').write_text(json.dumps({
-                "onlineFeatures": "disable",
-                "telemetry": "disable"
-            }))
-
-            # Create a config with the settings for the instance of the simulator
-            cfg = BeamNGConfig()
-            cfg.BEAMNG_PORT = ports[i]
-            cfg.BEAMNG_USER_DIR = userpaths[i]
-
-            # Launch the instance of the simulator
-            bng = BeamNGInterface(cfg)
-            bng.beamng_open()
-            bng.beamng_disconnect()
-
             # Generate the initial neighbor that the instance of the simulator will evaluate
             # and submit it to one process of the pool
             nbr = self.generate_neighbor(problem, i)
             log.info(f'{nbr} BeamNG evaluation start')
-            pool.apply_async(eval_neighbor, (nbr, i, ports[i], userpaths[i]),
-                             callback=neighbor_eval_completed, error_callback=lambda e: log.error(e))
+            pool.apply_async(eval_neighbor, (nbr, i),
+                             callback=neighbor_eval_completed,
+                             error_callback=lambda e: log.error(f'[NBR{i+1}] %s', e))
 
         # Wait for neighborhood exploration to end
         with cond_exploration_complete:
@@ -217,28 +206,50 @@ class BeamNGIndividual(Individual[BeamNGMember]):
         return ff1, ff2
 
 
-def eval_neighbor(neighbor: BeamNGMember, index: int, port: int, userpath: str):
-    """Function to execute in a subprocess to evaluate a neighbor."""
+def init_worker(args_queue: multiprocessing.Queue, eval_fun):
+    parallel_index, port, userpath = args_queue.get()
+
+    import logging
+    from logging import FileHandler
+    from pathlib import Path
+    log_file = Path(userpath).parent.joinpath('sim.log')
+    h = FileHandler(log_file, 'w')
+    h.setFormatter(logging.Formatter(rf'[%(asctime)s %(levelname)s] %(message)s', '%H:%M:%S'))
+    bng_log = logging.getLogger('beamngpy')
+    bng_log.setLevel(logging.INFO)
+    bng_log.addHandler(h)
+
+    bng_log.info(f'Starting parallel BeamNG instance {parallel_index} on port {port}')
+    
     from self_driving.beamng_evaluator import BeamNGLocalEvaluator
-    # from core.log import log_setup
-    # from core.folders import FOLDERS
+    from self_driving.beamng_config import BeamNGConfig
+    # Set the simulation to run without online features to prevent problems
+    cloud_settings = Path(userpath).joinpath('settings', 'cloud')
+    cloud_settings.mkdir(parents=True, exist_ok=True)
+    cloud_settings.joinpath('settings.json').write_text(json.dumps({
+        "onlineFeatures": "disable",
+        "telemetry": "disable"
+    }))
 
-    # log_setup.use_ini(FOLDERS.log_ini)
-
-    # print(f'nbr{index+1} evaluated on port {port}')
-    # import logging
-    # from rich.logging import RichHandler
-    # h = RichHandler(logging.INFO)
-    # h.setFormatter(logging.Formatter(rf'NBR{index+1} %(message)s'))
-    # logging.getLogger('beamngpy').addHandler(h)
-
-    # Create a config with settings to connect to the respective instance of the simulator
+    # Create a config with the settings for the instance of the simulator
     cfg = BeamNGConfig()
     cfg.BEAMNG_PORT = port
     cfg.BEAMNG_USER_DIR = userpath
-    # Evaluate the neighbor
+
+    # Create the evaluator and launch the instance of the simulator
     evaluator = BeamNGLocalEvaluator(cfg)
+    evaluator.bng = BeamNGInterface(cfg)
+    evaluator.bng.beamng_open()
+
+    # Save a reference to the evaluator in the function executed by the worker
+    eval_fun.evaluator = evaluator
+
+
+def eval_neighbor(neighbor: BeamNGMember, index: int):
+    """Function to execute in a subprocess to evaluate a neighbor."""
+    # Retrieve the evaluator instance created by the worker initialization function
+    evaluator = eval_neighbor.evaluator
     neighbor.satisfy_requirements = evaluator.evaluate(neighbor)
-    # Close connection with the simulator
-    evaluator.bng.beamng_disconnect()
+    import logging
+    logging.getLogger('beamngpy').info(f"================== Evaluation {index} done ==================")
     return neighbor, index
