@@ -113,4 +113,9 @@ if __name__ == '__main__':
     else:
         # Disable TensorFlow logs
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+        import warnings
+        warnings.filterwarnings('ignore', category=UserWarning)
+        import tensorflow.python.util.module_wrapper as mw
+        mw._PER_MODULE_WARNING_LIMIT = 0
+
         execute_deepjanus(prob)

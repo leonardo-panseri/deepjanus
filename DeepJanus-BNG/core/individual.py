@@ -141,7 +141,7 @@ class Individual(Generic[T]):
         raise NotImplemented()
 
     def __str__(self):
-        frontier_eval = 'na'
+        frontier_eval = '[na]'
         if self.distance_to_frontier:
             lb = f'{self.distance_to_frontier[0]:.3f}'
             ub = f'{self.distance_to_frontier[1]:.3f}'

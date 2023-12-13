@@ -35,7 +35,7 @@ class Config:
         self.MAX_NEIGHBORS = 20
 
         # Flag for turning on/off collection of extended data about simulations
-        self.SAVE_SIM_DATA = True
+        self.SAVE_SIM_DATA = False
         # Unique identifier for a simulation, can use '$(id)' for an incremental int identifier
         self.SIM_NAME = 'beamng_local_runner/sim_$(id)'
 
