@@ -209,6 +209,14 @@ class BeamNGIndividual(Individual[BeamNGMember]):
 def init_worker(args_queue: multiprocessing.Queue, eval_fun):
     parallel_index, port, userpath = args_queue.get()
 
+    # Disable TensorFlow logs
+    import os
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+    import warnings
+    warnings.filterwarnings('ignore', category=UserWarning)
+    import tensorflow.python.util.module_wrapper as mw
+    mw._PER_MODULE_WARNING_LIMIT = 0
+
     import logging
     from logging import FileHandler
     from pathlib import Path
