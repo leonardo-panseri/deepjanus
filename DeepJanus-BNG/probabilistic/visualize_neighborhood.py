@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from core.folders import FOLDERS, FolderStorage
+from deepjanus.folders import FOLDERS, FolderStorage
 from self_driving.beamng_member import BeamNGMember
 
 # Folder containing the serialized results of the experiment that we want to examine

@@ -1,7 +1,7 @@
 # Workaround for keeping type hinting while avoiding circular imports
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from core.member import Member
+    from .member import Member
 
 
 class Evaluator:

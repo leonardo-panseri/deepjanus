@@ -5,7 +5,11 @@ import shutil
 from pathlib import Path
 from time import sleep
 
-from core.log import get_logger
+from .log import get_logger
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .config import Config
 
 log = get_logger(__file__)
 
@@ -35,13 +39,12 @@ def delete_folder_recursively(path: str | Path):
 class Folders:
     """Class containing paths to all folders needed by DeepJanus"""
 
-    def __init__(self, core_folder: os.PathLike):
+    def __init__(self, root_folder: str):
         """
         Initializes paths based on the location of core module.
-        :param core_folder: path to the folder containing the DeepJanus core module
+        :param core_folder: path to the root folder of the project
         """
-        self.lib: Path = Path(core_folder).resolve()
-        self.root: Path = self.lib.joinpath('..').resolve()
+        self.root: Path = Path(root_folder).resolve()
         self.data: Path = self.root.joinpath('data').absolute()
         self.log_ini: Path = self.data.joinpath('log.ini').absolute()
         self.member_seeds: Path = self.data.joinpath('member_seeds').absolute()
@@ -49,9 +52,6 @@ class Folders:
         self.simulations: Path = self.data.joinpath('simulations').absolute()
         self.trained_models_colab: Path = self.data.joinpath('trained_models_colab').absolute()
         self.training_recordings: Path = self.data.joinpath('training_recordings').absolute()
-
-
-FOLDERS: Folders = Folders(os.path.dirname(__file__))
 
 
 class FolderStorage:
@@ -116,5 +116,5 @@ class FolderStorage:
 class SeedStorage(FolderStorage):
     """Shorthand for creating a FolderStorage for a seed pool"""
 
-    def __init__(self, subfolder: str):
-        super().__init__(FOLDERS.member_seeds.joinpath(subfolder), 'seed{}.json')
+    def __init__(self, config: 'Config', folder: str):
+        super().__init__(config.FOLDERS.member_seeds.joinpath(folder), 'seed{}.json')

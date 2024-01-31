@@ -1,7 +1,7 @@
 import numpy as np
 
-from core.archive import Archive
-from core.individual import Individual
+from .archive import Archive
+from .individual import Individual
 
 
 def calculate_seed_radius(solution: Archive):

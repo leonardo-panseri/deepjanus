@@ -17,7 +17,7 @@ class SimulationDataCollector:
         self.oob_monitor = OutOfBoundsMonitor(RoadPolygon(self.bng.road), self.bng.vehicle)
 
         self.states: SimulationDataRecords = []
-        self.simulation_data: SimulationData = SimulationData(simulation_name)
+        self.simulation_data: SimulationData = SimulationData(bng.config.FOLDERS.simulations.joinpath(simulation_name))
         self.simulation_data.set(self.bng.params, self.bng.road, self.states)
         self.simulation_data.clean()
 

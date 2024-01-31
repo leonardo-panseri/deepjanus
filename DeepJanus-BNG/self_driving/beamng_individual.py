@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING
 
 from matplotlib import pyplot as plt
 
-from core.folders import FOLDERS
-from core.individual import Individual
-from core.log import get_logger
+from deepjanus.individual import Individual
+from deepjanus.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_member import BeamNGMember
@@ -19,6 +18,8 @@ if TYPE_CHECKING:
     from self_driving.beamng_problem import BeamNGProblem
 
 log = get_logger(__file__)
+# Need to have this here for parallel evaluations
+PROJECT_ROOT = ""
 
 
 class BeamNGIndividual(Individual[BeamNGMember]):
@@ -89,6 +90,9 @@ class BeamNGIndividual(Individual[BeamNGMember]):
         if num_parallel < 2:
             return super().evaluate(problem)
 
+        global PROJECT_ROOT
+        PROJECT_ROOT = problem.config.PROJECT_ROOT
+
         log.info(f'Starting evaluation of {self}')
         start = timeit.default_timer()
 
@@ -123,7 +127,7 @@ class BeamNGIndividual(Individual[BeamNGMember]):
             ports.append(port)
             # Generate user content folder that the instance of the simulator will use
             # Instances need to have different user folders to avoid conflicts in accessing files
-            userpath = FOLDERS.simulations.joinpath('beamng_parallel', f'{i}', '0.30')
+            userpath = problem.config.FOLDERS.simulations.joinpath('beamng_parallel', f'{i}', '0.30')
             userpath = str(userpath)
             userpaths.append(userpath)
 
@@ -184,7 +188,7 @@ class BeamNGIndividual(Individual[BeamNGMember]):
 
         # Close all the instances of BeamNG used for neighborhood evaluation, but the main one
         for i in range(1, problem.config.PARALLEL_EVALS):
-            cfg = BeamNGConfig()
+            cfg = BeamNGConfig(PROJECT_ROOT)
             cfg.BEAMNG_PORT = ports[i]
             bng = BeamNGInterface(cfg)
             bng.beamng_open(launch=False)
@@ -240,7 +244,7 @@ def init_worker(args_queue: multiprocessing.Queue, eval_fun):
     }))
 
     # Create a config with the settings for the instance of the simulator
-    cfg = BeamNGConfig()
+    cfg = BeamNGConfig(PROJECT_ROOT)
     cfg.BEAMNG_PORT = port
     cfg.BEAMNG_USER_DIR = userpath
 

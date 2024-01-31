@@ -6,8 +6,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional, List
 
-from core.archive import SmartArchive
-from core.folders import FOLDERS, FolderStorage
+from deepjanus.archive import SmartArchive
+from deepjanus.folders import FOLDERS, FolderStorage
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_individual import BeamNGIndividual
 from self_driving.beamng_member import BeamNGMember

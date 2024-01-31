@@ -7,7 +7,7 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 
 from self_driving.beamng_roads import BeamNGRoad
-from core.folders import FOLDERS, delete_folder_recursively
+from deepjanus.folders import delete_folder_recursively
 
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',
                                   'steering_input', 'brake', 'brake_input', 'throttle', 'throttle_input',
@@ -40,9 +40,8 @@ class SimulationData:
     f_road = 'road'
     f_records = 'records'
 
-    def __init__(self, simulation_name: str):
-        self.name = simulation_name
-        self.path_root: Path = FOLDERS.simulations.joinpath(simulation_name)
+    def __init__(self, path: Path):
+        self.path_root = path
         self.path_json: Path = self.path_root.joinpath('simulation.full.json')
         self.path_partial: Path = self.path_root.joinpath('simulation.partial.tsv')
         self.path_road_img: Path = self.path_root.joinpath('road')
@@ -51,8 +50,6 @@ class SimulationData:
         self.road: BeamNGRoad | None = None
         self.states: SimulationDataRecord | None = None
         self.info: SimulationInfo | None = None
-
-        assert len(self.name) >= 3, 'the simulation name must be a string of at least 3 character'
 
     @property
     def n(self):
@@ -131,10 +128,3 @@ class SimulationData:
         """Records the end of the simulation."""
         self.info.end_time = str(datetime.datetime.now())
         self.info.success = success
-
-
-if __name__ == '__main__':
-    for s in (sim.parts[-2:] for sim in FOLDERS.simulations.joinpath('beamng_nvidia_runner').glob('*')):
-        sim1 = SimulationData('/'.join(s)).load()
-        if len(sim1.states) == 0:
-            print(sim1.name)

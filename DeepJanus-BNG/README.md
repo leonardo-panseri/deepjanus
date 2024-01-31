@@ -10,7 +10,8 @@ You need to have the following software installed on your machine:
 - BeamNG.tech simulator v0.30.5.0\
 A free version of the BeamNG simulator for research purposes can be found at https://register.beamng.tech/
 - Python 3.11
-- Python libraries listed in `requirements.txt`\
+- Python libraries listed in `requirements.txt`
+- DeepJanus core module, it can be installed from source with `pip install ../DeepJanus`\
 To easily install the dependencies, we suggest to create a dedicated virtual environment and run the command: `pip install -r requirements.txt`
 
 ## BeamNG Simulator Installation ##

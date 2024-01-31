@@ -2,8 +2,8 @@ import json
 import os
 import shutil
 
-from core.folders import delete_folder_recursively
-from core.log import get_logger
+from deepjanus.folders import delete_folder_recursively
+from deepjanus.log import get_logger
 
 # Workaround for keeping type hinting while avoiding circular imports
 from typing import TYPE_CHECKING
@@ -110,5 +110,5 @@ class MapUtils:
 map_utils = MapUtils()
 
 if __name__ == '__main__':
-    cfg = BeamNGConfig()
+    cfg = BeamNGConfig(os.path.dirname(os.path.dirname(__file__)))
     map_utils.install_map_if_needed(cfg.BEAMNG_USER_DIR)

@@ -1,7 +1,7 @@
 shapely
 similaritymeasures
 tensorflow==2.15.0
-keras==2.15.0
+tf-keras==2.15.0
 deap
 opencv-python
 beamngpy==1.27.1

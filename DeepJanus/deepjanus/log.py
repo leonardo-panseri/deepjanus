@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-from core.ini_file import IniFile
+from .ini_file import IniFile
 
 
 class LogSetup:

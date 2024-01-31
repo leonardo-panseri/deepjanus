@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from core.evaluator import Evaluator
-from core.folders import FOLDERS, SeedStorage
-from core.log import get_logger
+from deepjanus.evaluator import Evaluator
+from deepjanus.folders import SeedStorage
+from deepjanus.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_roads import BeamNGRoad
@@ -28,7 +28,7 @@ class BeamNGLocalEvaluator(Evaluator):
         self.config = config
         self.bng: BeamNGInterface | None = None
 
-        self.model_file = str(FOLDERS.trained_models_colab.joinpath(config.MODEL_FILE))
+        self.model_file = str(config.FOLDERS.trained_models_colab.joinpath(config.MODEL_FILE))
         if not os.path.exists(self.model_file):
             raise Exception(f'File {self.model_file} does not exist!')
 
@@ -86,8 +86,8 @@ class BeamNGLocalEvaluator(Evaluator):
             self.bng.beamng_step(1)
 
             if not self.model:
-                from keras.models import load_model
-                self.model = load_model(self.model_file)
+                import tensorflow as tf
+                self.model = tf.saved_model.load(self.model_file)
 
             iterations_count = 1000
             idx = 0
@@ -142,10 +142,10 @@ class BeamNGLocalEvaluator(Evaluator):
         try:
             image = np.asarray(image)
 
-            image = preprocess(image)
+            image = preprocess(image).astype(dtype=np.float32)
             image = np.array([image])
 
-            steering_angle = float(self.model.predict(image, batch_size=1, verbose=0))
+            steering_angle = float(self.model(image).numpy())
 
             speed = car_state.vel_kmh
             if speed > self.speed_limit:
@@ -162,9 +162,10 @@ class BeamNGLocalEvaluator(Evaluator):
 if __name__ == '__main__':
     from self_driving.beamng_member import BeamNGMember
 
-    inst = BeamNGLocalEvaluator(BeamNGConfig())
+    cfg = BeamNGConfig(os.path.dirname(__file__))
+    inst = BeamNGLocalEvaluator(cfg)
 
-    seed_storage = SeedStorage('population_HQ1')
+    seed_storage = SeedStorage(cfg, 'population_HQ1')
     for i in range(12):
         mbr = BeamNGMember.from_dict(seed_storage.load_json_by_index(i))
         mbr.clear_evaluation()

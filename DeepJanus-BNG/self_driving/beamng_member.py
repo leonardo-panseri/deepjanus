@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
-from core.member import Member
+from deepjanus.member import Member
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.shapely_roads import RoadGenerationBoundary, RoadPolygon
 from self_driving.points import Point4D

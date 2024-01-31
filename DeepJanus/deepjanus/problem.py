@@ -5,16 +5,16 @@ from pathlib import Path
 import numpy
 from deap import tools
 
-from core.config import Config
-from core.archive import Archive
-from core.evaluator import Evaluator
-from core.folders import FOLDERS, delete_folder_recursively
-from core.individual import Individual
-from core.log import get_logger
-from core.member import Member
-from core.metrics import calculate_seed_radius, calculate_diameter
-from core.mutator import Mutator
-from core.seed_pool import SeedPoolFolder, SeedPoolRandom
+from .config import Config, SeedPoolStrategy
+from .archive import Archive
+from .evaluator import Evaluator
+from .folders import delete_folder_recursively
+from .individual import Individual
+from .log import get_logger
+from .member import Member
+from .metrics import calculate_seed_radius, calculate_diameter
+from .mutator import Mutator
+from .seed_pool import SeedPoolFolder, SeedPoolRandom
 
 log = get_logger(__file__)
 
@@ -25,11 +25,11 @@ class Problem:
         self.config: Config = config
         self.archive = archive
 
-        if self.config.SEED_POOL_STRATEGY == self.config.GEN_RANDOM:
+        if self.config.SEED_POOL_STRATEGY == SeedPoolStrategy.GEN_RANDOM:
             self.seed_pool = SeedPoolRandom(self, config.POP_SIZE)
-        elif self.config.SEED_POOL_STRATEGY == self.config.GEN_RANDOM_SEEDED:
+        elif self.config.SEED_POOL_STRATEGY == SeedPoolStrategy.GEN_RANDOM_SEEDED:
             self.seed_pool = SeedPoolFolder(self, False, config.SEED_FOLDER)
-        elif self.config.SEED_POOL_STRATEGY == self.config.GEN_SEQUENTIAL_SEEDED:
+        elif self.config.SEED_POOL_STRATEGY == SeedPoolStrategy.GEN_SEQUENTIAL_SEEDED:
             self.seed_pool = SeedPoolFolder(self, True, config.SEED_FOLDER)
         else:
             raise ValueError(f"Seed pool strategy {self.config.SEED_POOL_STRATEGY} is invalid")
@@ -39,7 +39,7 @@ class Problem:
         self._evaluator: Evaluator | None = None
         self._mutator: Mutator | None = None
 
-        self.experiment_path = FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
+        self.experiment_path = config.FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
         delete_folder_recursively(self.experiment_path)
         self.experiment_path.mkdir(parents=True, exist_ok=True)
 
@@ -99,7 +99,9 @@ class Problem:
 
     def on_experiment_start(self):
         """Callback to execute actions at the start of the experiment."""
-        self.experiment_path.joinpath('config.json').write_text(json.dumps(self.config.__dict__))
+        config = dict(self.config.__dict__)
+        del config['FOLDERS']
+        self.experiment_path.joinpath('config.json').write_text(json.dumps(config))
 
     def on_experiment_end(self, logbook: tools.Logbook):
         """Callback to execute actions at the end of the experiment."""

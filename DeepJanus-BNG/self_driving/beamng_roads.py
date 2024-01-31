@@ -4,7 +4,7 @@ import uuid
 import numpy as np
 from matplotlib import pyplot as plt
 
-from core.log import get_logger
+from deepjanus.log import get_logger
 from self_driving.beamng_vehicles import BeamNGPose
 from self_driving.curve_interpolation import catmull_rom
 from self_driving.points import to_3d_point, Point3D, Point4D, Point2D

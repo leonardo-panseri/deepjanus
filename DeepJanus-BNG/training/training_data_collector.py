@@ -4,15 +4,17 @@ from datetime import datetime
 
 from matplotlib import pyplot as plt
 
-from core.folders import FOLDERS
 from self_driving.beamng_roads import BeamNGRoad
 from self_driving.points import Point2D
 from self_driving.shapely_roads import RoadPolygon
 from self_driving.oob_monitor import OutOfBoundsMonitor
 from self_driving.beamng_vehicles import BeamNGVehicle
+from self_driving.folders import Folders
 
 CSV_HEADER = ['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed']
 CSVEntry = namedtuple('CSVEntry', CSV_HEADER)
+
+FOLDERS = Folders(os.path.dirname(os.path.dirname(__file__)))
 
 
 class TrainingDataCollector:

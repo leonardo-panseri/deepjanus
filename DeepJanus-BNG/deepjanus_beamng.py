@@ -6,10 +6,10 @@ from datetime import datetime
 
 from matplotlib import pyplot as plt
 
-from core import nsga2
-from core.archive import SmartArchive
-from core.folders import FOLDERS, SeedStorage
-from core.log import get_logger, log_setup
+from deepjanus import nsga2
+from deepjanus.archive import SmartArchive
+from deepjanus.folders import SeedStorage
+from deepjanus.log import get_logger, log_setup
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_member import BeamNGMember
 from self_driving.beamng_problem import BeamNGProblem
@@ -28,7 +28,7 @@ def execute_deepjanus(problem: BeamNGProblem):
 def generate_seeds(problem1: BeamNGProblem, problem2: BeamNGProblem | None, folder_name='generated_seeds', quantity=12):
     good_members_found = 0
     attempts = 0
-    storage = SeedStorage(folder_name)
+    storage = SeedStorage(problem1.config, folder_name)
 
     def is_outside_frontier(member: BeamNGMember, problem: BeamNGProblem):
         member.clear_evaluation()
@@ -84,9 +84,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    cfg = BeamNGConfig()
+    cfg = BeamNGConfig(os.path.dirname(__file__))
     prob = BeamNGProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
-    log_setup.use_ini(FOLDERS.log_ini)
+    log_setup.use_ini(cfg.FOLDERS.log_ini)
     log_setup.setup_log_file(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         from training import train_dataset_recorder
         train_dataset_recorder.main(args.iterations)
     elif args.seeds:
-        cfg_lq = BeamNGConfig()
+        cfg_lq = BeamNGConfig(os.path.dirname(__file__))
         cfg_lq.BEAMNG_PORT += 1
         cfg_lq.MODEL_FILE = 'self-driving-car-4600'
         prob_lq = BeamNGProblem(cfg_lq, SmartArchive(cfg.ARCHIVE_THRESHOLD))

@@ -1,13 +1,13 @@
 import os.path
 import random
 
-from core.folders import SeedStorage
-from core.member import Member
+from .folders import SeedStorage
+from .member import Member
 
 # Workaround for keeping type hinting while avoiding circular imports
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from core.problem import Problem
+    from .problem import Problem
 
 
 class SeedPool:
@@ -60,7 +60,7 @@ class SeedPoolFolder(SeedPool):
 
     def __init__(self, problem: 'Problem', sequential: bool, folder_name: str):
         super().__init__(problem, sequential)
-        self.storage = SeedStorage(folder_name)
+        self.storage = SeedStorage(problem.config, folder_name)
         self.file_path_list = self.storage.all_files()
         assert (len(self.file_path_list)) > 0
         self.cache: dict[str, Member] = {}

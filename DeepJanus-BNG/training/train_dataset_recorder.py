@@ -1,6 +1,6 @@
 import numpy as np
 
-from core.log import get_logger
+from deepjanus.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_interface import BeamNGInterface
 from self_driving.beamng_roads import BeamNGRoad

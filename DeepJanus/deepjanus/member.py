@@ -1,6 +1,6 @@
-from core.evaluator import Evaluator
-from core.log import get_logger
-from core.mutator import Mutator
+from .evaluator import Evaluator
+from .log import get_logger
+from .mutator import Mutator
 
 log = get_logger(__file__)
 

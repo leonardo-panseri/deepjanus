@@ -7,11 +7,13 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers import Lambda, Conv2D, Dropout, Dense, Flatten
 import os
 
-from core.folders import FOLDERS
 from training.batch_generator import Generator
 from training.training_utils import INPUT_SHAPE
+from self_driving.folders import Folders
 
 np.random.seed(0)
+
+FOLDERS = Folders(os.path.dirname(os.path.dirname(__file__)))
 
 
 def load_data(args):

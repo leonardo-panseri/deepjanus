@@ -5,11 +5,11 @@ from statistics import NormalDist
 from typing import TYPE_CHECKING
 from typing import TypeVar, Generic
 
-from core.log import get_logger
-from core.member import Member
+from .log import get_logger
+from .member import Member
 
 if TYPE_CHECKING:
-    from core.problem import Problem
+    from .problem import Problem
 
 log = get_logger(__file__)
 T = TypeVar('T', bound=Member)

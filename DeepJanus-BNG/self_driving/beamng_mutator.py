@@ -1,6 +1,6 @@
 import random
 
-from core.mutator import Mutator
+from deepjanus.mutator import Mutator
 from self_driving.beamng_member import BeamNGMember
 
 

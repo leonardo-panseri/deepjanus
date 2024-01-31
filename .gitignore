@@ -1,0 +1,4 @@
+.idea/
+__pycache__/
+DeepJanus/deepjanus.egg-info/
+DeepJanus/build/

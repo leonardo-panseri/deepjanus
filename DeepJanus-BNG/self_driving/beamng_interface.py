@@ -7,8 +7,8 @@ from beamngpy import BeamNGpy, Scenario
 from beamngpy.logging import BNGError, BNGDisconnectedError
 from beamngpy.sensors import Camera
 
-from core.folders import SeedStorage
-from core.log import get_logger
+from deepjanus.folders import SeedStorage
+from deepjanus.log import get_logger
 from self_driving.beamng_config import BeamNGConfig
 from self_driving.beamng_map_utils import LEVEL_NAME, map_utils
 from self_driving.beamng_vehicles import BeamNGVehicle
@@ -156,9 +156,10 @@ class BeamNGInterface:
 if __name__ == '__main__':
     from self_driving.beamng_member import BeamNGMember
 
-    brewer = BeamNGInterface(BeamNGConfig())
+    cfg = BeamNGConfig(os.path.dirname(__file__))
+    brewer = BeamNGInterface(cfg)
 
-    seed_storage = SeedStorage('population_HQ1')
+    seed_storage = SeedStorage(cfg, 'population_HQ1')
     member = BeamNGMember.from_dict(seed_storage.load_json_by_index(0))
 
     brewer.setup_road(member.road)
