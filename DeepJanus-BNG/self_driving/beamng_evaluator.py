@@ -28,7 +28,7 @@ class BeamNGLocalEvaluator(Evaluator):
         self.config = config
         self.bng: BeamNGInterface | None = None
 
-        self.model_file = str(config.FOLDERS.trained_models_colab.joinpath(config.MODEL_FILE))
+        self.model_file = str(config.FOLDERS.models.joinpath(config.MODEL_FILE))
         if not os.path.exists(self.model_file):
             raise Exception(f'File {self.model_file} does not exist!')
 

@@ -6,6 +6,8 @@ This tool is developed in Python on top of the DEAP evolutionary computation fra
 The less powerful graphics card we have successfully tested our tool with is an NVIDIA GeForce 940MX.
 
 ## Dependencies ##
+DeepJanus-BNG runs on Windows 10/11.
+
 You need to have the following software installed on your machine:
 - BeamNG.tech simulator v0.30.5.0\
 A free version of the BeamNG simulator for research purposes can be found at https://register.beamng.tech/

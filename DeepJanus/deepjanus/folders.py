@@ -47,10 +47,10 @@ class Folders:
         self.root: Path = Path(root_folder).resolve()
         self.data: Path = self.root.joinpath('data').absolute()
         self.log_ini: Path = self.data.joinpath('log.ini').absolute()
-        self.member_seeds: Path = self.data.joinpath('member_seeds').absolute()
+        self.seeds: Path = self.data.joinpath('seeds').absolute()
         self.experiments: Path = self.data.joinpath('experiments').absolute()
         self.simulations: Path = self.data.joinpath('simulations').absolute()
-        self.trained_models_colab: Path = self.data.joinpath('trained_models_colab').absolute()
+        self.models: Path = self.data.joinpath('models').absolute()
         self.training_recordings: Path = self.data.joinpath('training_recordings').absolute()
 
 
@@ -117,4 +117,4 @@ class SeedStorage(FolderStorage):
     """Shorthand for creating a FolderStorage for a seed pool"""
 
     def __init__(self, config: 'Config', folder: str):
-        super().__init__(config.FOLDERS.member_seeds.joinpath(folder), 'seed{}.json')
+        super().__init__(config.FOLDERS.seeds.joinpath(folder), 'seed{}.json')

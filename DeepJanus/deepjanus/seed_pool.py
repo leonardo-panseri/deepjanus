@@ -2,12 +2,15 @@ import os.path
 import random
 
 from .folders import SeedStorage
+from .log import get_logger
 from .member import Member
 
 # Workaround for keeping type hinting while avoiding circular imports
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .problem import Problem
+
+log = get_logger(__file__)
 
 
 class SeedPool:
@@ -62,8 +65,10 @@ class SeedPoolFolder(SeedPool):
         super().__init__(problem, sequential)
         self.storage = SeedStorage(problem.config, folder_name)
         self.file_path_list = self.storage.all_files()
-        assert (len(self.file_path_list)) > 0
         self.cache: dict[str, Member] = {}
+
+        if len(self.file_path_list) == 0:
+            log.warning(f'Seed folder "{folder_name}" is empty')
 
     def __len__(self):
         return len(self.file_path_list)
