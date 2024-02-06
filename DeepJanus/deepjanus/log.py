@@ -32,21 +32,14 @@ class LogSetup:
             terminal_handler.setFormatter(logging.Formatter(fmt, date_fmt))
             self.base_logger.addHandler(terminal_handler)
 
-        for logger in self._all_loggers:
-            self._setup_log_level(logger)
+        self.base_logger.setLevel(self._log_ini
+                                  .get_option_or_create('config', 'level', 'INFO'))
 
     def setup_log_file(self, file_path: Path):
         """Configure DeepJanus logger to save logs to file."""
         file_handler = logging.FileHandler(file_path, 'w')
         file_handler.setFormatter(logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', '%H:%M:%S'))
         self.base_logger.addHandler(file_handler)
-
-    def _setup_log_level(self, logger: logging.Logger):
-        if self._log_ini:
-            level = self._log_ini.get_option_or_create('log_levels', logger.name, 'INFO')
-        else:
-            level = 'INFO'
-        logger.setLevel(level)
 
     def get_logger(self, logger_name_path):
         """
@@ -57,7 +50,6 @@ class LogSetup:
         logger_name = os.path.basename(logger_name_path).replace(".py", "")
         log = logging.getLogger(f'deepjanus.{logger_name}')
         self._all_loggers.add(log)
-        self._setup_log_level(log)
         return log
 
 
