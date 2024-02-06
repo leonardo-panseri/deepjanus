@@ -2,3 +2,8 @@
 __pycache__/
 DeepJanus/deepjanus.egg-info/
 DeepJanus/build/
+venv/
+**/data/experiments/
+
+*.log
+log.ini
