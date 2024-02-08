@@ -21,6 +21,10 @@ def closest_elements(elements_set: set[T], obj: T, distance_fun: Callable[[T, T]
 class Archive(set):
     """Base class representing the archive of non-dominated individuals"""
 
+    def __init__(self, target_error: float):
+        super().__init__()
+        self.TARGET_ERROR = target_error
+
     def process_population(self, pop: Iterable[Individual]):
         """
         Processes a new population to decide which individuals to store in the archive.
@@ -34,30 +38,38 @@ class Archive(set):
         if len(elements) == 0:
             return 1.0
 
+        # TODO: Should this be normalized?
         closest_element_dist = closest_elements(elements, ind, lambda a, b: a.distance(b))[0]
         return closest_element_dist[1]
+
+    def find_candidates(self, population: Iterable[Individual]):
+        candidates = []
+        for individual in population:
+            # TODO: Is this ok? Do we need a threshold for distance_to_frontier?
+            error = (individual.distance_to_frontier[1] - individual.distance_to_frontier[0]) / 2.
+            if error <= self.TARGET_ERROR:
+                candidates.append(individual)
+        return candidates
 
 
 class GreedyArchive(Archive):
     """Archive that stores every individual at the frontier"""
 
     def process_population(self, pop: Iterable[Individual]):
-        for candidate in pop:
-            # TODO: Check if a threshold for distance_to_frontier is needed for considering adding a candidate
+        for candidate in self.find_candidates(pop):
             self.add(candidate)
 
 
 class SmartArchive(Archive):
     """Archive that stores only individuals that are distant at least a configurable threshold from each other"""
 
-    def __init__(self, archive_threshold):
-        super().__init__()
+    def __init__(self, target_error: float, archive_threshold: float):
+        super().__init__(target_error)
         self.ARCHIVE_THRESHOLD = archive_threshold
 
     def process_population(self, pop: Iterable[Individual]):
-        for candidate in pop:
+        for candidate in self.find_candidates(pop):
             assert candidate.distance_to_frontier, candidate.name
-            # TODO: Check if a threshold for distance_to_frontier is needed for considering adding a candidate
             if len(self) == 0:
                 self._add(candidate)
                 log.debug('Add initial individual')
