@@ -13,7 +13,7 @@ class LogSetup:
         self._all_loggers: set[logging.Logger] = set()
         self._log_ini: IniFile | None = None
 
-    def use_ini(self, ini_path):
+    def setup_console_log(self, ini_path):
         """Set the INI file from which to load the logging configurations."""
         self._log_ini = IniFile(ini_path)
 
@@ -35,7 +35,7 @@ class LogSetup:
         self.base_logger.setLevel(self._log_ini
                                   .get_option_or_create('config', 'level', 'INFO'))
 
-    def setup_log_file(self, file_path: Path):
+    def setup_file_log(self, file_path: Path):
         """Configure DeepJanus logger to save logs to file."""
         file_handler = logging.FileHandler(file_path, 'w')
         file_handler.setFormatter(logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', '%H:%M:%S'))
