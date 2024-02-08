@@ -1,9 +1,12 @@
+import json
 import math
 import timeit
 from statistics import NormalDist
 # Workaround for keeping type hinting while avoiding circular imports
 from typing import TYPE_CHECKING
 from typing import TypeVar, Generic
+
+import matplotlib.pyplot as plt
 
 from .log import get_logger
 from .member import Member
@@ -37,9 +40,13 @@ class Individual(Generic[T]):
         # Map to quickly check if neighbors are all different from each other
         self.neighbors_hash = {}
 
-    def clone(self, individual_creator) -> 'Individual':
+    def clone(self, individual_creator):
         """Creates a deep copy of the individual using the provided DEAP creator."""
-        raise NotImplemented()
+        # Need to use the DEAP creator to instantiate new individual
+        # Do not pass self.name, as we use this to create the offspring
+        res = individual_creator(self.mbr.clone(), self.seed)
+        log.info(f'Cloned to {res} from {self}')
+        return res
 
     def generate_neighbor(self, problem: 'Problem', index: int) -> Member:
         """Generate a neighbor of this individual different from all other neighbors already generated."""
@@ -127,18 +134,56 @@ class Individual(Generic[T]):
         """Calculates the distance with another individual."""
         return self.mbr.distance(i2.mbr)
 
-    def save(self, folder):
+    def save(self, folder, neighborhood_image: bool = True):
         """Saves a human-interpretable representation of the individual on disk."""
-        raise NotImplemented()
+        # Save a JSON representation of the individual
+        json_path = folder.joinpath(self.name + '.json')
+        json_path.write_text(json.dumps(self.to_dict(), indent=2))
+
+        # Save an image of member and all neighbors
+        if neighborhood_image:
+            nbh_size = len(self.neighbors)
+
+            num_cols = 3
+            num_rows = math.ceil(nbh_size / num_cols) + 1
+            fig = plt.figure()
+            gs = fig.add_gridspec(num_rows, num_cols)
+            fig.set_size_inches(15, 10)
+
+            def plot(member: Member, pos: plt.SubplotSpec):
+                ax = fig.add_subplot(pos)
+                ax.set_title(f'{member}', fontsize=12)
+                member.to_image(ax)
+
+            plot(self.mbr, gs[0, 1])
+            for i in range(nbh_size):
+                row = math.floor(i / num_cols) + 1
+                col = i % num_cols
+                plot(self.neighbors[i], gs[row, col])
+
+            fig.suptitle(f'Neighborhood size = {nbh_size}; Frontier distance = {self.distance_to_frontier}')
+            fig.savefig(folder.joinpath(self.name + '_neighborhood.svg'))
+            plt.close(fig)
 
     def to_dict(self) -> dict:
         """Serializes the individual into a dictionary that can be easily stored on disk."""
-        raise NotImplemented()
+        return {'name': self.name,
+                'frontier_dist': self.distance_to_frontier,
+                'archive_sparseness': self.sparseness,
+                'mbr': self.mbr.to_dict(),
+                'neighbors': [nbh.to_dict() for nbh in self.neighbors],
+                'seed': self.seed.to_dict() if self.seed else None}
 
     @classmethod
-    def from_dict(cls, d, individual_creator) -> 'Individual':
+    def from_dict(cls, d, individual_creator):
         """Builds an individual from its serialized representation using the provided DEAP creator."""
-        raise NotImplemented()
+        mbr = T.from_dict(d['mbr'])
+        neighbors = [T.from_dict(nbh) for nbh in d['neighbors']]
+        seed = T.from_dict(d['seed']) if d['seed'] else None
+        ind = individual_creator(mbr, seed, neighbors, d['name'])
+        ind.distance_to_frontier = d['frontier_dist']
+        ind.sparseness = d['archive_sparseness']
+        return ind
 
     def __str__(self):
         frontier_eval = '[na]'

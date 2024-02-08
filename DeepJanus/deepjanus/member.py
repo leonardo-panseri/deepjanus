@@ -52,6 +52,10 @@ class Member:
         """Returns a 2D point representing the member, useful for visualization."""
         raise NotImplemented()
 
+    def to_image(self, ax):
+        """Plots a human-interpretable representation of the member on a matplotlib axes."""
+        raise NotImplemented()
+
     def to_dict(self) -> dict:
         """Returns a serialized version of the member that can be saved to file."""
         raise NotImplemented()

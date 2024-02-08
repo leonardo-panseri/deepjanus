@@ -76,7 +76,6 @@ class BeamNGMember(Member):
         return hashlib.sha256(str([tuple(node) for node in self.road.control_nodes]).encode('UTF-8')).hexdigest()
 
     def to_image(self, ax: Axis = None):
-        """Plots the shape of the road for the member in a matplotlib figure."""
         fig: Figure | None = None
         if not ax:
             fig, ax = plt.subplots()
