@@ -19,7 +19,7 @@ To easily install the dependencies, we suggest to create a dedicated virtual env
 ### Input
 * A trained model in a format supported by Keras, the default one is in the folder `data/models`
 * The seeds used for the input generation, the default ones are in the folder `data/seeds`
-* `deepjanus_bng/beamng_config.py` containing the configuration of the tool
+* `deepjanus_mnist/mnist_config.py` containing the configuration of the tool
 
 ### Output
 When the run is finished, the tool produces the following outputs in the `data/experiments/<experiment_name>` folder:
