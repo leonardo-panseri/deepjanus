@@ -1,4 +1,5 @@
 import json
+import random
 from json import JSONEncoder
 from pathlib import Path
 
@@ -51,9 +52,10 @@ class Problem:
         """Returns the class that represents individuals for this problem."""
         raise NotImplemented()
 
-    def deap_generate_individual(self) -> Individual:
+    def deap_generate_individual(self, seed: Member = None) -> Individual:
         """Generates a new individual from the seed pool."""
-        seed = self.seed_pool.get_seed()
+        if seed is None:
+            seed = self.seed_pool.get_seed()
 
         # Need to use the DEAP creator to instantiate new individual
         individual: Individual = self.individual_creator(seed.clone(), seed)
@@ -83,10 +85,16 @@ class Problem:
          a solution in the archive."""
         if len(self.archive) > 0:
             archived_seeds = [i.seed for i in self.archive]
+
+            non_archived_seeds = list(self.archive - set(archived_seeds))
+            if len(non_archived_seeds) == 0:
+                return
+
             for i in range(len(population)):
                 if population[i].seed in archived_seeds:
-                    ind1 = self.deap_generate_individual()
-                    log.info(f'Reseed rem {population[i]}')
+                    seed = random.choice(non_archived_seeds)
+                    ind1 = self.deap_generate_individual(seed)
+                    log.info(f'Repopulation: substitute {population[i]} with {ind1}')
                     population[i] = ind1
 
     def member_class(self):
