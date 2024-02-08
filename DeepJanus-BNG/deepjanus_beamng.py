@@ -86,8 +86,8 @@ if __name__ == '__main__':
 
     cfg = BeamNGConfig(os.path.dirname(__file__))
     prob = BeamNGProblem(cfg, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
-    log_setup.use_ini(cfg.FOLDERS.log_ini)
-    log_setup.setup_log_file(prob.experiment_path
+    log_setup.setup_console_log(cfg.FOLDERS.log_ini)
+    log_setup.setup_file_log(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
 
     def signal_handler(_, __):

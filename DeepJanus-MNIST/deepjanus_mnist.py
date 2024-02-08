@@ -44,9 +44,9 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--seeds', help='generate seeds from a MNIST subset', dest='seed_dataset', type=str)
 
     cfg = MNISTConfig(os.path.dirname(__file__))
-    prob = MNISTProblem(cfg, SmartArchive(cfg.ARCHIVE_THRESHOLD))
-    log_setup.use_ini(cfg.FOLDERS.log_ini)
-    log_setup.setup_log_file(prob.experiment_path
+    prob = MNISTProblem(cfg, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
+    log_setup.setup_console_log(cfg.FOLDERS.log_ini)
+    log_setup.setup_file_log(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
 
     args = parser.parse_args()
