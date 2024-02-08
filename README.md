@@ -5,10 +5,11 @@ This repository contains the tools and the data of the paper "Model-based Explor
  by V. Riccio and P. Tonella, published in the [Proceedings of the ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering (ESEC/FSE 2020)](https://dl.acm.org/doi/abs/10.1145/3368089.3409730).
 
 ## Repository Structure ##
-The package is structured as follows:
+The project is structured as follows:
 
-* [__DeepJanus-MNIST__](/DeepJanus-MNIST) contains the DeepJanus tool adapted to the handwritten digit classification case study and the instructions on how to use it;
-* [__DeepJanus-BNG__](/DeepJanus-BNG) contains the DeepJanus tool adapted to the self-driving car case study and the instructions on how to use it;
+* [__DeepJanus__](/DeepJanus) contains the DeepJanus core package, that provides a way to easily adapt DeepJanus to specific problems;
+* [__DeepJanus-BNG__](/DeepJanus-BNG) contains the DeepJanus tool adapted to the self-driving car case study;
+* [__DeepJanus-MNIST__](/DeepJanus-MNIST) contains the DeepJanus tool adapted to the handwritten digit classification case study;
 * [__experiments__](/experiments) contains the raw experimental data reported in the paper and the scripts to obtain the data.
 
 _Note:_ each sub-package contains further specific instructions.
