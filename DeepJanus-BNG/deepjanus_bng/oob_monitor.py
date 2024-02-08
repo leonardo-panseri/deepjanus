@@ -2,8 +2,8 @@ from typing import Literal
 
 from shapely.geometry import Point, Polygon
 
-from self_driving.shapely_roads import RoadPolygon
-from self_driving.beamng_vehicles import BeamNGVehicle
+from .shapely_roads import RoadPolygon
+from .beamng_vehicles import BeamNGVehicle
 
 
 class OutOfBoundsMonitor:

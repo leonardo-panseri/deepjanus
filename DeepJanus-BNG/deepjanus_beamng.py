@@ -10,9 +10,9 @@ from deepjanus import nsga2
 from deepjanus.archive import SmartArchive
 from deepjanus.folders import SeedStorage
 from deepjanus.log import get_logger, log_setup
-from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_member import BeamNGMember
-from self_driving.beamng_problem import BeamNGProblem
+from deepjanus_bng.beamng_config import BeamNGConfig
+from deepjanus_bng.beamng_member import BeamNGMember
+from deepjanus_bng.beamng_problem import BeamNGProblem
 
 log = get_logger(__file__)
 
@@ -99,10 +99,10 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     if args.subcmd == 'train':
-        from training import train_from_recordings
+        from deepjanus_bng.training import train_from_recordings
         train_from_recordings.main(args)
     elif args.subcmd == 'generate-training':
-        from training import train_dataset_recorder
+        from deepjanus_bng.training import train_dataset_recorder
         train_dataset_recorder.main(args.iterations)
     elif args.seeds:
         cfg_lq = BeamNGConfig(os.path.dirname(__file__))

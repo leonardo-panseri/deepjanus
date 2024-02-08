@@ -4,9 +4,9 @@ import math
 from shapely import Point, Polygon, LineString, box
 import numpy as np
 
-from self_driving.beamng_roads import BeamNGRoad, log
-from self_driving.curve_interpolation import catmull_rom
-from self_driving.points import Point4D, Point2D
+from .beamng_roads import BeamNGRoad, log
+from .curve_interpolation import catmull_rom
+from .points import Point4D, Point2D
 
 
 class RoadPolygon:
@@ -306,7 +306,7 @@ class RoadGenerator:
 if __name__ == "__main__":
     cnt_nodes, smp_nodes, _ = RoadGenerator(num_control_nodes=10, num_spline_nodes=20).generate()
 
-    from self_driving.curve_interpolation import plot_catmull_rom
+    from .curve_interpolation import plot_catmull_rom
 
     c = [(n[0], n[1]) for n in smp_nodes]
     ps = [(n[0], n[1]) for n in cnt_nodes]

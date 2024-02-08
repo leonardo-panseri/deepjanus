@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 
-from self_driving.points import Point4D, Point2D
+from .points import Point4D, Point2D
 
 AngleLength = Tuple[float, float]
 ListOfAngleLength = List[AngleLength]

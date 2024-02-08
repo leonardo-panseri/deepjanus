@@ -1,12 +1,12 @@
 import numpy as np
 
 from deepjanus.log import get_logger
-from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_interface import BeamNGInterface
-from self_driving.beamng_roads import BeamNGRoad
-from self_driving.shapely_roads import RoadGenerator
-from training.training_data_collector import TrainingDataCollector
-from self_driving.points import Point4D, Point2D, points_distance
+from .training_data_collector import TrainingDataCollector
+from ..beamng_config import BeamNGConfig
+from ..beamng_interface import BeamNGInterface
+from ..beamng_roads import BeamNGRoad
+from ..points import Point4D, Point2D, points_distance
+from ..shapely_roads import RoadGenerator
 
 log = get_logger(__file__)
 

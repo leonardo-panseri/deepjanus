@@ -51,7 +51,6 @@ class Folders:
         self.experiments: Path = self.data.joinpath('experiments').absolute()
         self.simulations: Path = self.data.joinpath('simulations').absolute()
         self.models: Path = self.data.joinpath('models').absolute()
-        self.training_recordings: Path = self.data.joinpath('training_recordings').absolute()
 
 
 class FolderStorage:

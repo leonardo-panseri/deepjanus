@@ -1,7 +1,7 @@
 import random
 
 from deepjanus.mutator import Mutator
-from self_driving.beamng_member import BeamNGMember
+from .beamng_member import BeamNGMember
 
 
 class BeamNGRoadMutator(Mutator):

@@ -5,10 +5,10 @@ from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
 from deepjanus.member import Member
-from self_driving.beamng_roads import BeamNGRoad
-from self_driving.shapely_roads import RoadGenerationBoundary, RoadPolygon
-from self_driving.points import Point4D
-from self_driving.levenshtein_distance import iterative_levenshtein
+from .beamng_roads import BeamNGRoad
+from .shapely_roads import RoadGenerationBoundary, RoadPolygon
+from .points import Point4D
+from .levenshtein_distance import iterative_levenshtein
 
 
 class BeamNGMember(Member):

@@ -3,12 +3,12 @@ from deepjanus.evaluator import Evaluator
 from deepjanus.log import get_logger
 from deepjanus.mutator import Mutator
 from deepjanus.problem import Problem
-from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_evaluator import BeamNGLocalEvaluator
-from self_driving.beamng_individual import BeamNGIndividual
-from self_driving.beamng_member import BeamNGMember
-from self_driving.beamng_mutator import BeamNGRoadMutator
-from self_driving.shapely_roads import RoadGenerator
+from .beamng_config import BeamNGConfig
+from .beamng_evaluator import BeamNGLocalEvaluator
+from .beamng_individual import BeamNGIndividual
+from .beamng_member import BeamNGMember
+from .beamng_mutator import BeamNGRoadMutator
+from .shapely_roads import RoadGenerator
 
 log = get_logger(__file__)
 

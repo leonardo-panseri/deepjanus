@@ -1,24 +1,21 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-from keras.models import Sequential
-from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint
-from keras.layers import Lambda, Conv2D, Dropout, Dense, Flatten
+from tf_keras.models import Sequential
+from tf_keras.optimizers import Adam
+from tf_keras.callbacks import ModelCheckpoint
+from tf_keras.layers import Lambda, Conv2D, Dropout, Dense, Flatten
 import os
 
-from training.batch_generator import Generator
-from training.training_utils import INPUT_SHAPE
-from self_driving.folders import Folders
+from .batch_generator import Generator
+from .training_utils import INPUT_SHAPE
 
 np.random.seed(0)
-
-FOLDERS = Folders(os.path.dirname(os.path.dirname(__file__)))
 
 
 def load_data(args):
     """Loads training data and splits it into training and validation set."""
-    tracks = [FOLDERS.training_recordings]
+    tracks = ['data/training_recordings']
 
     x = np.empty([0, 3])
     y = np.array([])

@@ -1,21 +1,17 @@
 import json
-import math
 import multiprocessing
 import threading
 import timeit
-from pathlib import Path
 from typing import TYPE_CHECKING
-
-from matplotlib import pyplot as plt
 
 from deepjanus.individual import Individual
 from deepjanus.log import get_logger
-from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_interface import BeamNGInterface
-from self_driving.beamng_member import BeamNGMember
+from .beamng_config import BeamNGConfig
+from .beamng_interface import BeamNGInterface
+from .beamng_member import BeamNGMember
 
 if TYPE_CHECKING:
-    from self_driving.beamng_problem import BeamNGProblem
+    from .beamng_problem import BeamNGProblem
 
 log = get_logger(__file__)
 # Need to have this here for parallel evaluations
@@ -181,8 +177,8 @@ def init_worker(args_queue: multiprocessing.Queue, eval_fun):
 
     bng_log.info(f'Starting parallel BeamNG instance {parallel_index} on port {port}')
     
-    from self_driving.beamng_evaluator import BeamNGLocalEvaluator
-    from self_driving.beamng_config import BeamNGConfig
+    from .beamng_evaluator import BeamNGLocalEvaluator
+    from .beamng_config import BeamNGConfig
     # Set the simulation to run without online features to prevent problems
     cloud_settings = Path(userpath).joinpath('settings', 'cloud')
     cloud_settings.mkdir(parents=True, exist_ok=True)

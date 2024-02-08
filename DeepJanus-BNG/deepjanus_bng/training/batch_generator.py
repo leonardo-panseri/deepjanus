@@ -1,6 +1,6 @@
-from keras.utils import Sequence
+from tf_keras.utils import Sequence
 import numpy as np
-from training.training_utils import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS, load_image, augment, preprocess
+from .training_utils import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS, load_image, augment, preprocess
 
 
 class Generator(Sequence):

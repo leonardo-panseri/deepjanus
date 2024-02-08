@@ -1,20 +1,18 @@
 import os
 from collections import namedtuple
 from datetime import datetime
+from pathlib import Path
 
 from matplotlib import pyplot as plt
 
-from self_driving.beamng_roads import BeamNGRoad
-from self_driving.points import Point2D
-from self_driving.shapely_roads import RoadPolygon
-from self_driving.oob_monitor import OutOfBoundsMonitor
-from self_driving.beamng_vehicles import BeamNGVehicle
-from self_driving.folders import Folders
+from ..beamng_roads import BeamNGRoad
+from ..points import Point2D
+from ..shapely_roads import RoadPolygon
+from ..oob_monitor import OutOfBoundsMonitor
+from ..beamng_vehicles import BeamNGVehicle
 
 CSV_HEADER = ['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed']
 CSVEntry = namedtuple('CSVEntry', CSV_HEADER)
-
-FOLDERS = Folders(os.path.dirname(os.path.dirname(__file__)))
 
 
 class TrainingDataCollector:
@@ -25,7 +23,7 @@ class TrainingDataCollector:
         self.road = road
         self.script_points = script_points
 
-        self.log_folder = FOLDERS.training_recordings.joinpath(datetime.today().strftime('%Y-%m-%d_%H-%M-%S'))
+        self.log_folder = Path('data/training_recordings').joinpath(datetime.today().strftime('%Y-%m-%d_%H-%M-%S'))
         self.oob_monitor = OutOfBoundsMonitor(RoadPolygon(road), self.vehicle)
         self.sequence_index = 0
 

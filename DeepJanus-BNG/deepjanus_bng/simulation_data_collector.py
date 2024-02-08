@@ -1,10 +1,10 @@
 from typing import Literal
 
-from self_driving.beamng_interface import BeamNGInterface
-from self_driving.oob_monitor import OutOfBoundsMonitor
-from self_driving.shapely_roads import RoadPolygon
-from self_driving.simulation_data import SimulationDataRecords, SimulationData, SimulationDataRecord
-from self_driving.points import points_distance
+from .beamng_interface import BeamNGInterface
+from .oob_monitor import OutOfBoundsMonitor
+from .shapely_roads import RoadPolygon
+from .simulation_data import SimulationDataRecords, SimulationData, SimulationDataRecord
+from .points import points_distance
 
 
 class SimulationDataCollector:

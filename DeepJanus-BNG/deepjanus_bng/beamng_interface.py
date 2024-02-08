@@ -9,11 +9,11 @@ from beamngpy.sensors import Camera
 
 from deepjanus.folders import SeedStorage
 from deepjanus.log import get_logger
-from self_driving.beamng_config import BeamNGConfig
-from self_driving.beamng_map_utils import LEVEL_NAME, map_utils
-from self_driving.beamng_vehicles import BeamNGVehicle
-from self_driving.beamng_roads import BeamNGRoad
-from self_driving.simulation_data import SimulationParams
+from .beamng_config import BeamNGConfig
+from .beamng_map_utils import LEVEL_NAME, map_utils
+from .beamng_vehicles import BeamNGVehicle
+from .beamng_roads import BeamNGRoad
+from .simulation_data import SimulationParams
 
 log = get_logger(__file__)
 
@@ -154,7 +154,7 @@ class BeamNGInterface:
 
 
 if __name__ == '__main__':
-    from self_driving.beamng_member import BeamNGMember
+    from .beamng_member import BeamNGMember
 
     cfg = BeamNGConfig(os.path.dirname(__file__))
     brewer = BeamNGInterface(cfg)

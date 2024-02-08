@@ -6,7 +6,7 @@ from pathlib import Path
 
 from matplotlib import pyplot as plt
 
-from self_driving.beamng_roads import BeamNGRoad
+from .beamng_roads import BeamNGRoad
 from deepjanus.folders import delete_folder_recursively
 
 SimulationDataRecordProperties = ['timer', 'damage', 'pos', 'dir', 'vel', 'gforces', 'gforces2', 'steering',

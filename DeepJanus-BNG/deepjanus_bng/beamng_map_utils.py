@@ -1,17 +1,14 @@
 import json
 import os
 import shutil
+from typing import TYPE_CHECKING
 
 from deepjanus.folders import delete_folder_recursively
 from deepjanus.log import get_logger
-
-# Workaround for keeping type hinting while avoiding circular imports
-from typing import TYPE_CHECKING
-
-from self_driving.beamng_config import BeamNGConfig
+from .beamng_config import BeamNGConfig
 
 if TYPE_CHECKING:
-    from self_driving.beamng_roads import BeamNGRoad
+    from .beamng_roads import BeamNGRoad
 
 log = get_logger(__file__)
 
