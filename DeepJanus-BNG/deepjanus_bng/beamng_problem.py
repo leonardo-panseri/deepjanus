@@ -50,6 +50,6 @@ class BeamNGProblem(Problem):
 
     def get_mutator(self) -> Mutator:
         if not self._mutator:
-            self._mutator = BeamNGRoadMutator(-int(self.config.MUTATION_EXTENT), int(self.config.MUTATION_EXTENT))
+            self._mutator = BeamNGRoadMutator(self.config)
 
         return self._mutator

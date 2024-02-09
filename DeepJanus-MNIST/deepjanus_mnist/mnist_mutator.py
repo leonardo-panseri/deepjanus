@@ -16,10 +16,6 @@ class MNISTDigitMutator(Mutator):
     # Matches all Bézier curve control points of an SVG path
     PATTERN_CONTROL_POINTS = re.compile('C([\d.]+),([\d.]+)\s([\d.]+),([\d.]+)\s')
 
-    def __init__(self, lower_bound: float, upper_bound: float):
-        self.lower_bound = lower_bound
-        self.higher_bound = upper_bound
-
     def mutate_point(self, point: tuple):
         """Applies a random displacement to one of the two coordinates of a point."""
         # Mutation is valid if the displaced coordinate is still inside the image
@@ -27,9 +23,7 @@ class MNISTDigitMutator(Mutator):
         mutated_point = point
         while not valid_mutation:
             # Randomly select displacement and sign
-            displacement = uniform(self.lower_bound, self.higher_bound)
-            if getrandbits(1):
-                displacement = -displacement
+            displacement = self.get_random_mutation_extent()
 
             # Choose which coordinate to mutate
             if getrandbits(1):
@@ -124,6 +118,7 @@ class MNISTDigitMutator(Mutator):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+    from .mnist_config import MNISTConfig
 
     mbr = MNISTMember(
         "<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\" height=\"28\" width=\"28\"><path d=\" M12,24 C8,23 4,20 5,18 C5,15 8,15 8,17 C8,20 11,21 15,20 C19,19 19,17 14,16 C10,14 9,13 9,10 C9,9 8,8 8,8 C7,8 6,7 6,6 C6,5 7,5 12,5 C19,5 24,6 24,7 C24,8 22,9 20,9 C17,9 15,9 14,10 C12,12 13,14 15,13 C16,13 23,19 23,20 C23,23 16,24 12,24 Z\" /></svg>",
@@ -132,7 +127,8 @@ if __name__ == '__main__':
     plt.imshow(mbr.bitmap, cmap='Greys')
     plt.show()
 
-    mtr = MNISTDigitMutator(0.01, 0.6)
+    cfg = MNISTConfig('.')
+    mtr = MNISTDigitMutator(cfg)
     for i in range(100):
         mbr.mutate(mtr)
 

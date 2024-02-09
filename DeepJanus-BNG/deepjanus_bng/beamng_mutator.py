@@ -9,10 +9,6 @@ class BeamNGRoadMutator(Mutator):
 
     NUM_UNDO_ATTEMPTS = 20
 
-    def __init__(self, lower_bound: int, upper_bound: int):
-        self.lower_bound = lower_bound
-        self.higher_bound = upper_bound
-
     def mutate(self, member: BeamNGMember):
         """Mutates a DeepJanus-BNG member: picks a random road control node (excluding the first
         and last three) and adds a random value in the range [lower_bound,upper_bound]. If the road sampled from the
@@ -54,16 +50,13 @@ class BeamNGRoadMutator(Mutator):
 
         assert member.road.control_nodes != original_nodes
 
-    def mutate_gene(self, member: BeamNGMember, index: int, xy_prob=0.5) -> tuple[int, int]:
+    def mutate_gene(self, member: BeamNGMember, index: int) -> tuple[int, int]:
         """Mutates a road control node of a member."""
         gene = list(member.road.control_nodes[index])
         # Choose the mutation extent
-        mut_value = random.randint(self.lower_bound, self.higher_bound)
-        # Avoid to choose 0
-        if mut_value == 0:
-            mut_value += 1
+        mut_value = self.get_random_mutation_extent()
         coord_index = 0
-        if random.random() < xy_prob:
+        if random.getrandbits(1):
             coord_index = 1
         gene[coord_index] += mut_value
         member.road.mutate_node(index, tuple(gene))

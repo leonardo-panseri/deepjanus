@@ -23,8 +23,11 @@ class BeamNGConfig(Config):
         # Number of generations
         self.NUM_GENERATIONS = 100
 
-        # Absolute value of bound for the mutation of a member
-        self.MUTATION_EXTENT = 6.0
+        # Bounds for the mutation of a member
+        self.MUTATION_LOWER_BOUND = 1
+        self.MUTATION_UPPER_BOUND = 6
+        # Flag indicating if the sign for the mutation value should be chosen randomly
+        self.MUTATION_RANDOMIZE_SIGN = True
         # Minimum distance that an individual must have with all other individuals in the archive to be added
         self.ARCHIVE_THRESHOLD = 35.0
 

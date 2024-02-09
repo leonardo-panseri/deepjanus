@@ -37,6 +37,6 @@ class MNISTProblem(Problem):
 
     def get_mutator(self) -> Mutator:
         if not self._mutator:
-            self._mutator = MNISTDigitMutator(self.config.MUTATION_LOWER_BOUND, self.config.MUTATION_EXTENT)
+            self._mutator = MNISTDigitMutator(self.config)
 
         return self._mutator

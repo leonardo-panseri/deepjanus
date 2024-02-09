@@ -35,8 +35,11 @@ class Config:
     # Number of generations
     NUM_GENERATIONS = None
 
-    # Absolute value of bound for the mutation of a member
-    MUTATION_EXTENT = None
+    # Bounds for the mutation of a member
+    MUTATION_LOWER_BOUND = None
+    MUTATION_UPPER_BOUND = None
+    # Flag indicating if the sign for the mutation value should be chosen randomly
+    MUTATION_RANDOMIZE_SIGN = None
     # Minimum distance that an individual must have with all other individuals in the archive to be added
     ARCHIVE_THRESHOLD = None
 
