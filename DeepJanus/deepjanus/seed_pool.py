@@ -26,10 +26,10 @@ class SeedPool:
         self.counter = 0
 
     def __len__(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def __getitem__(self, item) -> Member:
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def get_seed(self) -> Member:
         """Gets a seed from the pool. The behavior of this method depends on the sequential flag set
@@ -43,7 +43,7 @@ class SeedPool:
 
 
 class SeedPoolRandom(SeedPool):
-    """Seed pool that generates n random members and then accesses them sequentially"""
+    """Seed pool that generates random members"""
 
     def __init__(self, problem, n):
         super().__init__(problem)
@@ -58,7 +58,7 @@ class SeedPoolRandom(SeedPool):
 
 
 class SeedPoolFolder(SeedPool):
-    """Seed pool that loads members from their serialized representation in a folder, either sequentially or randomly"""
+    """Seed pool that loads members from their serialized representation in a folder"""
 
     def __init__(self, problem: 'Problem', sequential: bool, folder_name: str):
         super().__init__(problem, sequential)
