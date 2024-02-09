@@ -2,7 +2,6 @@ import json
 import math
 import timeit
 from statistics import NormalDist
-# Workaround for keeping type hinting while avoiding circular imports
 from typing import TYPE_CHECKING
 from typing import TypeVar, Generic
 

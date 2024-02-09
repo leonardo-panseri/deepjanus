@@ -1,12 +1,11 @@
 import os.path
 import random
+from typing import TYPE_CHECKING
 
 from .folders import SeedStorage
 from .log import get_logger
 from .member import Member
 
-# Workaround for keeping type hinting while avoiding circular imports
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .problem import Problem
 

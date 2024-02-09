@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy
 from deap import tools
 
-from .config import Config, SeedPoolStrategy
 from .archive import Archive
+from .config import Config, SeedPoolStrategy
 from .evaluator import Evaluator
 from .folders import delete_folder_recursively
 from .individual import Individual

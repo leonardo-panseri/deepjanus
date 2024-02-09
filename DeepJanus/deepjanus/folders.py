@@ -4,10 +4,10 @@ import re
 import shutil
 from pathlib import Path
 from time import sleep
+from typing import TYPE_CHECKING
 
 from .log import get_logger
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .config import Config
 
