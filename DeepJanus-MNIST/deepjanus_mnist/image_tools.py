@@ -84,12 +84,18 @@ def calculate_bitmap_distance(bitmap1: np.ndarray, bitmap2: np.ndarray):
 
 if __name__ == '__main__':
     import tf_keras
+    import matplotlib.pyplot as plt
 
-    x = tf_keras.datasets.mnist.load_data()[0][0].astype('float32') / 255.
-    Image.fromarray(x[0]).save('test_original.png')
+    def save_img(img, f):
+        plt.imshow(img, cmap='Greys')
+        plt.axis('off')
+        plt.savefig(f, bbox_inches='tight')
+
+    x = tf_keras.datasets.mnist.load_data()[0][0]
+    save_img(x[0], 'test_original.png')
     s = bitmap_to_svg(x[0])
     with open('test_vector.svg', 'w') as file:
         file.write(s)
 
     b = svg_to_bitmap(s)
-    Image.fromarray(b).save('test_raster.png')
+    save_img(b, 'test_raster.png')
