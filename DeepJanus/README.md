@@ -21,7 +21,8 @@ You will need to implement the following abstract classes:
 - `Evaluator`
 - `Mutator`
 
-To start a DeepJanus run you will need seeds. There is a utility class in `deepjanus.seed_pool` to help preparing them:
+To start a DeepJanus run you will need seeds. There is a utility class in `deepjanus.seed_pool` to help preparing them 
+(`YourConfig` and `YourProblem` are the subclasses you implemented):
 ```python
 from deepjanus.seed_pool import SeedFileGenerator
 
@@ -44,7 +45,7 @@ quantity = 10
 seed_generator.generate_seeds(quantity)
 ```
 
-To run DeepJanus (`YourConfig` and `YourProblem` are the subclasses you implemented):
+To run DeepJanus:
 ```python
 from datetime import datetime
 from deepjanus.log import log_setup
