@@ -84,7 +84,6 @@ class MNISTDigitMutator(Mutator):
     def mutate(self, member: MNISTMember):
         """Mutates a DeepJanus-MNIST member: applies a random displacement LB<=|disp|<=UB to a random vertex or Bézier
          curve control point of the SVG path of this member."""
-        # TODO: mutation strat
         svg_root: ET.Element = ET.fromstring(member.svg)
         svg_path = svg_root.find('{http://www.w3.org/2000/svg}path').get('d')
 

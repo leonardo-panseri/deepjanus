@@ -30,7 +30,7 @@ def reshape_bitmap_as_model_input(x: np.ndarray):
 
 
 class MNISTLocalEvaluator(Evaluator):
-    """Executes a local ??? instance and uses it to evaluate members."""
+    """Evaluate members by classifying a digit with the model and checking the prediction."""
 
     def __init__(self, config: MNISTConfig):
         self.config = config
@@ -42,7 +42,6 @@ class MNISTLocalEvaluator(Evaluator):
         self.model = None
 
     def evaluate(self, member: 'MNISTMember', max_attempts=20) -> bool:
-        # TODO: mbr evaluation
         if self.model is None:
             import tf_keras.models
             self.model = tf_keras.models.load_model(self.model_file)

@@ -7,7 +7,7 @@ from .image_tools import svg_to_bitmap, calculate_bitmap_distance
 
 
 class MNISTMember(Member):
-    """Member for DeepJanus-BNG"""
+    """Member for DeepJanus-MNIST"""
 
     def __init__(self, svg: str, expected_label: int, name: str = None):
         super().__init__(name)
@@ -17,10 +17,8 @@ class MNISTMember(Member):
 
         self.predicted_label = None
         self.prediction_quality = None
-        # TODO: add mbr data
 
     def clone(self, name: str = None):
-        # TODO: clone all mbr info
         res = MNISTMember(self.svg, self.expected_label, name)
         res.satisfy_requirements = self.satisfy_requirements
         res.predicted_label = self.predicted_label
@@ -40,12 +38,9 @@ class MNISTMember(Member):
 
     def to_tuple(self) -> tuple[float, float]:
         # TODO: tuple repr (needed?)
-        # barycenter = np.mean(np.asarray(self.road.control_nodes), axis=0)[:2]
-        # return barycenter
         raise NotImplementedError()
 
     def to_dict(self) -> dict:
-        # TODO: dict repr
         return {
             'svg': self.svg,
             'expected_label': self.expected_label,
@@ -56,7 +51,6 @@ class MNISTMember(Member):
 
     @classmethod
     def from_dict(cls, d: dict, name: str = None) -> 'MNISTMember':
-        # TODO: dict deserialization
         res = MNISTMember(d['svg'],
                           d['expected_label'],
                           name)
