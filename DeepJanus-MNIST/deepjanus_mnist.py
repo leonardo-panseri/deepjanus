@@ -26,6 +26,13 @@ if __name__ == '__main__':
                                                                          'its frontier of behaviors')
     parser.add_argument('-s', '--seeds', help='generate seeds from MNIST dataset', action='store_true')
 
+    subparsers = parser.add_subparsers(dest='subcmd')
+
+    parser_train = subparsers.add_parser('train', description='Trains a CNN model for handwritten digit '
+                                                              'classification on the MNIST dataset')
+    parser_train.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=200)
+    parser_train.add_argument('-b', help='batch size', dest='batch_size', type=int, default=128)
+
     cfg = MNISTConfig(os.path.dirname(__file__))
     prob = MNISTProblem(cfg)
     log_setup.setup_console_log(cfg.FOLDERS.log_ini)
@@ -34,7 +41,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.seeds:
+    if args.subcmd == 'train':
+        from deepjanus_mnist.model_trainer import train_model
+        train_model(str(cfg.FOLDERS.models.joinpath('cnnClassifier_trained')),
+                    args.batch_size, args.nb_epoch)
+    elif args.seeds:
         cfg_lq = MNISTConfig(os.path.dirname(__file__))
         cfg_lq.MODEL_FILE = 'cnnClassifier_lowLR'
         prob_lq = MNISTProblem(cfg_lq)
