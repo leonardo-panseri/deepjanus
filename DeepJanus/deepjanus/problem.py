@@ -86,7 +86,7 @@ class Problem:
         if len(self.archive) > 0:
             archived_seeds = [i.seed for i in self.archive]
 
-            non_archived_seeds = list(self.archive - set(archived_seeds))
+            non_archived_seeds = [seed for seed in self.seed_pool.cache.values() if seed not in archived_seeds]
             if len(non_archived_seeds) == 0:
                 return
 

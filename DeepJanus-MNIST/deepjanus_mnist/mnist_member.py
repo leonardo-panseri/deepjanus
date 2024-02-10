@@ -73,4 +73,7 @@ class MNISTMember(Member):
         return hashlib.sha256((self.svg + str(self.expected_label)).encode('UTF-8')).hexdigest()
 
     def __str__(self):
-        return f'{super().__str__()} p={self.predicted_label}'
+        prediction = 'na'
+        if self.predicted_label is not None:
+            prediction = self.predicted_label
+        return f'{super().__str__()} p={prediction}'

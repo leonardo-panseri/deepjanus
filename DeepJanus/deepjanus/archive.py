@@ -41,7 +41,7 @@ class Archive(set):
 
         # TODO: Should this be normalized?
         closest_element_dist = closest_elements(elements, ind, lambda a, b: a.distance(b))[0]
-        return closest_element_dist[1]
+        return closest_element_dist[1].item()
 
     def find_candidates(self, population: Iterable[Individual]):
         candidates = []

@@ -6,7 +6,6 @@ from deepjanus.log import log_setup
 from deepjanus.seed_pool import SeedFileGenerator
 from deepjanus_mnist.mnist_config import MNISTConfig
 from deepjanus_mnist.mnist_problem import MNISTProblem
-from deepjanus_mnist.seed_generator import seed_candidate_generator
 
 
 def execute_deepjanus(problem: MNISTProblem):
@@ -14,6 +13,7 @@ def execute_deepjanus(problem: MNISTProblem):
 
 
 def generate_seeds(problem1: MNISTProblem, problem2: MNISTProblem, folder_name='generated', quantity=100):
+    from deepjanus_mnist.seed_generator import seed_candidate_generator
     seed_generator = SeedFileGenerator([problem1, problem2], folder_name, seed_candidate_generator(5))
     seed_generator.generate_seeds(quantity)
 
@@ -51,4 +51,6 @@ if __name__ == '__main__':
         prob_lq = MNISTProblem(cfg_lq)
         generate_seeds(prob, prob_lq)
     else:
+        # Disable TensorFlow logs
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
         execute_deepjanus(prob)

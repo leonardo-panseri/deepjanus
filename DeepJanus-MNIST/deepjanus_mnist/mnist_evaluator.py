@@ -48,7 +48,7 @@ class MNISTLocalEvaluator(Evaluator):
 
         batch = reshape_bitmap_as_model_input(member.bitmap)
         # Array containing the confidence for each label (digit 0-9)
-        confidences = self.model.predict(batch)[0]
+        confidences = self.model.predict(batch, verbose=0)[0]
 
         best_label, second_best_label = np.argsort(-confidences)[:2]
 
