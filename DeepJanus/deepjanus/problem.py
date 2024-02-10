@@ -22,9 +22,9 @@ log = get_logger(__file__)
 
 class Problem:
     """Class representing a problem to be solved by DeepJanus."""
-    def __init__(self, config: Config, archive: Archive):
+    def __init__(self, config: Config):
         self.config: Config = config
-        self.archive = archive
+        self.archive = self.initialize_archive()
 
         if self.config.SEED_POOL_STRATEGY == SeedPoolStrategy.GEN_RANDOM:
             self.seed_pool = SeedPoolRandom(self, config.POP_SIZE)
@@ -136,6 +136,10 @@ class Problem:
         """Callback to execute actions at the end of each iteration."""
         (self.current_generation_path.joinpath('fitness_stats.json')
          .write_text(json.dumps(stats_record, cls=NumpyArrayEncoder)))
+
+    def initialize_archive(self) -> Archive:
+        """Initializes the archive to store solutions of the problem."""
+        raise NotImplemented()
 
     def get_evaluator(self) -> Evaluator:
         """Returns the evaluator that implements the strategy for evaluating members."""

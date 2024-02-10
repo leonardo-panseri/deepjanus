@@ -2,7 +2,6 @@ import os.path
 from datetime import datetime
 
 from deepjanus import nsga2
-from deepjanus.archive import SmartArchive
 from deepjanus.log import log_setup
 from deepjanus.seed_pool import SeedFileGenerator
 from deepjanus_mnist.mnist_config import MNISTConfig
@@ -28,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--seeds', help='generate seeds from MNIST dataset', action='store_true')
 
     cfg = MNISTConfig(os.path.dirname(__file__))
-    prob = MNISTProblem(cfg, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
+    prob = MNISTProblem(cfg)
     log_setup.setup_console_log(cfg.FOLDERS.log_ini)
     log_setup.setup_file_log(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
@@ -38,7 +37,7 @@ if __name__ == '__main__':
     if args.seeds:
         cfg_lq = MNISTConfig(os.path.dirname(__file__))
         cfg_lq.MODEL_FILE = 'cnnClassifier_lowLR'
-        prob_lq = MNISTProblem(cfg_lq, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
+        prob_lq = MNISTProblem(cfg_lq)
         generate_seeds(prob, prob_lq)
     else:
         execute_deepjanus(prob)

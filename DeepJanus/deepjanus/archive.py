@@ -2,6 +2,7 @@ from typing import Iterable, Callable, TypeVar
 
 import numpy as np
 
+from .config import Config
 from .individual import Individual
 from .log import get_logger
 
@@ -21,9 +22,9 @@ def closest_elements(elements_set: set[T], obj: T, distance_fun: Callable[[T, T]
 class Archive(set):
     """Base class representing the archive of non-dominated individuals"""
 
-    def __init__(self, target_error: float):
+    def __init__(self, config: Config):
         super().__init__()
-        self.TARGET_ERROR = target_error
+        self.TARGET_ERROR = config.TARGET_ERROR
 
     def process_population(self, pop: Iterable[Individual]):
         """
@@ -63,9 +64,9 @@ class GreedyArchive(Archive):
 class SmartArchive(Archive):
     """Archive that stores only individuals that are distant at least a configurable threshold from each other"""
 
-    def __init__(self, target_error: float, archive_threshold: float):
-        super().__init__(target_error)
-        self.ARCHIVE_THRESHOLD = archive_threshold
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.ARCHIVE_THRESHOLD = config.ARCHIVE_THRESHOLD
 
     def process_population(self, pop: Iterable[Individual]):
         for candidate in self.find_candidates(pop):

@@ -1,4 +1,4 @@
-from deepjanus.archive import Archive
+from deepjanus.archive import Archive, SmartArchive
 from deepjanus.evaluator import Evaluator
 from deepjanus.log import get_logger
 from deepjanus.mutator import Mutator
@@ -16,9 +16,9 @@ log = get_logger(__file__)
 class MNISTProblem(Problem):
     """Representation of the DeepJanus-MNIST problem"""
 
-    def __init__(self, config: MNISTConfig, archive: Archive):
+    def __init__(self, config: MNISTConfig):
         self.config: MNISTConfig = config
-        super().__init__(config, archive)
+        super().__init__(config)
 
     def deap_individual_class(self):
         return MNISTIndividual
@@ -28,6 +28,9 @@ class MNISTProblem(Problem):
 
     def generate_random_member(self, name: str = None) -> MNISTMember:
         raise Exception('Random member generation is not supported by DeepJanus-MNIST')
+
+    def initialize_archive(self) -> Archive:
+        return SmartArchive(self.config)
 
     def get_evaluator(self) -> Evaluator:
         if not self._evaluator:

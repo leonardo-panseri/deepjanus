@@ -32,23 +32,27 @@ def seed_candidate_generator():
         # ...
         yield member
 
-# The seed generator will select candidates that satisfy requirements for all given problems
+# Define problem and tool configuration
+config = YourConfig()
+problem = YourProblem(config)
+
+# The seed generator will select candidates that satisfy requirements for all given problems (you can pass more than one)
 # and will save them to 'data/seeds/<folder_name>/'
-seed_generator = SeedFileGenerator([problem1, problem2], folder_name, seed_candidate_generator())
+seed_generator = SeedFileGenerator([problem1], 'generated', seed_candidate_generator())
+# How many seeds to generate
+quantity = 10
 seed_generator.generate_seeds(quantity)
 ```
 
 To run DeepJanus (`YourConfig` and `YourProblem` are the subclasses you implemented):
 ```python
 from datetime import datetime
-from deepjanus.archive import SmartArchive
 from deepjanus.log import log_setup
 from deepjanus.nsga2 import main
 
 # Define problem and tool configuration
 config = YourConfig()
-archive = SmartArchive(config.TARGET_ERROR, config.ARCHIVE_THRESHOLD)
-problem = YourProblem(config, archive)
+problem = YourProblem(config)
 
 # Enable logging (optional)
 # You can install package 'rich' for better console logs

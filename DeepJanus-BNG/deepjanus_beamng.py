@@ -4,7 +4,6 @@ import sys
 from datetime import datetime
 
 from deepjanus import nsga2
-from deepjanus.archive import SmartArchive
 from deepjanus.log import get_logger, log_setup
 from deepjanus.seed_pool import SeedFileGenerator
 from deepjanus_bng.beamng_config import BeamNGConfig
@@ -52,7 +51,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cfg = BeamNGConfig(os.path.dirname(__file__))
-    prob = BeamNGProblem(cfg, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
+    prob = BeamNGProblem(cfg)
     log_setup.setup_console_log(cfg.FOLDERS.log_ini)
     log_setup.setup_file_log(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
@@ -75,7 +74,7 @@ if __name__ == '__main__':
         cfg_lq = BeamNGConfig(os.path.dirname(__file__))
         cfg_lq.BEAMNG_PORT += 1
         cfg_lq.MODEL_FILE = 'self-driving-car-4600'
-        prob_lq = BeamNGProblem(cfg_lq, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
+        prob_lq = BeamNGProblem(cfg_lq)
         generate_seeds(prob, prob_lq)
     else:
         # Disable TensorFlow logs

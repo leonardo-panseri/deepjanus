@@ -1,4 +1,4 @@
-from deepjanus.archive import Archive
+from deepjanus.archive import Archive, SmartArchive
 from deepjanus.evaluator import Evaluator
 from deepjanus.log import get_logger
 from deepjanus.mutator import Mutator
@@ -16,9 +16,9 @@ log = get_logger(__file__)
 class BeamNGProblem(Problem):
     """Representation of the DeepJanus-BNG problem"""
 
-    def __init__(self, config: BeamNGConfig, archive: Archive):
+    def __init__(self, config: BeamNGConfig):
         self.config: BeamNGConfig = config
-        super().__init__(config, archive)
+        super().__init__(config)
 
     def deap_individual_class(self):
         return BeamNGIndividual
@@ -31,6 +31,9 @@ class BeamNGProblem(Problem):
             num_control_nodes=self.config.NUM_CONTROL_NODES,
             seg_length=self.config.SEG_LENGTH).generate()
         return BeamNGMember(control_nodes, sample_nodes, RoadGenerator.NUM_SPLINE_NODES, gen_boundary, name)
+
+    def initialize_archive(self) -> Archive:
+        return SmartArchive(self.config)
 
     def get_evaluator(self) -> Evaluator:
         if not self._evaluator:
