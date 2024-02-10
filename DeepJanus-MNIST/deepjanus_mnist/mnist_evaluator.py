@@ -52,7 +52,6 @@ class MNISTLocalEvaluator(Evaluator):
         confidences = self.model.predict(batch)[0]
 
         best_label, second_best_label = np.argsort(-confidences)[:2]
-        log.info(f'{confidences} => {best_label}')
 
         confidence_expected_label = confidences[member.expected_label]
         if best_label == member.expected_label:
