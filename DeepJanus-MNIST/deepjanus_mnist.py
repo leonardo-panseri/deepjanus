@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     parser_train = subparsers.add_parser('train', description='Trains a CNN model for handwritten digit '
                                                               'classification on the MNIST dataset')
-    parser_train.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=200)
+    parser_train.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=12)
     parser_train.add_argument('-b', help='batch size', dest='batch_size', type=int, default=128)
 
     cfg = MNISTConfig(os.path.dirname(__file__))

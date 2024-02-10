@@ -31,11 +31,10 @@ When the run is finished, the tool produces the following outputs in the `data/e
 Run `python deepjanus_mnist.py`
 
 ### Train a New Predictor ===WIP===
-* Run `python deepjanus_mnist.py generate-training`  to generate a new training set
-* Run `python deepjanus_mnist.py train`  to train the ML model
+Run `python deepjanus_mnist.py train`  to train the ML model
 
 
-### Generate New Seeds ===WIP===
+### Generate New Seeds
 Run `python deepjanus_mnist.py -s`
 
 ## Detailed Information
