@@ -1,8 +1,8 @@
 numpy
-h5py
 potracer
 cairosvg
 pillow
 deap
 matplotlib
 tensorflow==2.15.0
+tf_keras==2.15.0

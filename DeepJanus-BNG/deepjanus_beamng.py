@@ -1,17 +1,13 @@
-import json
 import os
 import signal
 import sys
 from datetime import datetime
 
-from matplotlib import pyplot as plt
-
 from deepjanus import nsga2
 from deepjanus.archive import SmartArchive
-from deepjanus.folders import SeedStorage
 from deepjanus.log import get_logger, log_setup
+from deepjanus.seed_pool import SeedFileGenerator
 from deepjanus_bng.beamng_config import BeamNGConfig
-from deepjanus_bng.beamng_member import BeamNGMember
 from deepjanus_bng.beamng_problem import BeamNGProblem
 
 log = get_logger(__file__)
@@ -20,43 +16,14 @@ log = get_logger(__file__)
 def execute_deepjanus(problem: BeamNGProblem):
     nsga2.main(problem)
 
-    # Needed?
-    plt.ioff()
-    plt.show()
 
+def generate_seeds(problem1: BeamNGProblem, problem2: BeamNGProblem, folder_name='generated', quantity=12):
+    def seed_candidate_generator():
+        while True:
+            yield problem1.generate_random_member()
 
-def generate_seeds(problem1: BeamNGProblem, problem2: BeamNGProblem | None, folder_name='generated_seeds', quantity=12):
-    good_members_found = 0
-    attempts = 0
-    storage = SeedStorage(problem1.config, folder_name)
-
-    def is_outside_frontier(member: BeamNGMember, problem: BeamNGProblem):
-        member.clear_evaluation()
-        return not member.evaluate(problem.get_evaluator())
-
-    while good_members_found < quantity:
-        seed_index = good_members_found + 1
-        path = storage.get_path_by_index(seed_index)
-        if path.exists():
-            log.info(f'Seed{seed_index} already generated')
-            good_members_found += 1
-            continue
-        attempts += 1
-        log.info(f'Total attempts: {attempts}; Found {good_members_found}/{quantity}; Looking for seed{seed_index}')
-
-        mbr = problem1.generate_random_member()
-        if is_outside_frontier(mbr, problem1):
-            continue
-
-        if problem2:
-            mbr = problem2.member_class().from_dict(mbr.to_dict())
-            if is_outside_frontier(mbr, problem2):
-                continue
-
-        mbr.clear_evaluation()
-        path.write_text(json.dumps(mbr.to_dict()))
-
-        good_members_found += 1
+    seed_generator = SeedFileGenerator([problem1, problem2], folder_name, seed_candidate_generator())
+    seed_generator.generate_seeds(quantity)
 
 
 if __name__ == '__main__':
@@ -108,7 +75,7 @@ if __name__ == '__main__':
         cfg_lq = BeamNGConfig(os.path.dirname(__file__))
         cfg_lq.BEAMNG_PORT += 1
         cfg_lq.MODEL_FILE = 'self-driving-car-4600'
-        prob_lq = BeamNGProblem(cfg_lq, SmartArchive(cfg.ARCHIVE_THRESHOLD))
+        prob_lq = BeamNGProblem(cfg_lq, SmartArchive(cfg.TARGET_ERROR, cfg.ARCHIVE_THRESHOLD))
         generate_seeds(prob, prob_lq)
     else:
         # Disable TensorFlow logs

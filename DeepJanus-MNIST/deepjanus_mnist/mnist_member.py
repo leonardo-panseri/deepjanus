@@ -36,7 +36,7 @@ class MNISTMember(Member):
         return calculate_bitmap_distance(self.bitmap, other.bitmap)
 
     def to_image(self, ax: plt.Axes):
-        ax.imshow(self.bitmap, cmap='gray', vmin=0, vmax=255)
+        ax.imshow(self.bitmap, cmap='Greys')
 
     def to_tuple(self) -> tuple[float, float]:
         # TODO: tuple repr (needed?)
@@ -77,3 +77,6 @@ class MNISTMember(Member):
 
     def member_hash(self):
         return hashlib.sha256((self.svg + str(self.expected_label)).encode('UTF-8')).hexdigest()
+
+    def __str__(self):
+        return f'{super().__str__()} p={self.predicted_label}'

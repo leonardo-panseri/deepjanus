@@ -12,7 +12,7 @@ def svg_path_from_potrace_path(potrace_path: potrace.Path) -> str:
     def coord_pair(coords):
         return f'{int(coords.x)},{int(coords.y)}'
 
-    # Build a SVG path description:
+    # Build an SVG path description:
     # M - Move To <point>
     # L - Line To <point>
     # C - Bézier Curve with <control_point_1> <control_point_2> To <end>
@@ -54,7 +54,7 @@ def create_svg_xml(svg_path: str) -> str:
 
 def bitmap_to_svg(bitmap: np.ndarray) -> str:
     """Converts a grayscale bitmap image to a SVG image."""
-    potrace_bitmap = potrace.Bitmap(bitmap)
+    potrace_bitmap = potrace.Bitmap(Image.fromarray(bitmap))
     potrace_bitmap.invert()
     potrace_path = potrace_bitmap.trace()
     svg_path = svg_path_from_potrace_path(potrace_path)
@@ -72,19 +72,20 @@ def svg_to_bitmap(svg: str) -> np.ndarray:
     # CairoSVG returns an image in RGBA format.
     # We can easily convert to grayscale by keeping only the A channel
     bitmap = rgba[:,:,3]
+    # Normalize pixels
+    bitmap = bitmap.astype(np.float32) / 255.
     return bitmap
 
 
 def calculate_bitmap_distance(bitmap1: np.ndarray, bitmap2: np.ndarray):
     """Measures the 'distance' between two grayscale bitmaps (how different they are)."""
-    return np.linalg.norm(bitmap1- bitmap2)
+    return np.linalg.norm(bitmap1 - bitmap2)
 
 
 if __name__ == '__main__':
-    import h5py
+    import tf_keras
 
-    d = h5py.File('../data/mnist/digit5.h5', 'r')
-    x = np.array(d.get('xn'))
+    x = tf_keras.datasets.mnist.load_data()[0][0].astype('float32') / 255.
     Image.fromarray(x[0]).save('test_original.png')
     s = bitmap_to_svg(x[0])
     with open('test_vector.svg', 'w') as file:

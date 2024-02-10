@@ -21,6 +21,23 @@ You will need to implement the following abstract classes:
 - `Evaluator`
 - `Mutator`
 
+To start a DeepJanus run you will need seeds. There is a utility class in `deepjanus.seed_pool` to help preparing them:
+```python
+from deepjanus.seed_pool import SeedFileGenerator
+
+# Define a generator that produces members of your problem
+def seed_candidate_generator():
+    while True:
+        # Your code to generate new members here
+        # ...
+        yield member
+
+# The seed generator will select candidates that satisfy requirements for all given problems
+# and will save them to 'data/seeds/<folder_name>/'
+seed_generator = SeedFileGenerator([problem1, problem2], folder_name, seed_candidate_generator())
+seed_generator.generate_seeds(quantity)
+```
+
 To run DeepJanus (`YourConfig` and `YourProblem` are the subclasses you implemented):
 ```python
 from datetime import datetime

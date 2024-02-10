@@ -42,7 +42,7 @@ class Folders:
     def __init__(self, root_folder: str):
         """
         Initializes paths based on the location of core module.
-        :param core_folder: path to the root folder of the project
+        :param root_folder: path to the root folder of the project
         """
         self.root: Path = Path(root_folder).resolve()
         self.data: Path = self.root.joinpath('data').absolute()
@@ -107,7 +107,7 @@ class FolderStorage:
     def save_json_by_path(cls, path: str | Path, object_instance):
         """Save a JSON representation of an object to the file at the path."""
         with open(path, 'w') as f:
-            dumps = json.dumps(object_instance)
+            dumps = json.dumps(object_instance, indent=2)
             f.write(dumps)
         return dumps
 

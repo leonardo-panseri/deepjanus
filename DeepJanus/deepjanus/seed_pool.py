@@ -1,6 +1,6 @@
 import os.path
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
 from .folders import SeedStorage
 from .log import get_logger
@@ -43,7 +43,8 @@ class SeedPool:
 
 
 class SeedPoolRandom(SeedPool):
-    """Seed pool that generates random members"""
+    """Seed pool that generates random members. This is outside the definition of seeds given in the paper
+    and should be used only for testing"""
 
     def __init__(self, problem, n):
         super().__init__(problem)
@@ -81,3 +82,56 @@ class SeedPoolFolder(SeedPool):
             self.cache[path] = result
         result.problem = self.problem
         return result
+
+
+class SeedFileGenerator:
+    """Class for generating serialized representation of seeds and saving them in files"""
+
+    def __init__(self, problems: list['Problem'], folder: str, member_generator: Generator[Member, None, None]):
+        """
+        Creates a seed file generator. A candidate member will be considered a seed only if it passes evaluation
+        for all given problems.
+        :param problems: a list of problems for which a member must pass evaluation to be considered a seed
+        :param folder: the folder where to store generated seeds
+        :param member_generator: a generator yielding members that are seed candidates
+        """
+        assert problems
+        self.problems = problems
+        self.folder = folder
+        self.generator = member_generator
+
+    def is_candidate_valid(self, member: Member):
+        for problem in self.problems:
+            member.clear_evaluation()
+            satisfy_requirements = member.evaluate(problem.get_evaluator())
+            if not satisfy_requirements:
+                return False
+        return True
+
+    def generate_seeds(self, n: int):
+        """Generates n seeds and save their serialized representation to the folder."""
+        seeds_found = 0
+        attempts = 0
+        storage = SeedStorage(self.problems[0].config, self.folder)
+
+        while seeds_found < n:
+            seed_index = seeds_found
+
+            path = storage.get_path_by_index(seed_index)
+            if path.exists():
+                log.info(f'Skipping seed{seed_index}: already generated')
+                seeds_found += 1
+                continue
+
+            attempts += 1
+            log.info(f'Total attempts: {attempts}; Found {seeds_found}/{n}; Looking for seed{seed_index}')
+
+            candidate = next(self.generator, None)
+            if candidate is None:
+                log.error(f'Could not find {n} seeds: candidate generator exhausted')
+                break
+
+            if self.is_candidate_valid(candidate):
+                candidate.clear_evaluation()
+                storage.save_json_by_path(path, candidate.to_dict())
+                seeds_found += 1
