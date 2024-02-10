@@ -45,7 +45,5 @@ class MNISTConfig(Config):
 
         # ==================
 
-        # TODO: Check if it is ok and add comments
-        self.IMG_SIZE = 28
-        self.NUM_CLASSES = 10
+        # Name of the handwritten digit classifier Keras model
         self.MODEL_FILE = 'cnnClassifier' # 'cnnClassifier_lowLR'
