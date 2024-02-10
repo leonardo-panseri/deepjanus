@@ -19,7 +19,7 @@ class BeamNGConfig(Config):
         self.FITNESS_WEIGHTS = (1.0, -1.0)
 
         # Size of the population
-        self.POP_SIZE = 4#12
+        self.POP_SIZE = 12
         # Number of generations
         self.NUM_GENERATIONS = 100
 
