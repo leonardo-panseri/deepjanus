@@ -106,11 +106,13 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
                 del ind.fitness.values
 
             # Repopulate by substituting descendants of seeds that already generated a solution
-            toolbox.repopulate(pop)
+            new_individuals = toolbox.repopulate(pop)
 
-            # Evaluate the individuals
-            individuals_to_eval = offspring + pop
+            # Choose the individuals to evaluate: all in offspring because they are mutated and any individual
+            # substituted by re-population
+            individuals_to_eval = offspring + new_individuals
 
+        # Evaluate the individuals
         fitness = toolbox.map(toolbox.evaluate, individuals_to_eval)
         for ind, fit in zip(individuals_to_eval, fitness):
             ind.fitness.values = fit

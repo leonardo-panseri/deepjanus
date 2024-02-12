@@ -80,22 +80,25 @@ class Problem:
         for ind in self.archive:
             ind.save(self.current_archive_path)
 
-    def deap_repopulate(self, population: list[Individual]):
+    def deap_repopulate(self, population: list[Individual]) -> list[Individual]:
         """Repopulates by substituting individuals that are evolved from a seed that already generated
-         a solution in the archive."""
+         a solution in the archive. Returns a list of new individuals that have been inserted in the population."""
         if len(self.archive) > 0:
             archived_seeds = [i.seed for i in self.archive]
 
             non_archived_seeds = [seed for seed in self.seed_pool.cache.values() if seed not in archived_seeds]
             if len(non_archived_seeds) == 0:
-                return
+                return []
 
+            new_individuals = []
             for i in range(len(population)):
                 if population[i].seed in archived_seeds:
                     seed = random.choice(non_archived_seeds)
                     ind1 = self.deap_generate_individual(seed)
                     log.info(f'Repopulation: substitute {population[i]} with {ind1}')
                     population[i] = ind1
+                    new_individuals.append(ind1)
+            return new_individuals
 
     def member_class(self):
         """Returns the class that represents members for this problem."""
