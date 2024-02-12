@@ -17,8 +17,8 @@ class MNISTConfig(Config):
         self.NUM_GENERATIONS = 100
 
         # Bounds for the mutation of a member
-        self.MUTATION_LOWER_BOUND = 0.01
-        self.MUTATION_UPPER_BOUND = 0.6
+        self.MUTATION_LOWER_BOUND = 1  # 0.01
+        self.MUTATION_UPPER_BOUND = 6  # 0.6
         # Flag indicating if the sign for the mutation value should be chosen randomly
         self.MUTATION_RANDOMIZE_SIGN = True
         # Minimum distance that an individual must have with all other individuals in the archive to be added
