@@ -43,12 +43,12 @@ class MNISTLocalEvaluator(Evaluator):
 
     def evaluate(self, member: 'MNISTMember', max_attempts=20) -> bool:
         if self.model is None:
-            import tf_keras.models
-            self.model = tf_keras.models.load_model(self.model_file)
+            import tensorflow as tf
+            self.model = tf.saved_model.load(self.model_file)
 
         batch = reshape_bitmap_as_model_input(member.bitmap)
         # Array containing the confidence for each label (digit 0-9)
-        confidences = self.model.predict(batch, verbose=0)[0]
+        confidences = self.model(batch).numpy()[0]
 
         best_label, second_best_label = np.argsort(-confidences)[:2]
 
