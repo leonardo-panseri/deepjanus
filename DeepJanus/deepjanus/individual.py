@@ -147,7 +147,7 @@ class Individual(Generic[T]):
             num_cols = 3
             num_rows = math.ceil(nbh_size / num_cols) + 1
             fig = plt.figure()
-            gs = fig.add_gridspec(num_rows, num_cols)
+            gs = fig.add_gridspec(num_rows, num_cols, hspace=0.5)
             fig.set_size_inches(15, 10)
 
             def plot(member: Member, pos: plt.SubplotSpec):
