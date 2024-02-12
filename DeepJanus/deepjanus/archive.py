@@ -47,8 +47,9 @@ class Archive(set):
         candidates = []
         for individual in population:
             # TODO: Is this ok? Do we need a threshold for distance_to_frontier?
-            error = (individual.unsafe_region_probability[1] - individual.unsafe_region_probability[0]) / 2.
-            if error <= self.TARGET_ERROR:
+            # error = (individual.unsafe_region_probability[1] - individual.unsafe_region_probability[0]) / 2.
+            # if error <= self.TARGET_ERROR:
+            if individual.fitness.values[1] < 0.3:
                 candidates.append(individual)
         return candidates
 

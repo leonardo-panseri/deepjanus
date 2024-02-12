@@ -107,6 +107,8 @@ class Individual(Generic[T]):
         p_th = problem.config.PROBABILITY_THRESHOLD
         ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
 
+        self.fitness.values = (ff1, ff2)
+
         minutes, seconds = divmod(timeit.default_timer() - start, 60)
         log.info(f'Time for eval: {int(minutes):02}:{int(seconds):02}')
         log.info(f'Evaluated {self}')
@@ -190,7 +192,7 @@ class Individual(Generic[T]):
         return ind
 
     def __str__(self):
-        unsafe_eval = '[na]'
+        unsafe_eval = 'na'
         if self.unsafe_region_probability:
             lb = f'{self.unsafe_region_probability[0]:.3f}'
             ub = f'{self.unsafe_region_probability[1]:.3f}'
@@ -200,8 +202,11 @@ class Individual(Generic[T]):
             if self.unsafe_region_probability[1] >= 0:
                 ub = '+' + ub
 
-            unsafe_eval = f'[{lb},{ub}]'
+            unsafe_eval = f'{lb},{ub}'
         # frontier_eval = frontier_eval.ljust(9)
+        f = 'na'
+        if self.fitness.values:
+            f = f'{self.fitness.values[0]:.3f},{self.fitness.values[1]:.3f}'
         return (f'{self.name.ljust(6)} mbr[{self.mbr}] nbh[n={len(self.neighbors)}; '
                 f'sr={len(list(filter(lambda n: n.satisfy_requirements, self.neighbors)))}] seed[{self.seed}] '
-                f'ur{unsafe_eval}')
+                f'ur[{unsafe_eval}] f[{f}]')

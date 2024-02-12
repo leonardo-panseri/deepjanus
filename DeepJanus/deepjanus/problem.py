@@ -99,6 +99,7 @@ class Problem:
                     population[i] = ind1
                     new_individuals.append(ind1)
             return new_individuals
+        return []
 
     def member_class(self):
         """Returns the class that represents members for this problem."""

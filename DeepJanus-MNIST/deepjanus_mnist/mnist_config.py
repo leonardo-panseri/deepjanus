@@ -25,13 +25,13 @@ class MNISTConfig(Config):
         self.ARCHIVE_THRESHOLD = 4.0
 
         # Unsafe region probability threshold
-        self.PROBABILITY_THRESHOLD = 0.01
+        self.PROBABILITY_THRESHOLD = 0.8
         # Desired confidence level for calculating the confidence interval
         self.CONFIDENCE_LEVEL = 0.90
         # Target error for deciding when to stop neighborhood exploration
-        self.TARGET_ERROR = 0.1
+        self.TARGET_ERROR = 0.01
         # Maximum number of neighbors to generate for an individual
-        self.MAX_NEIGHBORS = 20
+        self.MAX_NEIGHBORS = 50
 
         # Flag for turning on/off collection of extended data about simulations
         self.SAVE_SIM_DATA = False
