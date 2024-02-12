@@ -153,6 +153,10 @@ class Individual(Generic[T]):
             def plot(member: Member, pos: plt.SubplotSpec):
                 ax = fig.add_subplot(pos)
                 ax.set_title(f'{member}', fontsize=12)
+                ax.set_yticklabels([])
+                ax.set_xticklabels([])
+                ax.set_xticks([])
+                ax.set_yticks([])
                 member.to_image(ax)
 
             plot(self.mbr, gs[0, 1])
