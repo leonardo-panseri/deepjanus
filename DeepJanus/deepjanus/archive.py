@@ -47,7 +47,7 @@ class Archive(set):
         candidates = []
         for individual in population:
             # TODO: Is this ok? Do we need a threshold for distance_to_frontier?
-            error = (individual.distance_to_frontier[1] - individual.distance_to_frontier[0]) / 2.
+            error = (individual.unsafe_region_probability[1] - individual.unsafe_region_probability[0]) / 2.
             if error <= self.TARGET_ERROR:
                 candidates.append(individual)
         return candidates
@@ -70,7 +70,6 @@ class SmartArchive(Archive):
 
     def process_population(self, pop: Iterable[Individual]):
         for candidate in self.find_candidates(pop):
-            assert candidate.distance_to_frontier, candidate.name
             if len(self) == 0:
                 self._add(candidate)
                 log.debug('Add initial individual')

@@ -21,6 +21,7 @@ class Individual(Generic[T]):
     """Class representing an individual of the population"""
 
     counter = 1
+    _NORMAL_DIST = NormalDist()
 
     def __init__(self, mbr: T, seed: T = None, neighbors: list[T] = None, name: str = None):
         """Creates a DeepJanus individual. Parameter 'name' can be passed to create clones of existing individuals,
@@ -34,7 +35,7 @@ class Individual(Generic[T]):
         self.seed: T | None = seed
 
         self.sparseness: float | None = None
-        self.distance_to_frontier: tuple[float, float] | None = None
+        self.unsafe_region_probability: tuple[float, float] | None = None
 
         # Map to quickly check if neighbors are all different from each other
         self.neighbors_hash = {}
@@ -98,7 +99,7 @@ class Individual(Generic[T]):
             curr_err = (upper_bound - lower_bound) / 2.
             log.info(f'CI is now [{lower_bound:.3f},{upper_bound:.3f}] (err: +-{curr_err:.3f})')
 
-        self.distance_to_frontier = (lower_bound, upper_bound)
+        self.unsafe_region_probability = (lower_bound, upper_bound)
 
         # Fitness function 'Quality of Individual'
         ff1 = self.sparseness
@@ -115,7 +116,7 @@ class Individual(Generic[T]):
     def _calculate_wilson_ci(cls, estimator: float, sample_size: int, confidence_level: float):
         """Calculates the Wilson Confidence Interval for an estimator, given the sample size and the desired confidence
         level. Returns a tuple containing the lower and upper bounds of the CI."""
-        z = NormalDist().inv_cdf((1 + confidence_level) / 2.)
+        z = cls._NORMAL_DIST.inv_cdf((1 + confidence_level) / 2.)
         gamma = (z * z) / sample_size
         p = 1 / (1 + gamma) * (estimator + gamma / 2)
         offset = z / (1 + gamma) * math.sqrt(estimator * (1 - estimator) / sample_size + gamma / (4 * sample_size))
@@ -160,14 +161,14 @@ class Individual(Generic[T]):
                 col = i % num_cols
                 plot(self.neighbors[i], gs[row, col])
 
-            fig.suptitle(f'Neighborhood size = {nbh_size}; Frontier distance = {self.distance_to_frontier}')
-            fig.savefig(folder.joinpath(self.name + '_neighborhood.svg'))
+            fig.suptitle(f'Neighborhood size = {nbh_size}; Unsafe region = {self.unsafe_region_probability}')
+            fig.savefig(folder.joinpath(self.name + '_neighborhood.png'))
             plt.close(fig)
 
     def to_dict(self) -> dict:
         """Serializes the individual into a dictionary that can be easily stored on disk."""
         return {'name': self.name,
-                'frontier_dist': self.distance_to_frontier,
+                'unsafe_region': self.unsafe_region_probability,
                 'archive_sparseness': self.sparseness,
                 'mbr': self.mbr.to_dict(),
                 'neighbors': [nbh.to_dict() for nbh in self.neighbors],
@@ -180,23 +181,23 @@ class Individual(Generic[T]):
         neighbors = [T.from_dict(nbh) for nbh in d['neighbors']]
         seed = T.from_dict(d['seed']) if d['seed'] else None
         ind = individual_creator(mbr, seed, neighbors, d['name'])
-        ind.distance_to_frontier = d['frontier_dist']
+        ind.unsafe_region_probability = d['unsafe_region']
         ind.sparseness = d['archive_sparseness']
         return ind
 
     def __str__(self):
-        frontier_eval = '[na]'
-        if self.distance_to_frontier:
-            lb = f'{self.distance_to_frontier[0]:.3f}'
-            ub = f'{self.distance_to_frontier[1]:.3f}'
+        unsafe_eval = '[na]'
+        if self.unsafe_region_probability:
+            lb = f'{self.unsafe_region_probability[0]:.3f}'
+            ub = f'{self.unsafe_region_probability[1]:.3f}'
 
-            if self.distance_to_frontier[0] >= 0:
+            if self.unsafe_region_probability[0] >= 0:
                 lb = '+' + lb
-            if self.distance_to_frontier[1] >= 0:
+            if self.unsafe_region_probability[1] >= 0:
                 ub = '+' + ub
 
-            frontier_eval = f'[{lb},{ub}]'
+            unsafe_eval = f'[{lb},{ub}]'
         # frontier_eval = frontier_eval.ljust(9)
         return (f'{self.name.ljust(6)} mbr[{self.mbr}] nbh[n={len(self.neighbors)}; '
                 f'sr={len(list(filter(lambda n: n.satisfy_requirements, self.neighbors)))}] seed[{self.seed}] '
-                f'f{frontier_eval}')
+                f'ur{unsafe_eval}')

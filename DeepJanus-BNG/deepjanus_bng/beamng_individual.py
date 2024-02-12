@@ -140,7 +140,7 @@ class BeamNGIndividual(Individual[BeamNGMember]):
 
         pool.join()
 
-        self.distance_to_frontier = (lower_bound, upper_bound)
+        self.unsafe_region_probability = (lower_bound, upper_bound)
 
         # Fitness function 'Quality of Individual'
         ff1 = self.sparseness
