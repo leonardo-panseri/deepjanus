@@ -14,7 +14,7 @@ def calculate_seed_radius(solution: Archive):
         dist = i.mbr.distance(i.seed)
         distances.append(dist)
     radius = np.mean(distances)
-    return radius
+    return radius.item()
 
 
 def calculate_diameter(solution: Archive):
@@ -31,4 +31,4 @@ def calculate_diameter(solution: Archive):
                     max_dist = dist
         max_distances.append(max_dist)
     diameter = np.mean(max_distances)
-    return diameter
+    return diameter.item()
