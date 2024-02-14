@@ -149,8 +149,8 @@ class Individual(Generic[T]):
             num_cols = 3
             num_rows = math.ceil(nbh_size / num_cols) + 1
             fig = plt.figure()
-            gs = fig.add_gridspec(num_rows, num_cols, hspace=0.5)
-            fig.set_size_inches(15, 10)
+            gs = fig.add_gridspec(num_rows, num_cols, hspace=0.8)
+            fig.set_size_inches(20, 15)
 
             def plot(member: Member, pos: plt.SubplotSpec):
                 ax = fig.add_subplot(pos)
@@ -162,13 +162,17 @@ class Individual(Generic[T]):
                 member.to_image(ax)
 
             plot(self.mbr, gs[0, 1])
+            satisfy_requirements = 0
             for i in range(nbh_size):
                 row = math.floor(i / num_cols) + 1
                 col = i % num_cols
                 plot(self.neighbors[i], gs[row, col])
+                if self.neighbors[i].satisfy_requirements:
+                    satisfy_requirements += 1
 
-            fig.suptitle(f'Neighborhood size = {nbh_size}; Unsafe region = {self.unsafe_region_probability}')
-            fig.savefig(folder.joinpath(self.name + '_neighborhood.png'))
+            fig.suptitle(f'Neighbors satisfying req. = {satisfy_requirements}/{nbh_size}; '
+                         f'Unsafe region = {self.unsafe_region_probability[0]:.3f},{self.unsafe_region_probability[1]:.3f}')
+            fig.savefig(folder.joinpath(self.name + '_neighborhood.png'), bbox_inches='tight')
             plt.close(fig)
 
     def to_dict(self) -> dict:
