@@ -114,6 +114,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
 
         # Evaluate the individuals
         fitness = toolbox.map(toolbox.evaluate, individuals_to_eval)
+        # TODO: should archive sparseness be normalized?
         for ind, fit in zip(individuals_to_eval, fitness):
             ind.fitness.values = fit
 

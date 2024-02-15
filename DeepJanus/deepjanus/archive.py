@@ -11,7 +11,9 @@ T = TypeVar("T")
 
 
 def closest_elements(elements_set: set[T], obj: T, distance_fun: Callable[[T, T], float]) -> list[tuple[T, float]]:
-    """Returns pairs of closest elements."""
+    """Given a set, returns a list of closest elements from the set to an object, using the custom function to
+    calculate distances. The output is a sorted list of tuples containing the item of the set and the distance from the
+    object."""
     elements = list(elements_set)
     distances = [distance_fun(obj, el) for el in elements]
     indexes = list(np.argsort(distances))
@@ -24,7 +26,7 @@ class Archive(set):
 
     def __init__(self, config: Config):
         super().__init__()
-        self.TARGET_ERROR = config.TARGET_ERROR
+        self.TARGET_PROBABILITY = config.PROBABILITY_THRESHOLD
 
     def process_population(self, pop: Iterable[Individual]):
         """
@@ -39,17 +41,14 @@ class Archive(set):
         if len(elements) == 0:
             return 1.0
 
-        # TODO: Should this be normalized?
         closest_element_dist = closest_elements(elements, ind, lambda a, b: a.distance(b))[0]
-        return closest_element_dist[1].item()
+        return closest_element_dist[1]
 
     def find_candidates(self, population: Iterable[Individual]):
         candidates = []
         for individual in population:
-            # TODO: Is this ok? Do we need a threshold for distance_to_frontier?
-            # error = (individual.unsafe_region_probability[1] - individual.unsafe_region_probability[0]) / 2.
-            # if error <= self.TARGET_ERROR:
-            if individual.fitness.values[1] < 0.3:
+            lower_bound, upper_bound = individual.unsafe_region_probability
+            if lower_bound <= self.TARGET_PROBABILITY <= upper_bound:
                 candidates.append(individual)
         return candidates
 
