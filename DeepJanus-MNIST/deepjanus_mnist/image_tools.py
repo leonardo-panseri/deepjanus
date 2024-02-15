@@ -77,9 +77,9 @@ def svg_to_bitmap(svg: str) -> np.ndarray:
     return bitmap
 
 
-def calculate_bitmap_distance(bitmap1: np.ndarray, bitmap2: np.ndarray):
+def calculate_bitmap_distance(bitmap1: np.ndarray, bitmap2: np.ndarray) -> float:
     """Measures the 'distance' between two grayscale bitmaps (how different they are)."""
-    return np.linalg.norm(bitmap1 - bitmap2)
+    return np.linalg.norm(bitmap1 - bitmap2).item()
 
 
 if __name__ == '__main__':

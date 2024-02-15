@@ -70,7 +70,7 @@ class MNISTMember(Member):
         return True
 
     def member_hash(self):
-        return hashlib.sha256((self.svg + str(self.expected_label)).encode('UTF-8')).hexdigest()
+        return hashlib.sha256(self.bitmap.tobytes()).hexdigest()
 
     def __str__(self):
         prediction = 'na'
