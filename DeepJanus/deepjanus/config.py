@@ -61,3 +61,25 @@ class Config:
     SEED_POOL_STRATEGY = None
     # Name of the seed pool folder
     SEED_FOLDER = None
+
+    @classmethod
+    def from_dict(cls, d: dict, root_path: str):
+        """Iterates through the dictionary and copy key-value pairs from it to a new instance of Config,
+        that will be returned."""
+        new_instance = cls(root_path)
+        for key, value in d.items():
+           setattr(new_instance, key, value)
+        return new_instance
+
+    @classmethod
+    def from_file(cls, file_path: str, root_path: str):
+        """Reads a serialized config from a json file and returns a new instance with all the key-value pairs copied
+        from the serialized version."""
+        import os
+        import json
+        if os.path.isfile(file_path):
+            with open(file_path, 'r') as f:
+                json_str = f.read()
+                d = json.loads(json_str)
+                return cls.from_dict(d, root_path)
+

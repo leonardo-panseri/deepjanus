@@ -25,6 +25,7 @@ if __name__ == '__main__':
                                                                          'space of a digit recognition system to identify '
                                                                          'its frontier of behaviors')
     parser.add_argument('-s', '--seeds', help='generate seeds from MNIST dataset', action='store_true')
+    parser.add_argument('-c', '--config', type=str, help='load config from file')
 
     subparsers = parser.add_subparsers(dest='subcmd')
 
@@ -33,13 +34,17 @@ if __name__ == '__main__':
     parser_train.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=12)
     parser_train.add_argument('-b', help='batch size', dest='batch_size', type=int, default=128)
 
-    cfg = MNISTConfig(os.path.dirname(__file__))
+    args = parser.parse_args()
+
+    proj_root = os.path.dirname(__file__)
+    if args.config:
+        cfg = MNISTConfig.from_file(args.config, proj_root)
+    else:
+        cfg = MNISTConfig(proj_root)
     prob = MNISTProblem(cfg)
     log_setup.setup_console_log(cfg.FOLDERS.log_ini)
     log_setup.setup_file_log(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
-
-    args = parser.parse_args()
 
     if args.subcmd == 'train':
         from deepjanus_mnist.model_trainer import train_model

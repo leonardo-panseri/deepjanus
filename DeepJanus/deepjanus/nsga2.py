@@ -31,7 +31,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     # Bi-objective fitness function:
     # 1. Maximize the sparseness among the individuals in the archive
     # 2. Minimize the distance to the frontier of behavior
-    creator.create("FitnessMulti", base.Fitness, weights=config.FITNESS_WEIGHTS)
+    creator.create("FitnessMulti", base.Fitness, weights=tuple(config.FITNESS_WEIGHTS))
     # Individuals will be represented by a custom class, based on the problem
     # Their fitness will be evaluated by the bi-objective fitness function defined above
     creator.create("Individual", problem.deap_individual_class(), fitness=creator.FitnessMulti)

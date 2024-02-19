@@ -31,6 +31,7 @@ if __name__ == '__main__':
                                                                        'space of a lane-keep assist system to identify '
                                                                        'its frontier of behaviors')
     parser.add_argument('-s', '--seeds', action='store_true', help='generate seeds')
+    parser.add_argument('-c', '--config', type=str, help='load config from file')
     subparsers = parser.add_subparsers(dest='subcmd')
 
     parser_train = subparsers.add_parser('train', description='Lane-keeping assist system behavioral cloning '
@@ -50,7 +51,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    cfg = BeamNGConfig(os.path.dirname(__file__))
+    proj_root = os.path.dirname(__file__)
+    if args.config:
+        cfg = BeamNGConfig.from_file(args.config, proj_root)
+    else:
+        cfg = BeamNGConfig(proj_root)
     prob = BeamNGProblem(cfg)
     log_setup.setup_console_log(cfg.FOLDERS.log_ini)
     log_setup.setup_file_log(prob.experiment_path
