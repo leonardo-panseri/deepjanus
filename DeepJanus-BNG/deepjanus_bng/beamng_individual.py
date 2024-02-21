@@ -1,5 +1,6 @@
 import json
 import multiprocessing
+import os
 import threading
 import timeit
 from typing import TYPE_CHECKING
@@ -72,7 +73,7 @@ class BeamNGIndividual(Individual[BeamNGMember]):
             # Generate user content folder that the instance of the simulator will use
             # Instances need to have different user folders to avoid conflicts in accessing files
             userpath = problem.config.BEAMNG_USER_DIR.replace('instance0', f'instance{i}')
-            userpath.mkdir(parents=True, exist_ok=True)
+            os.makedirs(userpath, exist_ok=True)
             userpath = str(userpath)
             userpaths.append(userpath)
 
