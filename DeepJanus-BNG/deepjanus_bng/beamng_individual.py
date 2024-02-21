@@ -71,7 +71,8 @@ class BeamNGIndividual(Individual[BeamNGMember]):
             ports.append(port)
             # Generate user content folder that the instance of the simulator will use
             # Instances need to have different user folders to avoid conflicts in accessing files
-            userpath = problem.config.FOLDERS.simulations.joinpath('beamng_parallel', f'{i}', '0.30')
+            userpath = problem.config.BEAMNG_USER_DIR.replace('instance0', f'instance{i}')
+            userpath.mkdir(parents=True, exist_ok=True)
             userpath = str(userpath)
             userpaths.append(userpath)
 

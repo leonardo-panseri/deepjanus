@@ -13,6 +13,14 @@ log = get_logger(__file__)
 
 
 def execute_deepjanus(problem: BeamNGProblem):
+    # Save BeamNGpy logs to file
+    import logging
+    l = logging.getLogger('beamngpy')
+    fh = logging.FileHandler(problem.config.FOLDERS.simulations.joinpath('beamng', 'instance0', 'sim.log'), 'w')
+    fh.setFormatter(logging.Formatter(r'[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s', '%H:%M:%S'))
+    l.addHandler(fh)
+    l.setLevel(logging.DEBUG)
+
     nsga2.main(problem)
 
 

@@ -32,7 +32,7 @@ class BeamNGConfig(Config):
         self.ARCHIVE_THRESHOLD = 35.0
 
         # Unsafe region probability threshold
-        self.PROBABILITY_THRESHOLD = 0.01
+        self.PROBABILITY_THRESHOLD = 0.8
         # Desired confidence level for calculating the confidence interval
         self.CONFIDENCE_LEVEL = 0.90
         # Target error for deciding when to stop neighborhood exploration
@@ -65,10 +65,10 @@ class BeamNGConfig(Config):
 
         # Number of parallel instances of BeamNG to use to evaluate a neighborhood
         # Set to 0 to disable parallel evaluation
-        self.PARALLEL_EVALS = 1
+        self.PARALLEL_EVALS = 3
 
         # BeamNG user data directory
-        self.BEAMNG_USER_DIR = os.path.join(os.getenv('LOCALAPPDATA'), 'BeamNG.tech', '0.30')
+        self.BEAMNG_USER_DIR = str(self.FOLDERS.simulations.joinpath('beamng', 'instance0', '0.31'))
         # Host for the BeamNG instance
         self.BEAMNG_HOST = 'localhost'
         # Port for the BeamNG instance
@@ -77,7 +77,7 @@ class BeamNGConfig(Config):
         self.BEAMNG_STEPS = 5
         # How many frames should the simulator try to render in a second
         # This will influence the duration of a step: 1 step will be 1/fps
-        self.BEAMNG_FPS = 20
+        self.BEAMNG_FPS = 30
         # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks
         # Set to -1 to disable
         self.BEAMNG_RESTART_AFTER = 20
