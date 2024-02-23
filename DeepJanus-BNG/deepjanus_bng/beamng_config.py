@@ -65,10 +65,10 @@ class BeamNGConfig(Config):
 
         # Number of parallel instances of BeamNG to use to evaluate a neighborhood
         # Set to 0 to disable parallel evaluation
-        self.PARALLEL_EVALS = 3
+        self.PARALLEL_EVALS = 2
 
         # BeamNG user data directory
-        self.BEAMNG_USER_DIR = str(self.FOLDERS.simulations.joinpath('beamng', 'instance0', '0.31'))
+        self.BEAMNG_USER_DIR = str(self.FOLDERS.simulations.joinpath('beamng', 'instance0', '0.30'))
         # Host for the BeamNG instance
         self.BEAMNG_HOST = 'localhost'
         # Port for the BeamNG instance

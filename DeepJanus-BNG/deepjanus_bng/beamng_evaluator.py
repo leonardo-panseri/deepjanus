@@ -39,17 +39,25 @@ class BeamNGLocalEvaluator(Evaluator):
         attempt = 0
         while True:
             attempt += 1
+
             if attempt == max_attempts:
                 raise Exception('Exhausted attempts')
+
             if attempt > 1:
                 log.info(f'RETRYING TO run simulation, attempt {attempt}')
             else:
                 log.info(f'{member} BeamNG evaluation start')
+
             if attempt >= 2:
                 time.sleep(5)
-            sim = self._run_simulation(member.road)
-            if sim.info.success:
-                break
+
+            try:
+                sim = self._run_simulation(member.road)
+
+                if sim.info.success:
+                    break
+            except TimeoutError:
+                self.bng.beamng_close()
 
         # Requirement: do not go outside lane boundaries
         satisfy_requirements = sim.min_oob_distance() > 0

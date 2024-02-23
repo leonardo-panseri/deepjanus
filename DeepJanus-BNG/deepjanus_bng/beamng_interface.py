@@ -31,15 +31,18 @@ class BeamNGInterface:
             self.setup_road(road)
 
         # Remove the BeamNG version from the user path, as it will be added automatically by BeamNG
-        user_path = os.path.dirname(config.BEAMNG_USER_DIR)
-        self._bng = BeamNGpy(config.BEAMNG_HOST, config.BEAMNG_PORT, user=user_path)
+        self.user_path = os.path.dirname(config.BEAMNG_USER_DIR)
+        self._initialize()
+
+    def _initialize(self):
+        self._bng = BeamNGpy(self.config.BEAMNG_HOST, self.config.BEAMNG_PORT, user=self.user_path)
 
         self.vehicle: BeamNGVehicle | None = None
 
         self.scenario: Scenario | None = None
         self.camera: Camera | None = None
 
-        self.params = SimulationParams(iteration_steps=config.BEAMNG_STEPS, fps_limit=config.BEAMNG_FPS)
+        self.params = SimulationParams(iteration_steps=self.config.BEAMNG_STEPS, fps_limit=self.config.BEAMNG_FPS)
 
         self.simulation_count = 0
 
