@@ -52,6 +52,10 @@ class Config:
     # Maximum number of neighbors to generate for an individual
     MAX_NEIGHBORS = None
 
+    # Number of parallel workers to use to evaluate a neighborhood
+    # If < 2 evaluation will be sequential
+    PARALLEL_EVALS = 2
+
     # Flag for turning on/off collection of extended data about simulations
     SAVE_SIM_DATA = None
     # Unique identifier for a simulation, can use '$(id)' for an incremental int identifier

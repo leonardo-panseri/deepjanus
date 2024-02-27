@@ -4,7 +4,7 @@ from deepjanus.log import get_logger
 from deepjanus.mutator import Mutator
 from deepjanus.problem import Problem
 from .beamng_config import BeamNGConfig
-from .beamng_evaluator import BeamNGLocalEvaluator
+from .beamng_evaluator import BeamNGLocalEvaluator, BeamNGParallelEvaluator
 from .beamng_individual import BeamNGIndividual
 from .beamng_member import BeamNGMember
 from .beamng_mutator import BeamNGRoadMutator
@@ -37,17 +37,11 @@ class BeamNGProblem(Problem):
 
     def get_evaluator(self) -> Evaluator:
         if not self._evaluator:
-            ev_name = self.config.BEAMNG_EVALUATOR
-            # if ev_name == BeamNGConfig.EVALUATOR_FAKE:
-            #     from self_driving.beamng_evaluator_fake import BeamNGFakeEvaluator
-            #     self._evaluator = BeamNGFakeEvaluator(self.config)
-            if ev_name == BeamNGConfig.EVALUATOR_LOCAL_BEAMNG:
+            parallel_evals = self.config.PARALLEL_EVALS
+            if parallel_evals < 2:
                 self._evaluator = BeamNGLocalEvaluator(self.config)
-            # elif ev_name == BeamNGConfig.EVALUATOR_REMOTE_BEAMNG:
-            #     from self_driving.beamng_evaluator_remote import BeamNGRemoteEvaluator
-            #     self._evaluator = BeamNGRemoteEvaluator(self.config)
             else:
-                raise NotImplemented(self.config.BEAMNG_EVALUATOR)
+                self._evaluator = BeamNGParallelEvaluator(self.config)
 
         return self._evaluator
 

@@ -41,7 +41,7 @@ class MNISTLocalEvaluator(Evaluator):
 
         self.model = None
 
-    def evaluate(self, member: 'MNISTMember', max_attempts=20) -> bool:
+    def evaluate_member_sequential(self, member: 'MNISTMember') -> 'MNISTMember':
         if self.model is None:
             import tensorflow as tf
             self.model = tf.saved_model.load(self.model_file)
@@ -67,6 +67,5 @@ class MNISTLocalEvaluator(Evaluator):
         member.satisfy_requirements = satisfy_requirements
         member.predicted_label = best_label.item()
         member.prediction_quality = prediction_quality.item()
-        log.info(f'{member} evaluation completed')
 
-        return satisfy_requirements
+        return member

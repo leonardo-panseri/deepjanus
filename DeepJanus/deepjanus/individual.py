@@ -1,7 +1,5 @@
 import json
 import math
-import timeit
-from statistics import NormalDist
 from typing import TYPE_CHECKING
 from typing import TypeVar, Generic
 
@@ -21,7 +19,6 @@ class Individual(Generic[T]):
     """Class representing an individual of the population"""
 
     counter = 1
-    _NORMAL_DIST = NormalDist()
 
     def __init__(self, mbr: T, seed: T = None, neighbors: list[T] = None, name: str = None):
         """Creates a DeepJanus individual. Parameter 'name' can be passed to create clones of existing individuals,
@@ -48,12 +45,12 @@ class Individual(Generic[T]):
         log.info(f'Cloned to {res} from {self}')
         return res
 
-    def generate_neighbor(self, problem: 'Problem', index: int) -> Member:
+    def generate_neighbor(self, problem: 'Problem') -> Member:
         """Generate a neighbor of this individual different from all other neighbors already generated."""
         equal_nbr = True
         nbr: Member | None = None
         while equal_nbr:
-            nbr = self.mbr.clone(f'nbr{index + 1}_{self.name.replace("ind", "")}')
+            nbr = self.mbr.clone(f'nbr{len(self.neighbors_hash) + 1}_{self.name.replace("ind", "")}')
             nbr.mutate(problem.get_mutator())
             equal_nbr = nbr.member_hash() in self.neighbors_hash
         self.neighbors_hash[nbr.member_hash()] = True
@@ -61,71 +58,7 @@ class Individual(Generic[T]):
 
     def evaluate(self, problem: 'Problem') -> tuple[float, float]:
         """Evaluates the individual and returns the two fitness values."""
-        log.info(f'Starting evaluation of {self}')
-        start = timeit.default_timer()
-
-        self.sparseness = problem.archive.evaluate_sparseness(self)
-
-        unsafe_count = 0
-        # Evaluate original member
-        if not self.mbr.evaluate(problem.get_evaluator()):
-            unsafe_count += 1
-
-        curr_neighbors = 0
-        max_neighbors = problem.config.MAX_NEIGHBORS
-        curr_err = 1
-        desired_error = problem.config.TARGET_ERROR
-
-        # Empty map
-        self.neighbors_hash = {}
-
-        confidence_level = problem.config.CONFIDENCE_LEVEL
-        lower_bound: float | None = None
-        upper_bound: float | None = None
-        while curr_neighbors < max_neighbors and curr_err > desired_error:
-            # Generate a neighbor different from all other neighbors
-            nbr: Member = self.generate_neighbor(problem, curr_neighbors)
-            self.neighbors.append(nbr)
-
-            if not nbr.evaluate(problem.get_evaluator()):
-                unsafe_count += 1
-
-            curr_neighbors += 1
-
-            # Number of evaluated members, all generated neighbors plus the original member
-            evaluated = curr_neighbors + 1
-            # Calculate Wilson Confidence Interval based on the estimator
-            lower_bound, upper_bound = self._calculate_wilson_ci(unsafe_count / evaluated, evaluated, confidence_level)
-            curr_err = (upper_bound - lower_bound) / 2.
-            log.info(f'CI is now [{lower_bound:.3f},{upper_bound:.3f}] (err: +-{curr_err:.3f})')
-
-        self.unsafe_region_probability = (lower_bound, upper_bound)
-
-        # Fitness function 'Quality of Individual'
-        ff1 = self.sparseness
-        # Fitness function 'Distance to Frontier'
-        p_th = problem.config.PROBABILITY_THRESHOLD
-        ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
-
-        self.fitness.values = (ff1, ff2)
-
-        minutes, seconds = divmod(timeit.default_timer() - start, 60)
-        log.info(f'Time for eval: {int(minutes):02}:{int(seconds):02}')
-        log.info(f'Evaluated {self}')
-        return ff1, ff2
-
-    @classmethod
-    def _calculate_wilson_ci(cls, estimator: float, sample_size: int, confidence_level: float):
-        """Calculates the Wilson Confidence Interval for an estimator, given the sample size and the desired confidence
-        level. Returns a tuple containing the lower and upper bounds of the CI."""
-        z = cls._NORMAL_DIST.inv_cdf((1 + confidence_level) / 2.)
-        gamma = (z * z) / sample_size
-        p = 1 / (1 + gamma) * (estimator + gamma / 2)
-        offset = z / (1 + gamma) * math.sqrt(estimator * (1 - estimator) / sample_size + gamma / (4 * sample_size))
-        lower_bound = p - offset
-        upper_bound = p + offset
-
-        return lower_bound, upper_bound
+        return problem.get_evaluator().evaluate_individual(self, problem)
 
     def mutate(self, problem: 'Problem'):
         """Mutates the individual."""

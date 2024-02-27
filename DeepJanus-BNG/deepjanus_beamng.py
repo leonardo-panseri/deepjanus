@@ -1,6 +1,4 @@
 import os
-import signal
-import sys
 from datetime import datetime
 
 from deepjanus import nsga2
@@ -71,14 +69,6 @@ if __name__ == '__main__':
     log_setup.setup_console_log(cfg.FOLDERS.log_ini)
     log_setup.setup_file_log(prob.experiment_path
                              .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
-
-    def signal_handler(_, __):
-        print('Run interrupted by user')
-        if prob.get_evaluator().bng:
-            prob.get_evaluator().bng.beamng_close()
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, signal_handler)
 
     if args.subcmd == 'train':
         from deepjanus_bng.training import train_from_recordings

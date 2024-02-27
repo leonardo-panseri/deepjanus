@@ -1,4 +1,3 @@
-from .evaluator import Evaluator
 from .log import get_logger
 from .mutator import Mutator
 
@@ -21,16 +20,6 @@ class Member:
         """Creates a deep copy of the member. The name of the new copy can be passed as a parameter."""
         raise NotImplemented()
 
-    def evaluate(self, evaluator: Evaluator) -> bool | None:
-        """Evaluates the member and returns if it satisfies the requirements of the problem."""
-        if self.needs_evaluation():
-            self.satisfy_requirements = evaluator.evaluate(self)
-        else:
-            log.info(f'{self} is already evaluated, skipping')
-
-        assert not self.needs_evaluation()
-        return self.satisfy_requirements
-
     def mutate(self, mutator: Mutator):
         """Mutates the member."""
         mutator.mutate(self)
@@ -39,10 +28,6 @@ class Member:
     def distance(self, o: 'Member') -> float:
         """Calculates the distance with another member."""
         raise NotImplemented()
-
-    def needs_evaluation(self):
-        """Returns True if the member needs to be evaluated, False if it has already been evaluated."""
-        return self.satisfy_requirements is None
 
     def clear_evaluation(self):
         """Clears the results of evaluation for the member."""

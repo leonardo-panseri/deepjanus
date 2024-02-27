@@ -6,8 +6,6 @@ from deepjanus.config import Config, SeedPoolStrategy
 class BeamNGConfig(Config):
     """Extension of the base DeepJanus config for BeamNG-specific parameters."""
 
-    EVALUATOR_LOCAL_BEAMNG = 'EVALUATOR_LOCAL_BEAMNG'
-
     def __init__(self, project_root: str):
         super().__init__(project_root)
         self.PROJECT_ROOT = project_root
@@ -40,6 +38,10 @@ class BeamNGConfig(Config):
         # Maximum number of neighbors to generate for an individual
         self.MAX_NEIGHBORS = 20
 
+        # Number of parallel workers to use to evaluate a neighborhood
+        # If < 2 evaluation will be sequential
+        self.PARALLEL_EVALS = 2
+
         # Flag for turning on/off collection of extended data about simulations
         self.SAVE_SIM_DATA = False
         # Unique identifier for a simulation, can use '$(id)' for an incremental int identifier
@@ -63,10 +65,6 @@ class BeamNGConfig(Config):
         # Maximum speed that the car is allowed to drive (in km/h)
         self.MAX_SPEED = 25
 
-        # Number of parallel instances of BeamNG to use to evaluate a neighborhood
-        # Set to 0 to disable parallel evaluation
-        self.PARALLEL_EVALS = 2
-
         # BeamNG user data directory
         self.BEAMNG_USER_DIR = str(self.FOLDERS.simulations.joinpath('beamng', 'instance0', '0.30'))
         # Host for the BeamNG instance
@@ -81,5 +79,3 @@ class BeamNGConfig(Config):
         # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks
         # Set to -1 to disable
         self.BEAMNG_RESTART_AFTER = 20
-        # Type of evaluator that runs the BeamNG simulations
-        self.BEAMNG_EVALUATOR = self.EVALUATOR_LOCAL_BEAMNG
