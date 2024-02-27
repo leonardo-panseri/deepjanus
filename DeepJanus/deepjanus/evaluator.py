@@ -263,14 +263,18 @@ class ParallelEvaluator(Evaluator):
 
             # If the stopping condition has not been reached, generate a new neighbor and start its evaluation
             if self._check_condition(self.individual):
-                nbr = self.individual.generate_neighbor(self.problem)
-                self._evaluate_member(nbr)
+                # Actually generate a neighbor only if the maximum number of neighbors has not already been reached
+                # We have to take into account also the neighbors currently being evaluated by other workers
+                if len(self.individual.neighbors_hash) < self.max_neighbors:
+                    nbr = self.individual.generate_neighbor(self.problem)
+                    self._evaluate_member(nbr)
             # Else stop the evaluation
             else:
                 self._stop_workers()
-                # If this is the last neighbor being evaluated wake up the main thread
-                if not self.current_evals:
-                    self.done_condition.notify()
+            
+            # If this is the last neighbor being evaluated wake up the main thread
+            if not self.current_evals:
+                self.done_condition.notify()
 
     def _evaluate_member(self, member: 'Member'):
         def on_eval_error(error):
