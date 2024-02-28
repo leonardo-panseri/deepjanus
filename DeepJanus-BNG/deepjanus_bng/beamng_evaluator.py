@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 import traceback
@@ -7,7 +8,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from deepjanus.evaluator import Evaluator, ParallelEvaluator
-from deepjanus.log import get_logger
 from .beamng_config import BeamNGConfig
 from .beamng_interface import BeamNGInterface
 from .beamng_roads import BeamNGRoad
@@ -18,9 +18,9 @@ from .training.training_utils import preprocess
 if TYPE_CHECKING:
     from .beamng_member import BeamNGMember
 
-log = get_logger(__file__)
 
 config: BeamNGConfig
+log: logging.Logger
 bng: BeamNGInterface | None = None
 model_file: str
 model = None
@@ -93,16 +93,9 @@ class BeamNGParallelEvaluator(ParallelEvaluator):
         import tensorflow.python.util.module_wrapper as mw
         mw._PER_MODULE_WARNING_LIMIT = 0
 
-        from logging import FileHandler, Formatter, getLogger, INFO
-        log_file = os.path.join(os.path.dirname(path), 'sim.log')
-        h = FileHandler(log_file, 'w')
-        h.setFormatter(Formatter(rf'[%(asctime)s %(levelname)s] %(message)s', '%H:%M:%S'))
-        log = getLogger('beamngpy')
-        log.setLevel(INFO)
-        log.addHandler(h)
-
-        log.info(f'Starting parallel BeamNG instance {parallel_index} on port {port}')
-
+        log = logging.getLogger('beamngpy')
+        log.setLevel(logging.DEBUG)
+        
         # Create a config with the settings for the instance of the simulator
         config = BeamNGConfig(project_root)
         config.BEAMNG_PORT = port
@@ -124,27 +117,19 @@ def _initialize_globals(cfg: BeamNGConfig):
     speed_limit = cfg.MAX_SPEED
 
 
-def _evaluate_member(member: 'BeamNGMember', stop_workers_event=None, max_attempts=20) -> 'BeamNGMember':
-    attempt = 0
-    while True:
-        attempt += 1
+def _evaluate_member(member: 'BeamNGMember', stop_workers_event=None) -> 'BeamNGMember':
+    if log.handlers:
+        h_old = log.handlers[0]
+        h_old.close()
+        log.removeHandler(h_old)
+    log_file = os.path.join(os.path.dirname(config.BEAMNG_USER_DIR), 'sim.log')
+    h = logging.FileHandler(log_file, 'w')
+    h.setFormatter(logging.Formatter(rf'[%(asctime)s %(levelname)s] %(message)s', '%H:%M:%S'))
+    log.addHandler(h)
 
-        if attempt == max_attempts:
-            raise Exception('Exhausted attempts')
+    log.info(f'Evaluating {member}')
 
-        if attempt > 1:
-            log.info(f'RETRYING TO run simulation, attempt {attempt}')
-
-        if attempt >= 2:
-            time.sleep(5)
-
-        try:
-            sim = _run_simulation(member.road, stop_workers_event)
-
-            if sim.info.success:
-                break
-        except TimeoutError:
-            bng.beamng_close()
+    sim = _run_simulation(member.road, stop_workers_event)
 
     # Requirement: do not go outside lane boundaries
     satisfy_requirements = sim is not None and sim.min_oob_distance() > 0
@@ -161,6 +146,7 @@ def _run_simulation(road: BeamNGRoad, stop_workers_event) -> SimulationData | No
     to the ML model, then send the controls to the simulation. The loop will break if the end of the road is
     reached, if the vehicle exits from its lane or if a max number of iterations is reached."""
     global bng, model
+
     if stop_workers_event is not None and stop_workers_event.is_set():
         _end_simulation()
         return None
@@ -177,62 +163,53 @@ def _run_simulation(road: BeamNGRoad, stop_workers_event) -> SimulationData | No
     sim_data_collector = SimulationDataCollector(bng, simulation_name=name)
 
     sim_data_collector.get_simulation_data().start()
-    try:
-        bng.beamng_bring_up()
 
-        bng.setup_scenario_camera()
+    bng.beamng_bring_up()
 
-        # Make the simulation run for 1 step to fill the car camera buffer
-        bng.beamng_step(1)
+    # bng.setup_scenario_camera()
 
-        if not model:
-            import tensorflow as tf
-            model = tf.saved_model.load(model_file)
+    # Make the simulation run for 1 step to fill the car camera buffer
+    bng.beamng_step(1)
 
-        iterations_count = 1000
-        idx = 0
-        while True:
-            if stop_workers_event is not None and stop_workers_event.is_set():
-                _end_simulation()
-                return None
+    if not model:
+        import tensorflow as tf
+        model = tf.saved_model.load(model_file)
 
-            idx += 1
-            if idx >= iterations_count:
-                sim_data_collector.save()
-                raise Exception('Timeout simulation ', sim_data_collector.name)
+    iterations_count = 1000
+    idx = 0
+    while True:
+        if stop_workers_event is not None and stop_workers_event.is_set():
+            _end_simulation()
+            return None
 
-            vehicle_state = sim_data_collector.collect_current_data(oob_bb=False)
-
-            if vehicle_state.dist_from_goal < 6.0:
-                break
-
-            if vehicle_state.is_oob:
-                break
-
-            img = bng.vehicle.capture_image()
-            # img.save(f"../img/{datetime.now().strftime('%d-%m_%H-%M-%S-%f')[:-3]}.jpg")
-
-            steering_angle, throttle = _predict(img, vehicle_state)
-            bng.vehicle.control(throttle=throttle, steering=steering_angle, brake=0)
-
-            bng.beamng_step()
-
-        sim_data_collector.get_simulation_data().end(success=True)
-    except ConnectionRefusedError:
-        log.warning('Looks like BeamNG simulator has been closed')
-    except Exception as ex:
-        sim_data_collector.get_simulation_data().end(success=False)
-        traceback.print_exception(type(ex), ex, ex.__traceback__)
-    finally:
-        if config.SAVE_SIM_DATA:
+        idx += 1
+        if idx >= iterations_count:
             sim_data_collector.save()
-            try:
-                sim_data_collector.take_car_picture_if_needed()
-            except Exception as ex:
-                log.warning('Cannot take OOB vehicle picture:')
-                traceback.print_exception(type(ex), ex, ex.__traceback__)
+            raise Exception('Timeout simulation ', sim_data_collector.name)
 
-        _end_simulation()
+        vehicle_state = sim_data_collector.collect_current_data(oob_bb=False)
+
+        if vehicle_state.dist_from_goal < 6.0:
+            break
+
+        if vehicle_state.is_oob:
+            break
+
+        img = bng.vehicle.capture_image()
+        # img.save(f"../img/{datetime.now().strftime('%d-%m_%H-%M-%S-%f')[:-3]}.jpg")
+
+        steering_angle, throttle = _predict(img, vehicle_state)
+        bng.vehicle.control(throttle=throttle, steering=steering_angle, brake=0)
+
+        bng.beamng_step()
+
+    sim_data_collector.get_simulation_data().end(success=True)
+
+    if config.SAVE_SIM_DATA:
+        sim_data_collector.save()
+        sim_data_collector.take_car_picture_if_needed()
+
+    _end_simulation()
 
     return sim_data_collector.simulation_data
 
@@ -246,21 +223,18 @@ def _predict(image, car_state: SimulationDataRecord):
     """Uses the loaded model to predict the next steering command for the vehicle from the image
     captured by the camera."""
     global speed_limit
-    try:
-        image = np.asarray(image)
 
-        image = preprocess(image).astype(dtype=np.float32)
-        image = np.array([image])
+    image = np.asarray(image)
 
-        steering_angle = float(model(image).numpy())
+    image = preprocess(image).astype(dtype=np.float32)
+    image = np.array([image])
 
-        speed = car_state.vel_kmh
-        if speed > speed_limit:
-            speed_limit = config.MIN_SPEED  # slow down
-        else:
-            speed_limit = config.MAX_SPEED
-        throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
-        return steering_angle, throttle
-    except Exception as ex:
-        log.error('Cannot predict steering angle:')
-        traceback.print_exception(type(ex), ex, ex.__traceback__)
+    steering_angle = float(model(image).numpy())
+
+    speed = car_state.vel_kmh
+    if speed > speed_limit:
+        speed_limit = config.MIN_SPEED  # slow down
+    else:
+        speed_limit = config.MAX_SPEED
+    throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
+    return steering_angle, throttle

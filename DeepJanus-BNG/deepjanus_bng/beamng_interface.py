@@ -105,10 +105,27 @@ class BeamNGInterface:
         self._bng.set_deterministic(self.params.fps_limit)
         self._bng.pause()
 
+        self._bng.connection.skt.skt.settimeout(10)
+
         if self.vehicle:
             self.vehicle.setup_cameras(self._bng)
 
         self._bng.start_scenario()
+
+        self._bng.connection.skt.skt.settimeout(None)
+
+        # retry = True
+        # while retry:
+        #     try:
+        #         self._bng.connection.skt.skt.settimeout(10)
+        #         self._bng.start_scenario()
+        #         retry = False
+        #     except TimeoutError:
+        #         print("Timed out")
+        #         pass
+        #     finally:
+        #         self._bng.connection.skt.skt.settimeout(None)
+
 
     def beamng_step(self, steps: int = None):
         """Runs the simulation for the predefined number of steps. A custom number of steps can be passed as
@@ -123,9 +140,6 @@ class BeamNGInterface:
             self._bng.stop_scenario()
         except BNGError:
             pass  # No scenario is loaded
-        except Exception as ex:
-            log.warning('Cannot stop BeamNG scenario:')
-            traceback.print_exception(type(ex), ex, ex.__traceback__)
         self.scenario = None
 
         self.simulation_count += 1
