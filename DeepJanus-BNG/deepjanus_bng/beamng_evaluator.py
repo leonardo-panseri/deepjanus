@@ -117,7 +117,7 @@ def _initialize_globals(cfg: BeamNGConfig):
     speed_limit = cfg.MAX_SPEED
 
 
-def _evaluate_member(member: 'BeamNGMember', stop_workers_event=None) -> 'BeamNGMember':
+def _evaluate_member(member: 'BeamNGMember', stop_workers_event=None, retries=5) -> 'BeamNGMember':
     if log.handlers:
         h_old = log.handlers[0]
         h_old.close()
@@ -129,7 +129,18 @@ def _evaluate_member(member: 'BeamNGMember', stop_workers_event=None) -> 'BeamNG
 
     log.info(f'Evaluating {member}')
 
-    sim = _run_simulation(member.road, stop_workers_event)
+
+    while retries > 0:
+        try:
+            sim = _run_simulation(member.road, stop_workers_event)
+            break
+        except TimeoutError:
+            log.warn("BeamNG instance has stopped answering, killing it and restarting")
+            bng.beamng_kill()
+        
+        retries -= 1
+        if retries == 0:
+            raise Exception(f"BeamNG instance evaluating {member} on port {config.BEAMNG_PORT} cannot be recovered")
 
     # Requirement: do not go outside lane boundaries
     satisfy_requirements = sim is not None and sim.min_oob_distance() > 0

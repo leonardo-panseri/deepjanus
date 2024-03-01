@@ -1,6 +1,7 @@
 import os
 import subprocess
 import traceback
+import time
 
 from PIL import Image
 from beamngpy import BeamNGpy, Scenario
@@ -105,26 +106,15 @@ class BeamNGInterface:
         self._bng.set_deterministic(self.params.fps_limit)
         self._bng.pause()
 
-        self._bng.connection.skt.skt.settimeout(10)
-
         if self.vehicle:
             self.vehicle.setup_cameras(self._bng)
 
+        # Set the socket in non blocking mode before sending the StartScenario message
+        # There is a bug in BeamNG that randomly breaks the server that listen for BeamNGpy messages
+        # The only solution is to detect when this happens and restart the BeamNG instance
+        self._bng.connection.skt.skt.settimeout(20)
         self._bng.start_scenario()
-
         self._bng.connection.skt.skt.settimeout(None)
-
-        # retry = True
-        # while retry:
-        #     try:
-        #         self._bng.connection.skt.skt.settimeout(10)
-        #         self._bng.start_scenario()
-        #         retry = False
-        #     except TimeoutError:
-        #         print("Timed out")
-        #         pass
-        #     finally:
-        #         self._bng.connection.skt.skt.settimeout(None)
 
 
     def beamng_step(self, steps: int = None):
@@ -168,6 +158,14 @@ class BeamNGInterface:
             except Exception as ex:
                 log.warning('Cannot close BeamNG instance:')
                 traceback.print_exception(type(ex), ex, ex.__traceback__)
+    
+    def beamng_kill(self, sleep_seconds=5):
+        """Kills the simulator."""
+        if self._bng:
+            self._bng.disconnect()
+            self._bng.process.kill()
+            self._initialize()
+            time.sleep(sleep_seconds)
 
 
 if __name__ == '__main__':

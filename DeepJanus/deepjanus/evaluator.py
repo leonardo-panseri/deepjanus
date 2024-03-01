@@ -226,11 +226,11 @@ class ParallelEvaluator(Evaluator):
         with self.done_condition:
             # If an error occurred in one of the other workers do nothing
             if self.worker_error:
-                log.debug(f'Error {error} occured in other worker, ignoring additional errors')
+                log.debug(f'Error "{error}" occured in other worker, ignoring additional errors')
                 return
 
             # If a worker raised an error, save it and stop the evaluation
-            log.debug(f'Error {error} occured in worker, terminating')
+            log.debug(f'Error "{error}" occured in worker, terminating')
             self.worker_error = error
             self._close_pool()
             self.done_condition.notify()
