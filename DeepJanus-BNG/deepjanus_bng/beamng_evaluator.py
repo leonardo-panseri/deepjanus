@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import time
-import traceback
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -38,6 +37,10 @@ class BeamNGLocalEvaluator(Evaluator):
 
     @staticmethod
     def evaluate_member_sequential(member: 'BeamNGMember') -> 'BeamNGMember':
+        global log
+        log = logging.getLogger('beamngpy')
+        log.setLevel(logging.INFO)
+
         return _evaluate_member(member)
 
 
@@ -94,7 +97,7 @@ class BeamNGParallelEvaluator(ParallelEvaluator):
         mw._PER_MODULE_WARNING_LIMIT = 0
 
         log = logging.getLogger('beamngpy')
-        log.setLevel(logging.DEBUG)
+        log.setLevel(logging.INFO)
         
         # Create a config with the settings for the instance of the simulator
         config = BeamNGConfig(project_root)
