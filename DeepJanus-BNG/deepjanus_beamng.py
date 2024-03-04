@@ -7,6 +7,9 @@ from deepjanus.seed_pool import SeedFileGenerator
 from deepjanus_bng.beamng_config import BeamNGConfig
 from deepjanus_bng.beamng_problem import BeamNGProblem
 
+import matplotlib
+matplotlib.use('Agg')
+
 log = get_logger(__file__)
 
 
