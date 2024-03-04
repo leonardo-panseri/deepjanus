@@ -128,7 +128,7 @@ class Evaluator:
 
     def _evaluate_member(self, member: 'Member'):
         """Method that implements the strategy to evaluate a single member. It should call the user-defined function
-        evaluate_member(member)."""
+        evaluate_member_*(member)."""
         log.info(f'{member} evaluation start')
         if not self.evaluate_member_sequential(member).satisfy_requirements:
             self.unsafe += 1
@@ -224,15 +224,14 @@ class ParallelEvaluator(Evaluator):
 
     def _on_eval_error(self, error):
         """Callback for errors raised by worker processes."""
-        with self.done_condition:
-            # If an error occurred in one of the other workers do nothing
-            if self.worker_error:
-                log.debug('Error occurred in other worker, ignoring additional errors')
-                traceback.print_exception(type(error), error, error.__traceback__)
-                return
+        # If an error occurred in one of the other workers do nothing
+        if self.worker_error:
+            log.error(f'Error occurred in other worker, ignoring additional error: {error}')
+            return
 
+        with self.done_condition:
             # If a worker raised an error, save it and stop the evaluation
-            log.debug('Error occurred in worker, terminating')
+            log.error('Error occurred in worker, terminating')
             traceback.print_exception(type(error), error, error.__traceback__)
             self.worker_error = error
             self._close_pool()
@@ -263,8 +262,12 @@ class ParallelEvaluator(Evaluator):
                 self.unsafe += 1
             log.info(f'{member} evaluation completed')
 
-            # If this is not the main member of the individual, update the CI
-            if member.name.startswith('nbr'):
+            # If this is the main member of the individual update it with the results
+            # (the member passed to the worker for evaluation is serialized, so it is no longer a reference)
+            if not member.name.startswith('nbr'):
+                self.individual.mbr.satisfy_requirements = member.satisfy_requirements
+            # If this is not the main member of the individual, update the CI, and add it to the neighbors
+            else:
                 self.individual.neighbors.append(member)
 
                 lower_bound, upper_bound = self._calculate_wilson_ci()
