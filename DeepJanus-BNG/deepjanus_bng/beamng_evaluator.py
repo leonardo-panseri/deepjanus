@@ -129,13 +129,13 @@ def _evaluate_member(member: 'BeamNGMember', stop_workers_event=None, retries=5)
 
     log.info(f'Evaluating {member}')
 
-
+    sim = None
     while retries > 0:
         try:
             sim = _run_simulation(member.road, stop_workers_event)
             break
         except TimeoutError:
-            log.warn("BeamNG instance has stopped answering, killing it and restarting")
+            log.warning("BeamNG instance has stopped answering, killing it and restarting")
             bng.beamng_kill()
         
         retries -= 1

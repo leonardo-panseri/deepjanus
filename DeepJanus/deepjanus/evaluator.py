@@ -1,4 +1,5 @@
 import math
+import traceback
 from multiprocessing import Manager, Pool, Queue
 from multiprocessing.managers import SyncManager
 from multiprocessing.pool import Pool as ProcessPool
@@ -60,7 +61,7 @@ class Evaluator:
         start = timeit.default_timer()
 
         # Calculates sparseness of this individual wrt other individuals in the archive
-        sparseness = problem.archive.evaluate_sparseness(self)
+        sparseness = problem.archive.evaluate_sparseness(individual)
         individual.sparseness = sparseness
 
         # Generates neighborhood to calculate unsafe region confidence interval
@@ -226,11 +227,13 @@ class ParallelEvaluator(Evaluator):
         with self.done_condition:
             # If an error occurred in one of the other workers do nothing
             if self.worker_error:
-                log.debug(f'Error "{error}" occured in other worker, ignoring additional errors')
+                log.debug('Error occurred in other worker, ignoring additional errors')
+                traceback.print_exception(type(error), error, error.__traceback__)
                 return
 
             # If a worker raised an error, save it and stop the evaluation
-            log.debug(f'Error "{error}" occured in worker, terminating')
+            log.debug('Error occurred in worker, terminating')
+            traceback.print_exception(type(error), error, error.__traceback__)
             self.worker_error = error
             self._close_pool()
             self.done_condition.notify()
