@@ -22,8 +22,8 @@ PROJECT_ROOT = ""
 class BeamNGIndividual(Individual[BeamNGMember]):
     """Individual for DeepJanus-BNG"""
 
-    def __init__(self, mbr: BeamNGMember, seed: BeamNGMember = None,
+    def __init__(self, mbr: BeamNGMember, seed_index: BeamNGMember = None,
                  neighbors: list[BeamNGMember] = None, name: str = None):
         """Creates a DeepJanus-BNG individual. Parameter 'name' can be passed to create clones of existing individuals,
         disabling the automatic incremental names."""
-        super().__init__(mbr, seed, neighbors, name)
+        super().__init__(mbr, seed_index, neighbors, name)

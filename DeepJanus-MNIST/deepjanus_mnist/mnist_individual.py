@@ -9,6 +9,6 @@ log = get_logger(__file__)
 class MNISTIndividual(Individual[MNISTMember]):
     """Individual for DeepJanus-MNIST"""
 
-    def __init__(self, mbr: MNISTMember, seed: MNISTMember = None,
+    def __init__(self, mbr: MNISTMember, seed_index: MNISTMember = None,
                  neighbors: list[MNISTMember] = None, name: str = None):
-        super().__init__(mbr, seed, neighbors, name)
+        super().__init__(mbr, seed_index, neighbors, name)

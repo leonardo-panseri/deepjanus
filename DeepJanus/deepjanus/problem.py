@@ -84,16 +84,21 @@ class Problem:
         """Repopulates by substituting individuals that are evolved from a seed that already generated
          a solution in the archive. Returns a list of new individuals that have been inserted in the population."""
         if len(self.archive) > 0:
-            archived_seeds = [i.seed for i in self.archive]
+            archived_seed_indices = [i.seed_index for i in self.archive]
 
-            non_archived_seeds = [seed for seed in self.seed_pool.cache.values() if seed not in archived_seeds]
-            if len(non_archived_seeds) == 0:
+            non_archived_seed_indices = []
+            for i in range(len(self.seed_pool)):
+                if i in archived_seed_indices:
+                    continue
+                non_archived_seed_indices.append(i)
+
+            if len(non_archived_seed_indices) == 0:
                 return []
 
             new_individuals = []
             for i in range(len(population)):
-                if population[i].seed in archived_seeds:
-                    seed = random.choice(non_archived_seeds)
+                if population[i].seed_index in archived_seed_indices:
+                    seed = self.seed_pool[random.choice(non_archived_seed_indices)]
                     ind1 = self.deap_generate_individual(seed)
                     log.info(f'Repopulation: substitute {population[i]} with {ind1}')
                     population[i] = ind1
@@ -120,8 +125,8 @@ class Problem:
         report = {
             'generations': self.config.NUM_GENERATIONS,
             'archive_len': len(self.archive),
-            'radius': calculate_seed_radius(self.archive),
-            'diameter': calculate_diameter(self.archive)
+            'radius': calculate_seed_radius(self),
+            'diameter': calculate_diameter(self)
         }
         self.experiment_path.joinpath(f'report.json').write_text(json.dumps(report))
         self.experiment_path.joinpath(f'logbook.json').write_text(json.dumps(logbook, cls=NumpyArrayEncoder))

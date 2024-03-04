@@ -20,7 +20,7 @@ class Individual(Generic[T]):
 
     counter = 1
 
-    def __init__(self, mbr: T, seed: T = None, neighbors: list[T] = None, name: str = None):
+    def __init__(self, mbr: T, seed_index: int = None, neighbors: list[T] = None, name: str = None):
         """Creates a DeepJanus individual. Parameter 'name' can be passed to create clones of existing individuals,
         disabling the automatic incremental names."""
         self.name: str = name if name else f'ind{str(Individual.counter)}'
@@ -29,7 +29,7 @@ class Individual(Generic[T]):
 
         self.mbr: T = mbr
         self.neighbors: list[T] = neighbors if neighbors else []
-        self.seed: T | None = seed
+        self.seed_index: int | None = seed_index
 
         self.sparseness: float | None = None
         self.unsafe_region_probability: tuple[float, float] | None = None
@@ -41,7 +41,7 @@ class Individual(Generic[T]):
         """Creates a deep copy of the individual using the provided DEAP creator."""
         # Need to use the DEAP creator to instantiate new individual
         # Do not pass self.name, as we use this to create the offspring
-        res = individual_creator(self.mbr.clone(), self.seed)
+        res = individual_creator(self.mbr.clone(), self.seed_index)
         log.info(f'Cloned to {res} from {self}')
         return res
 
@@ -115,15 +115,15 @@ class Individual(Generic[T]):
                 'archive_sparseness': self.sparseness,
                 'mbr': self.mbr.to_dict(),
                 'neighbors': [nbh.to_dict() for nbh in self.neighbors],
-                'seed': self.seed.to_dict() if self.seed else None}
+                'seed': self.seed_index}
 
     @classmethod
     def from_dict(cls, d, individual_creator):
         """Builds an individual from its serialized representation using the provided DEAP creator."""
         mbr = T.from_dict(d['mbr'])
         neighbors = [T.from_dict(nbh) for nbh in d['neighbors']]
-        seed = T.from_dict(d['seed']) if d['seed'] else None
-        ind = individual_creator(mbr, seed, neighbors, d['name'])
+        seed_index = d['seed']
+        ind = individual_creator(mbr, seed_index, neighbors, d['name'])
         ind.unsafe_region_probability = d['unsafe_region']
         ind.sparseness = d['archive_sparseness']
         return ind
@@ -145,5 +145,5 @@ class Individual(Generic[T]):
         if self.fitness.values:
             f = f'{self.fitness.values[0]:.3f},{self.fitness.values[1]:.3f}'
         return (f'{self.name.ljust(6)} mbr[{self.mbr}] nbh[n={len(self.neighbors)}; '
-                f'sr={len(list(filter(lambda n: n.satisfy_requirements, self.neighbors)))}] seed[{self.seed}] '
+                f'sr={len(list(filter(lambda n: n.satisfy_requirements, self.neighbors)))}] seed[{self.seed_index}] '
                 f'ur[{unsafe_eval}] f[{f}]')
