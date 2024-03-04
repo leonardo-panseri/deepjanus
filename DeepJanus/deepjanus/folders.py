@@ -107,7 +107,7 @@ class FolderStorage:
     def save_json_by_path(cls, path: str | Path, object_instance):
         """Save a JSON representation of an object to the file at the path."""
         with open(path, 'w') as f:
-            dumps = json.dumps(object_instance, indent=2)
+            dumps = json.dumps(object_instance)
             f.write(dumps)
         return dumps
 

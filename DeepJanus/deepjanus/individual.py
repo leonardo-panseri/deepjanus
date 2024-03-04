@@ -73,7 +73,7 @@ class Individual(Generic[T]):
         """Saves a human-interpretable representation of the individual on disk."""
         # Save a JSON representation of the individual
         json_path = folder.joinpath(self.name + '.json')
-        json_path.write_text(json.dumps(self.to_dict(), indent=2))
+        json_path.write_text(json.dumps(self.to_dict()))
 
         # Save an image of member and all neighbors
         if neighborhood_image:
