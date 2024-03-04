@@ -40,7 +40,7 @@ class BeamNGConfig(Config):
 
         # Number of parallel workers to use to evaluate a neighborhood
         # If < 2 evaluation will be sequential
-        self.PARALLEL_EVALS = 2
+        self.PARALLEL_EVALS = 11
 
         # Flag for turning on/off collection of extended data about simulations
         self.SAVE_SIM_DATA = False
@@ -66,11 +66,11 @@ class BeamNGConfig(Config):
         self.MAX_SPEED = 25
 
         # BeamNG user data directory
-        self.BEAMNG_USER_DIR = str(self.FOLDERS.simulations.joinpath('beamng', 'instance0', '0.30'))
+        self.BEAMNG_USER_DIR = str(self.FOLDERS.simulations.joinpath('beamng', 'instance0', '0.31'))
         # Host for the BeamNG instance
         self.BEAMNG_HOST = 'localhost'
         # Port for the BeamNG instance
-        self.BEAMNG_PORT = 12345
+        self.BEAMNG_PORT = 65000
         # How many steps should the simulator advance at each iteration
         self.BEAMNG_STEPS = 5
         # How many frames should the simulator try to render in a second
