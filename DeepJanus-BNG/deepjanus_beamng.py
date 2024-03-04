@@ -13,19 +13,8 @@ matplotlib.use('Agg')
 log = get_logger(__file__)
 
 
-def execute_deepjanus(problem: BeamNGProblem):
-    # Save BeamNGpy logs to file
-    import logging
-    from pathlib import Path
-    l = logging.getLogger('beamngpy')
-    userpath = Path(problem.config.BEAMNG_USER_DIR).parent
-    userpath.mkdir(parents=True, exist_ok=True)
-    fh = logging.FileHandler(userpath.joinpath('sim.log'), 'w')
-    fh.setFormatter(logging.Formatter(r'[%(asctime)s %(levelname)s %(filename)s:%(lineno)d] %(message)s', '%H:%M:%S'))
-    l.addHandler(fh)
-    l.setLevel(logging.DEBUG)
-
-    nsga2.main(problem)
+def execute_deepjanus(problem: BeamNGProblem, restart_from_last_gen):
+    nsga2.main(problem, restart_from_last_gen=restart_from_last_gen)
 
 
 def generate_seeds(problem1: BeamNGProblem, folder_name='generated', quantity=12):
@@ -44,6 +33,8 @@ if __name__ == '__main__':
                                                                        'its frontier of behaviors')
     parser.add_argument('-s', '--seeds', action='store_true', help='generate seeds')
     parser.add_argument('-c', '--config', type=str, help='load config from file')
+    parser.add_argument('-r', dest='restart_from_last_gen', action='store_true',
+                        help='restarts experiment from last generation')
     subparsers = parser.add_subparsers(dest='subcmd')
 
     parser_train = subparsers.add_parser('train', description='Lane-keeping assist system behavioral cloning '
@@ -90,4 +81,4 @@ if __name__ == '__main__':
         import tensorflow.python.util.module_wrapper as mw
         mw._PER_MODULE_WARNING_LIMIT = 0
 
-        execute_deepjanus(prob)
+        execute_deepjanus(prob, args.restart_from_last_gen)

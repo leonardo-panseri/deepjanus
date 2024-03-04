@@ -1,6 +1,6 @@
 import json
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 from typing import TypeVar, Generic
 
 import matplotlib.pyplot as plt
@@ -118,12 +118,17 @@ class Individual(Generic[T]):
                 'seed': self.seed_index}
 
     @classmethod
-    def from_dict(cls, d, individual_creator):
+    def from_dict(cls, d, individual_creator, member_class: Type[T]):
         """Builds an individual from its serialized representation using the provided DEAP creator."""
-        mbr = T.from_dict(d['mbr'])
-        neighbors = [T.from_dict(nbh) for nbh in d['neighbors']]
+        name: str = d['name']
+        mbr = member_class.from_dict(d['mbr'], name.replace('ind', 'mbr'))
+        neighbors = []
+        i = 1
+        for nbr in d['neighbors']:
+            neighbors.append(member_class.from_dict(nbr, name.replace('ind', f'nbr{i}_')))
+            i += 1
         seed_index = d['seed']
-        ind = individual_creator(mbr, seed_index, neighbors, d['name'])
+        ind = individual_creator(mbr, seed_index, neighbors, name)
         ind.unsafe_region_probability = d['unsafe_region']
         ind.sparseness = d['archive_sparseness']
         return ind

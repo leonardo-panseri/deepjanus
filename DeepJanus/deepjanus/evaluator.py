@@ -43,6 +43,15 @@ class Evaluator:
         """Evaluates if a member satisfies the requirements of the problem."""
         raise NotImplementedError()
 
+    @staticmethod
+    def calculate_fitness_functions(archive_sparseness: float, p_th: float, lower_bound: float, upper_bound: float):
+        """Calculates the two fitness functions."""
+        # Fitness function 'Quality of Individual'
+        ff1 = archive_sparseness
+        # Fitness function 'Distance to Frontier'
+        ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
+        return ff1, ff2
+
     def _reset(self, problem: 'Problem'):
         """Resets all variables to start evaluation of a new individual."""
         self.max_neighbors = problem.config.MAX_NEIGHBORS
@@ -68,11 +77,8 @@ class Evaluator:
         lower_bound, upper_bound = self._do_evaluation(individual, problem)
         individual.unsafe_region_probability = (lower_bound, upper_bound)
 
-        # Fitness function 'Quality of Individual'
-        ff1 = sparseness
-        # Fitness function 'Distance to Frontier'
         p_th = problem.config.PROBABILITY_THRESHOLD
-        ff2 = max(abs(upper_bound - p_th), abs(lower_bound - p_th)) / max(p_th, 1 - p_th)
+        ff1, ff2 = self.calculate_fitness_functions(sparseness, p_th, lower_bound, upper_bound)
 
         # Update fitness here to print new values in logs
         individual.fitness.values = (ff1, ff2)

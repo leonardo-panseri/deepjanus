@@ -9,7 +9,6 @@ from deap import tools
 from .archive import Archive
 from .config import Config, SeedPoolStrategy
 from .evaluator import Evaluator
-from .folders import delete_folder_recursively
 from .individual import Individual
 from .log import get_logger
 from .member import Member
@@ -41,8 +40,6 @@ class Problem:
         self._mutator: Mutator | None = None
 
         self.experiment_path = config.FOLDERS.experiments.joinpath(self.config.EXPERIMENT_NAME)
-        delete_folder_recursively(self.experiment_path)
-        self.experiment_path.mkdir(parents=True, exist_ok=True)
 
         self.current_generation_path: Path | None = None
         self.current_population_path: Path | None = None
@@ -141,10 +138,13 @@ class Problem:
         self.current_archive_path = self.current_generation_path.joinpath('archive')
         self.current_archive_path.mkdir(parents=True, exist_ok=True)
 
-    def on_iteration_end(self, stats_record: dict):
+    def on_iteration_end(self, gen_idx: int, stats_record: dict):
         """Callback to execute actions at the end of each iteration."""
         (self.current_generation_path.joinpath('fitness_stats.json')
          .write_text(json.dumps(stats_record, cls=NumpyArrayEncoder)))
+        (self.experiment_path.joinpath('status.json')
+         .write_text(json.dumps({'last_gen': gen_idx,
+                                 'ind_counter': Individual.counter})))
 
     def initialize_archive(self) -> Archive:
         """Initializes the archive to store solutions of the problem."""

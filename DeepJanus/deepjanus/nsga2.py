@@ -1,3 +1,4 @@
+import json
 import random
 import timeit
 
@@ -6,21 +7,24 @@ from deap import base
 from deap import creator
 from deap import tools
 
+from .evaluator import Evaluator
+from .folders import delete_folder_recursively, FolderStorage
+from .individual import Individual
 from .log import get_logger
 from .problem import Problem
 
 log = get_logger(__file__)
 
 
-def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray = None):
+def main(problem: Problem, seed:  int | float | str | bytes | bytearray = None, restart_from_last_gen=False):
     """
     Executes the DeepJanus algorithm on a given problem.
     :param problem: class representing the search problem that DeepJanus needs to solve
     :param seed: seed to be used for all pseudorandom operations in this run of DeepJanus
+    :param restart_from_last_gen: if the experiment should be restarted keeping all the previous generations
     :return: a tuple containing the population of the final generation and the logbook where generations
      statistics are saved
     """
-
     config = problem.config
     random.seed(seed)
 
@@ -78,15 +82,27 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
 
     exp_start = timeit.default_timer()
 
-    # Customizable callback to execute actions at the start of the experiment
-    problem.on_experiment_start()
+    if restart_from_last_gen:
+        start_gen, pop = load_last_gen_data(problem)
+        # This will only assign the crowding distance to the individuals (no actual selection is done)
+        pop = toolbox.select(pop, config.POP_SIZE)
+        log.info(f'### Restarting from {start_gen} - loaded {len(pop)} individuals ({len(problem.archive)} in archive)')
+    else:
+        delete_folder_recursively(problem.experiment_path)
 
-    # Generate initial population
-    log.info("### Initializing population...")
-    pop = toolbox.population(n=config.POP_SIZE)
+        problem.experiment_path.mkdir(parents=True, exist_ok=True)
+
+        start_gen = 0
+
+        # Customizable callback to execute actions at the start of the experiment
+        problem.on_experiment_start()
+
+        # Generate initial population
+        log.info("### Initializing population...")
+        pop = toolbox.population(n=config.POP_SIZE)
 
     # Begin the generational process
-    for gen in range(config.NUM_GENERATIONS):
+    for gen in range(start_gen, config.NUM_GENERATIONS):
         log.info(f"### Generation {gen}")
         gen_start = timeit.default_timer()
 
@@ -131,7 +147,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
         log.info(f"Generation {gen} stats:\n{logbook.header}\n{logbook.stream}")
 
         # Customizable callback to execute actions at the end of each iteration
-        problem.on_iteration_end(record)
+        problem.on_iteration_end(gen, record)
 
         hours, remainder = divmod(timeit.default_timer() - gen_start, 3600)
         minutes, seconds = divmod(remainder, 60)
@@ -147,5 +163,30 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
     return pop, logbook
 
 
-if __name__ == "__main__":
-    final_population, search_stats = main()
+def load_last_gen_data(problem: Problem):
+    status = json.loads(problem.experiment_path.joinpath('status.json').read_text())
+
+    ind_counter = status['ind_counter']
+    Individual.counter = ind_counter
+
+    last_gen_idx = status['last_gen']
+    delete_folder_recursively(problem.experiment_path.joinpath(f'gen{last_gen_idx + 1}'))
+
+    pop = []
+    ind_by_name = {}
+    pop_storage = FolderStorage(problem.experiment_path.joinpath(f'gen{last_gen_idx}', 'population'), 'ind{}.json')
+    for path in pop_storage.all_files('*.json'):
+        ind: Individual = Individual.from_dict(pop_storage.load_json_by_path(path), problem.individual_creator,
+                                               problem.member_class())
+        ind_by_name[ind.name] = ind
+        lb, ub = ind.unsafe_region_probability
+        ind.fitness.values = (Evaluator.calculate_fitness_functions(ind.sparseness,
+                                                                    problem.config.PROBABILITY_THRESHOLD, lb, ub))
+        pop.append(ind)
+
+    archive_storage = FolderStorage(problem.experiment_path.joinpath(f'gen{last_gen_idx}', 'archive'), 'ind{}.json')
+    for path in archive_storage.all_files('*.json'):
+        name = pop_storage.load_json_by_path(path)['name']
+        problem.archive.add(ind_by_name[name])
+
+    return last_gen_idx + 1, pop

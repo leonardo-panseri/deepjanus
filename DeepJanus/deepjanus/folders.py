@@ -61,21 +61,21 @@ class FolderStorage:
         Create an interface for storing and loading data in a folder. The folder will be created if it does not
         exist.
         :param path: the path to the folder
-        :param mask: the pattern for file names in the folder (something like 'road{:03}_nodes.json')
+        :param mask: the pattern for file names in the folder (something like 'ind{}.json')
         """
         self.mask = mask
         self.folder = path
         path.mkdir(parents=True, exist_ok=True)
 
-    def all_files(self) -> list[str]:
+    def all_files(self, glob: str = '*.*') -> list[str]:
         """Gets a list of absolute paths for all files contained in the folder sorted in alphabetical order."""
 
         def natural_keys(text):
             """Keys for natural ordering of file names containing digits"""
             return [int(c) if c.isdigit() else c for c in re.split(r'(\d+)', text)]
 
-        expanded = [os.path.join(self.folder, filename) for filename in os.listdir(self.folder)]
-        return sorted([path for path in expanded if os.path.isfile(path)], key=natural_keys)
+        paths = [str(path.absolute()) for path in self.folder.glob(glob)]
+        return sorted(paths, key=natural_keys)
 
     def get_path_by_index(self, index: int) -> Path:
         """Get the path to the file with the given index, using the mask to generate the file name."""
