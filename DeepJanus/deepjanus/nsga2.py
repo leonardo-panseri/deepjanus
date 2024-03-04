@@ -128,7 +128,7 @@ def main(problem: Problem = None, seed:  int | float | str | bytes | bytearray =
         # Calculate statistics for the current generation
         record = stats.compile(pop)
         logbook.record(gen=gen, evals=len(individuals_to_eval), **record)
-        log.info(f"Generation {gen} stats:\n{logbook.stream}")
+        log.info(f"Generation {gen} stats:\n{logbook.header}\n{logbook.stream}")
 
         # Customizable callback to execute actions at the end of each iteration
         problem.on_iteration_end(record)
