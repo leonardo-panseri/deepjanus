@@ -103,7 +103,7 @@ class SeedFileGenerator:
     def is_candidate_valid(self, member: Member):
         for problem in self.problems:
             member.clear_evaluation()
-            satisfy_requirements = member.evaluate(problem.get_evaluator())
+            satisfy_requirements = problem.get_evaluator().evaluate_member_sequential(member).satisfy_requirements
             if not satisfy_requirements:
                 return False
         return True

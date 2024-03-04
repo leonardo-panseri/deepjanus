@@ -25,12 +25,12 @@ def execute_deepjanus(problem: BeamNGProblem):
     nsga2.main(problem)
 
 
-def generate_seeds(problem1: BeamNGProblem, problem2: BeamNGProblem, folder_name='generated', quantity=12):
+def generate_seeds(problem1: BeamNGProblem, folder_name='generated', quantity=12):
     def seed_candidate_generator():
         while True:
             yield problem1.generate_random_member()
 
-    seed_generator = SeedFileGenerator([problem1, problem2], folder_name, seed_candidate_generator())
+    seed_generator = SeedFileGenerator([problem1], folder_name, seed_candidate_generator())
     seed_generator.generate_seeds(quantity)
 
 
@@ -77,11 +77,8 @@ if __name__ == '__main__':
         from deepjanus_bng.training import train_dataset_recorder
         train_dataset_recorder.main(args.iterations)
     elif args.seeds:
-        cfg_lq = BeamNGConfig(os.path.dirname(__file__))
-        cfg_lq.BEAMNG_PORT += 1
-        cfg_lq.MODEL_FILE = 'self-driving-car-4600'
-        prob_lq = BeamNGProblem(cfg_lq)
-        generate_seeds(prob, prob_lq)
+        prob.config.PARALLEL_EVALS = 0
+        generate_seeds(prob)
     else:
         # Disable TensorFlow logs
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
