@@ -49,13 +49,15 @@ class Problem:
         """Returns the class that represents individuals for this problem."""
         raise NotImplemented()
 
-    def deap_generate_individual(self, seed: Member = None) -> Individual:
+    def deap_generate_individual(self, seed_index: int = None) -> Individual:
         """Generates a new individual from the seed pool."""
-        if seed is None:
-            seed = self.seed_pool.get_seed()
+        if seed_index is None:
+            seed, seed_index = self.seed_pool.get_seed()
+        else:
+            seed = self.seed_pool[seed_index]
 
         # Need to use the DEAP creator to instantiate new individual
-        individual: Individual = self.individual_creator(seed.clone(), seed)
+        individual: Individual = self.individual_creator(seed.clone(), seed_index)
         individual.mutate(self)
 
         log.info(f'Generated {individual}')
@@ -95,11 +97,11 @@ class Problem:
             new_individuals = []
             for i in range(len(population)):
                 if population[i].seed_index in archived_seed_indices:
-                    seed = self.seed_pool[random.choice(non_archived_seed_indices)]
-                    ind1 = self.deap_generate_individual(seed)
-                    log.info(f'Repopulation: substitute {population[i]} with {ind1}')
-                    population[i] = ind1
-                    new_individuals.append(ind1)
+                    seed_index = random.choice(non_archived_seed_indices)
+                    new_individual = self.deap_generate_individual(seed_index)
+                    log.info(f'Repopulation: substitute {population[i]} with {new_individual}')
+                    population[i] = new_individual
+                    new_individuals.append(new_individual)
             return new_individuals
         return []
 
