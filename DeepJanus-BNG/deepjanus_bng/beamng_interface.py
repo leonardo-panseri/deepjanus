@@ -86,9 +86,6 @@ class BeamNGInterface:
         of BeamNG and connects to it."""
         if not self._bng.connection:
             self._bng.open(launch=launch)
-            if self._bng.process:
-                # Do not pipe BeamNG.tech stdout to Python stdout
-                self._bng.process.stdout = subprocess.DEVNULL
 
     def beamng_bring_up(self):
         """Connects to the simulator, opening a new instance if necessary. Then, sets up the scenario (road, vehicle,
@@ -109,13 +106,12 @@ class BeamNGInterface:
         if self.vehicle:
             self.vehicle.setup_cameras(self._bng)
 
-        # Set the socket in non blocking mode before sending the StartScenario message
+        # Set the socket in non-blocking mode before sending the StartScenario message
         # There is a bug in BeamNG that randomly breaks the server that listen for BeamNGpy messages
         # The only solution is to detect when this happens and restart the BeamNG instance
         self._bng.connection.skt.skt.settimeout(20)
         self._bng.start_scenario()
         self._bng.connection.skt.skt.settimeout(None)
-
 
     def beamng_step(self, steps: int = None):
         """Runs the simulation for the predefined number of steps. A custom number of steps can be passed as
@@ -159,7 +155,7 @@ class BeamNGInterface:
                 log.warning('Cannot close BeamNG instance:')
                 traceback.print_exception(type(ex), ex, ex.__traceback__)
     
-    def beamng_kill(self, sleep_seconds=5):
+    def beamng_kill(self, sleep_seconds=10):
         """Kills the simulator."""
         if self._bng:
             self._bng.disconnect()
