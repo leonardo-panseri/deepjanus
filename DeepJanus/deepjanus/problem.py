@@ -66,7 +66,6 @@ class Problem:
     def deap_evaluate_individual(self, individual: Individual) -> tuple[float, float]:
         """Evaluates an individual of this problem."""
         fitness_values = individual.evaluate(self)
-        individual.save(self.current_population_path, False)
         return fitness_values
 
     def deap_mutate_individual(self, individual: Individual):

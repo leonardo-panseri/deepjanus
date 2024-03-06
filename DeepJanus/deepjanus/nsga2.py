@@ -121,6 +121,7 @@ def main(problem: Problem, seed:  int | float | str | bytes | bytearray = None, 
         # Customizable callback to execute actions at the start of each iteration
         problem.on_iteration_start(gen)
 
+        offspring = []
         if gen == 0:
             # Evaluate the initial population
             individuals_to_eval = pop
@@ -151,7 +152,11 @@ def main(problem: Problem, seed:  int | float | str | bytes | bytearray = None, 
 
         # Select the next generation population
         # For generation 0, this will only assign the crowding distance to the individuals (no actual selection is done)
-        pop = toolbox.select(individuals_to_eval, config.POP_SIZE)
+        pop = toolbox.select(pop + offspring, config.POP_SIZE)
+
+        # Save all selected individuals of this generation to disk
+        for ind in pop:
+            ind.save(problem.current_population_path, False)
 
         # Calculate statistics for the current generation
         record = stats.compile(pop)
@@ -186,12 +191,10 @@ def load_last_gen_data(problem: Problem):
     delete_folder_recursively(problem.experiment_path.joinpath(f'gen{last_gen_idx + 1}'))
 
     pop = []
-    ind_by_name = {}
     pop_storage = FolderStorage(problem.experiment_path.joinpath(f'gen{last_gen_idx}', 'population'), 'ind{}.json')
     for path in pop_storage.all_files('*.json'):
         ind: Individual = Individual.from_dict(pop_storage.load_json_by_path(path), problem.individual_creator,
                                                problem.member_class())
-        ind_by_name[ind.name] = ind
         lb, ub = ind.unsafe_region_probability
         ind.fitness.values = (Evaluator.calculate_fitness_functions(ind.sparseness,
                                                                     problem.config.PROBABILITY_THRESHOLD, lb, ub))
@@ -201,9 +204,6 @@ def load_last_gen_data(problem: Problem):
     for path in archive_storage.all_files('*.json'):
         ind: Individual = Individual.from_dict(archive_storage.load_json_by_path(path), problem.individual_creator,
                                                problem.member_class())
-        if ind.name in ind_by_name:
-            problem.archive.add(ind_by_name[ind.name])
-        else:
-            problem.archive.add(ind)
+        problem.archive.add(ind)
 
     return last_gen_idx + 1, pop
