@@ -74,7 +74,11 @@ class Evaluator:
         individual.sparseness = sparseness
 
         # Generates neighborhood to calculate unsafe region confidence interval
-        lower_bound, upper_bound = self._do_evaluation(individual, problem)
+        try:
+            lower_bound, upper_bound = self._do_evaluation(individual, problem)
+        except Exception as e:
+            log.exception('Exception occurred during evaluation')
+            raise e
         individual.unsafe_region_probability = (lower_bound, upper_bound)
 
         p_th = problem.config.PROBABILITY_THRESHOLD
@@ -203,8 +207,12 @@ class ParallelEvaluator(Evaluator):
     def _close_pool(self):
         """Makes all the worker processes stop their current task and closes the pool when they are all done."""
         self._stop_workers()
+
         self.process_pool.close()
         self.process_pool.join()
+
+        self.manager.shutdown()
+        self.manager.join()
 
     def _do_evaluation(self, individual: 'Individual', problem: 'Problem') -> tuple[float, float]:
         self.individual = individual
@@ -224,6 +232,7 @@ class ParallelEvaluator(Evaluator):
 
         # If a worker process raised an error, raise it from the main process
         if self.worker_error:
+            self._close_pool()
             raise self.worker_error
 
         return self.lower_bound, self.upper_bound
@@ -235,12 +244,11 @@ class ParallelEvaluator(Evaluator):
             log.error(f'Error occurred in other worker, ignoring additional error: {error}')
             return
 
+        # If a worker raised an error, save it and stop the evaluation
+        log.error('Error occurred in worker, terminating')
+        self.worker_error = error
+
         with self.done_condition:
-            # If a worker raised an error, save it and stop the evaluation
-            log.error('Error occurred in worker, terminating')
-            traceback.print_exception(type(error), error, error.__traceback__)
-            self.worker_error = error
-            self._close_pool()
             self.done_condition.notify()
 
     def _on_eval_complete(self, member: 'Member'):
