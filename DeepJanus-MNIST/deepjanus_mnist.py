@@ -42,9 +42,6 @@ if __name__ == '__main__':
     else:
         cfg = MNISTConfig(proj_root)
     prob = MNISTProblem(cfg)
-    log_setup.setup_console_log(cfg.FOLDERS.log_ini)
-    log_setup.setup_file_log(prob.experiment_path
-                             .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
 
     if args.subcmd == 'train':
         from deepjanus_mnist.model_trainer import train_model
