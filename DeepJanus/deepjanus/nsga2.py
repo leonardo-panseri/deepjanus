@@ -12,6 +12,7 @@ from .evaluator import Evaluator
 from .folders import delete_folder_recursively, FolderStorage
 from .individual import Individual
 from .log import get_logger, log_setup
+from .member import Member
 from .problem import Problem
 
 log = get_logger(__file__)
@@ -179,6 +180,7 @@ def load_last_gen_data(problem: Problem):
 
     ind_counter = status['ind_counter']
     Individual.counter = ind_counter
+    Member.counter = ind_counter
 
     last_gen_idx = status['last_gen']
     delete_folder_recursively(problem.experiment_path.joinpath(f'gen{last_gen_idx + 1}'))
@@ -197,7 +199,11 @@ def load_last_gen_data(problem: Problem):
 
     archive_storage = FolderStorage(problem.experiment_path.joinpath(f'gen{last_gen_idx}', 'archive'), 'ind{}.json')
     for path in archive_storage.all_files('*.json'):
-        name = pop_storage.load_json_by_path(path)['name']
-        problem.archive.add(ind_by_name[name])
+        ind: Individual = Individual.from_dict(archive_storage.load_json_by_path(path), problem.individual_creator,
+                                               problem.member_class())
+        if ind.name in ind_by_name:
+            problem.archive.add(ind_by_name[ind.name])
+        else:
+            problem.archive.add(ind)
 
     return last_gen_idx + 1, pop
