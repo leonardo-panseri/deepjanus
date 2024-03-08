@@ -71,7 +71,7 @@ class Config:
         invoke __init__ with the correct path on the new instance."""
         copy = self.__class__('.')
         del copy.FOLDERS
-        for param in filter(lambda key: 'A' <= key[0] <= 'Z', dir(Config)):
+        for param in filter(lambda key: 'A' <= key[0] <= 'Z', dir(self)):
             setattr(copy, param, getattr(self, param))
         return copy
 
