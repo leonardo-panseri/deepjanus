@@ -204,6 +204,9 @@ def load_last_gen_data(problem: Problem):
     for path in archive_storage.all_files('*.json'):
         ind: Individual = Individual.from_dict(archive_storage.load_json_by_path(path), problem.individual_creator,
                                                problem.member_class())
+        lb, ub = ind.unsafe_region_probability
+        ind.fitness.values = (Evaluator.calculate_fitness_functions(ind.sparseness,
+                                                                    problem.config.PROBABILITY_THRESHOLD, lb, ub))
         problem.archive.add(ind)
 
     return last_gen_idx + 1, pop
