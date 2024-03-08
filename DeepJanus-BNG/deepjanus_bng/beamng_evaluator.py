@@ -92,7 +92,7 @@ class BeamNGParallelEvaluator(ParallelEvaluator):
         global config, log
 
         config, project_root = args_queue.get()
-        config.__init__(project_root)
+        super(config.__class__, config).__init__(project_root)
 
         # Disable TensorFlow logs
         import os
