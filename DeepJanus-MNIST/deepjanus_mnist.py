@@ -8,13 +8,13 @@ from deepjanus_mnist.mnist_config import MNISTConfig
 from deepjanus_mnist.mnist_problem import MNISTProblem
 
 
-def execute_deepjanus(problem: MNISTProblem):
-    nsga2.main(problem)
+def execute_deepjanus(problem: MNISTProblem, restart_from_last_gen):
+    nsga2.main(problem, restart_from_last_gen=restart_from_last_gen)
 
 
-def generate_seeds(problem1: MNISTProblem, problem2: MNISTProblem, folder_name='generated', quantity=100):
+def generate_seeds(problem: MNISTProblem, folder_name='generated', quantity=100):
     from deepjanus_mnist.seed_generator import seed_candidate_generator
-    seed_generator = SeedFileGenerator([problem1, problem2], folder_name, seed_candidate_generator(5))
+    seed_generator = SeedFileGenerator([problem], folder_name, seed_candidate_generator(5))
     seed_generator.generate_seeds(quantity)
 
 
@@ -26,6 +26,8 @@ if __name__ == '__main__':
                                                                          'its frontier of behaviors')
     parser.add_argument('-s', '--seeds', help='generate seeds from MNIST dataset', action='store_true')
     parser.add_argument('-c', '--config', type=str, help='load config from file')
+    parser.add_argument('-r', dest='restart_from_last_gen', action='store_true',
+                        help='restarts experiment from last generation')
 
     subparsers = parser.add_subparsers(dest='subcmd')
 
@@ -51,11 +53,8 @@ if __name__ == '__main__':
         train_model(str(cfg.FOLDERS.models.joinpath('cnnClassifier_trained')),
                     args.batch_size, args.nb_epoch)
     elif args.seeds:
-        cfg_lq = MNISTConfig(os.path.dirname(__file__))
-        cfg_lq.MODEL_FILE = 'cnnClassifier_lowLR'
-        prob_lq = MNISTProblem(cfg_lq)
-        generate_seeds(prob, prob_lq)
+        generate_seeds(prob)
     else:
         # Disable TensorFlow logs
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-        execute_deepjanus(prob)
+        execute_deepjanus(prob, args.restart_from_last_gen)
