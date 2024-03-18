@@ -54,7 +54,7 @@ class Config:
 
     # Number of parallel workers to use to evaluate a neighborhood
     # If < 2 evaluation will be sequential
-    PARALLEL_EVALS = 2
+    PARALLEL_EVALS = None
 
     # Flag for turning on/off collection of extended data about simulations
     SAVE_SIM_DATA = None
@@ -66,13 +66,22 @@ class Config:
     # Name of the seed pool folder
     SEED_FOLDER = None
 
+    def clone(self) -> 'Config':
+        """Creates a copy of this config. Note that the FOLDERS parameter will not be set, it is needed to explicitly
+        invoke __init__ with the correct path on the new instance."""
+        copy = self.__class__('.')
+        for param in filter(lambda key: 'A' <= key[0] <= 'Z', dir(self)):
+            setattr(copy, param, getattr(self, param))
+        delattr(copy, 'FOLDERS')
+        return copy
+
     @classmethod
     def from_dict(cls, d: dict, root_path: str):
         """Iterates through the dictionary and copy key-value pairs from it to a new instance of Config,
         that will be returned."""
         new_instance = cls(root_path)
         for key, value in d.items():
-           setattr(new_instance, key, value)
+            setattr(new_instance, key, value)
         return new_instance
 
     @classmethod
@@ -86,4 +95,3 @@ class Config:
                 json_str = f.read()
                 d = json.loads(json_str)
                 return cls.from_dict(d, root_path)
-

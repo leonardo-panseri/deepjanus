@@ -60,9 +60,6 @@ if __name__ == '__main__':
     else:
         cfg = BeamNGConfig(proj_root)
     prob = BeamNGProblem(cfg)
-    log_setup.setup_console_log(cfg.FOLDERS.log_ini)
-    log_setup.setup_file_log(prob.experiment_path
-                             .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
 
     if args.subcmd == 'train':
         from deepjanus_bng.training import train_from_recordings

@@ -48,6 +48,7 @@ class BeamNGParallelEvaluator(ParallelEvaluator):
     """Executes parallel BeamNG instances in a process pool and uses them to evaluate members."""
 
     def __init__(self, cfg: BeamNGConfig):
+        self.cfg = cfg
         self.project_root = str(cfg.FOLDERS.root)
         _initialize_globals(cfg)
 
@@ -80,13 +81,18 @@ class BeamNGParallelEvaluator(ParallelEvaluator):
                     }))
 
             self.paths.append(path)
-            args_queue.put((i, port, path, self.project_root))
+
+            cfg = self.cfg.clone()
+            cfg.BEAMNG_PORT = port
+            cfg.BEAMNG_USER_DIR = path
+            args_queue.put((cfg, self.project_root))
 
     @staticmethod
     def init_worker(args_queue):
         global config, log
 
-        parallel_index, port, path, project_root = args_queue.get()
+        config, project_root = args_queue.get()
+        super(config.__class__, config).__init__(project_root)
 
         # Disable TensorFlow logs
         import os
@@ -98,11 +104,6 @@ class BeamNGParallelEvaluator(ParallelEvaluator):
 
         log = logging.getLogger('beamngpy')
         log.setLevel(logging.INFO)
-        
-        # Create a config with the settings for the instance of the simulator
-        config = BeamNGConfig(project_root)
-        config.BEAMNG_PORT = port
-        config.BEAMNG_USER_DIR = path
 
         _initialize_globals(config)
 

@@ -31,15 +31,17 @@ class SeedPool:
     def __getitem__(self, item) -> Member:
         raise NotImplementedError()
 
-    def get_seed(self) -> Member:
+    def get_seed(self) -> tuple[Member, int]:
         """Gets a seed from the pool. The behavior of this method depends on the sequential flag set
         when creating the seed pool."""
         if self.sequential:
-            seed = self[self.counter]
+            seed_index = self.counter
+            seed = self[seed_index]
             self.counter = (self.counter + 1) % len(self)
         else:
-            seed = random.choice(self)
-        return seed
+            seed_index = random.choice(range(len(self)))
+            seed = self[seed_index]
+        return seed, seed_index
 
 
 class SeedPoolRandom(SeedPool):

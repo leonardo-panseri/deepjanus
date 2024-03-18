@@ -17,8 +17,8 @@ class MNISTConfig(Config):
         self.NUM_GENERATIONS = 100
 
         # Bounds for the mutation of a member
-        self.MUTATION_LOWER_BOUND = 0.01
-        self.MUTATION_UPPER_BOUND = 0.6
+        self.MUTATION_LOWER_BOUND = 0.1
+        self.MUTATION_UPPER_BOUND = 6.0
         # Flag indicating if the sign for the mutation value should be chosen randomly
         self.MUTATION_RANDOMIZE_SIGN = True
         # Minimum distance that an individual must have with all other individuals in the archive to be added
@@ -32,6 +32,11 @@ class MNISTConfig(Config):
         self.TARGET_ERROR = 0.01
         # Maximum number of neighbors to generate for an individual
         self.MAX_NEIGHBORS = 50
+        
+        # Number of parallel workers to use to evaluate a neighborhood
+        # If < 2 evaluation will be sequential
+        # NOTE: parallel evaluation not implemented for this problem
+        self.PARALLEL_EVALS = 0
 
         # Flag for turning on/off collection of extended data about simulations
         self.SAVE_SIM_DATA = False
