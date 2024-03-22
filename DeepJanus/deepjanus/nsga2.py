@@ -170,10 +170,12 @@ def main(problem: Problem, seed:  int | float | str | bytes | bytearray = None, 
         minutes, seconds = divmod(remainder, 60)
         log.info(f"Time for generation {gen}: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
 
-    # Customizable callback to execute actions at the end of the experiment
-    problem.on_experiment_end(logbook)
+    tot_time = timeit.default_timer() - exp_start
 
-    hours, remainder = divmod(timeit.default_timer() - exp_start, 3600)
+    # Customizable callback to execute actions at the end of the experiment
+    problem.on_experiment_end(logbook, tot_time)
+
+    hours, remainder = divmod(tot_time, 3600)
     minutes, seconds = divmod(remainder, 60)
     log.info(f"Time for experiment: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
 

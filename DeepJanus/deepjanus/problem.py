@@ -118,13 +118,12 @@ class Problem:
         del config['FOLDERS']
         self.experiment_path.joinpath('config.json').write_text(json.dumps(config))
 
-    def on_experiment_end(self, logbook: tools.Logbook):
+    def on_experiment_end(self, logbook: tools.Logbook, tot_time: float):
         """Callback to execute actions at the end of the experiment."""
         report = {
             'generations': self.config.NUM_GENERATIONS,
             'archive_len': len(self.archive),
-            'radius': calculate_seed_radius(self),
-            'diameter': calculate_diameter(self)
+            'time': int(tot_time)
         }
         self.experiment_path.joinpath(f'report.json').write_text(json.dumps(report))
         self.experiment_path.joinpath(f'logbook.json').write_text(json.dumps(logbook, cls=NumpyArrayEncoder))
