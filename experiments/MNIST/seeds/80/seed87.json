@@ -1,0 +1,1 @@
+{"svg": "<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\" height=\"28\" width=\"28\"><path d=\" M11,25 C9,24 9,24 11,24 C12,24 14,24 15,25 C17,25 17,25 15,25 C13,25 11,25 11,25 Z\" /></svg>", "expected_label": 5, "satisfy_requirements": null, "predicted_label": null, "prediction_quality": null}
