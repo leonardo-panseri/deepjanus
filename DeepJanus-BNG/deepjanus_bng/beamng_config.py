@@ -8,7 +8,6 @@ class BeamNGConfig(Config):
 
     def __init__(self, project_root: str):
         super().__init__(project_root)
-        self.PROJECT_ROOT = project_root
 
         # Unique identifier for the experiment
         self.EXPERIMENT_NAME = 'exp'
@@ -78,4 +77,4 @@ class BeamNGConfig(Config):
         self.BEAMNG_FPS = 30
         # How many simulations to run before restarting BeamNG, this can be useful to circumvent memory leaks
         # Set to -1 to disable
-        self.BEAMNG_RESTART_AFTER = 20
+        self.BEAMNG_RESTART_AFTER = -1
