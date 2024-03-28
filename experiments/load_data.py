@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import json
 
@@ -27,8 +28,15 @@ def load_data(path, problem):
             archive = []
             solutions = experiment.glob('archive/*.json')
             for solution_path in solutions:
-                with open(solution_path, 'r') as f:
-                    solution = json.load(f)
+                # with open(solution_path, 'r') as f:
+                #     solution = json.load(f)
+                fd = os.open(solution_path, os.O_RDONLY)
+                try:
+                    size = os.fstat(fd).st_size
+                    file_bytes = os.read(fd, size)
+                    solution = json.loads(file_bytes.decode())
+                finally:
+                    os.close(fd)
                 archive.append(problem.deap_individual_class().from_dict(solution, problem.deap_individual_class(),
                                                                          problem.member_class()))
             experiment_data['archive'] = archive
