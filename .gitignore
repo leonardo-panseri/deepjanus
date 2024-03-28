@@ -4,6 +4,7 @@ DeepJanus/deepjanus.egg-info/
 DeepJanus/build/
 venv/
 **/data/experiments/
+**/data/seeds/
 
 *.log
 log.ini

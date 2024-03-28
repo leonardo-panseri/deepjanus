@@ -17,7 +17,7 @@ The project is structured as follows:
 * [__DeepJanus__](/DeepJanus) contains the DeepJanus core package that provides a way to easily adapt DeepJanus to specific problems;
 * [__DeepJanus-BNG__](/DeepJanus-BNG) contains the DeepJanus tool adapted to the self-driving car case study;
 * [__DeepJanus-MNIST__](/DeepJanus-MNIST) contains the DeepJanus tool adapted to the handwritten digit classification case study;
-* [__experiments__](/experiments) contains the raw experimental data reported in the paper and the scripts to obtain the data.
+* [__experiments__](/experiments) contains the raw experimental data reported in the thesis and the scripts to obtain the processed data.
 
 _Note:_ each sub-package contains further specific instructions.
 

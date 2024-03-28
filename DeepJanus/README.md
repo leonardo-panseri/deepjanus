@@ -39,7 +39,7 @@ problem = YourProblem(config)
 
 # The seed generator will select candidates that satisfy requirements for all given problems (you can pass more than one)
 # and will save them to 'data/seeds/<folder_name>/'
-seed_generator = SeedFileGenerator([problem1], 'generated', seed_candidate_generator())
+seed_generator = SeedFileGenerator([problem], 'generated', seed_candidate_generator())
 # How many seeds to generate
 quantity = 10
 seed_generator.generate_seeds(quantity)
@@ -47,20 +47,16 @@ seed_generator.generate_seeds(quantity)
 
 To run DeepJanus:
 ```python
-from datetime import datetime
-from deepjanus.log import log_setup
 from deepjanus.nsga2 import main
 
 # Define problem and tool configuration
 config = YourConfig()
 problem = YourProblem(config)
 
-# Enable logging (optional)
-# You can install package 'rich' for better console logs
-log_setup.setup_console_log(config.FOLDERS.log_ini)
-log_setup.setup_file_log(problem.experiment_path
-                         .joinpath(datetime.strftime(datetime.now(), '%d-%m-%Y_%H-%M-%S') + '.log'))
-
 # Start DeepJanus
-main(problem)
+main(problem,
+     restart_from_last_gen=False,  # Set to True to load the last generation that was completely evaluated and restart from there
+     log_to_terminal=True,  # Set to False to disable terminal logs
+     log_to_file=True  # Set to False to disable file logs
+     )
 ```
